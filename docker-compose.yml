@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: alpha-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alpha
+      POSTGRES_USER: alpha
+      POSTGRES_PASSWORD: alpha_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - alpha_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alpha -d alpha"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: alpha-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - alpha_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  app:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alpha-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://alpha:alpha_dev_password@postgres:5432/alpha?schema=public
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: change-this-before-production-with-at-least-32-characters
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  alpha_postgres_data:
+  alpha_redis_data:

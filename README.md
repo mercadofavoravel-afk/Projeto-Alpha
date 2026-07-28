@@ -1,49 +1,26 @@
-# Projeto ALPHA
+# Projeto ALPHA Next.js V9
 
-Plataforma imobiliária construída com Next.js, React, PostgreSQL e Prisma.
+Starter técnico para migração do portal a uma fonte única de dados.
 
-## Recursos implementados
+## Incluído
+- Next.js + TypeScript
+- catálogo central em JSON
+- páginas dinâmicas
+- busca
+- coleções
+- painel administrativo visual
+- APIs-base de empreendimentos e leads
+- sitemap e robots dinâmicos
 
-- catálogo centralizado de empreendimentos;
-- busca, coleções e páginas dinâmicas;
-- autenticação com sessões persistidas e redefinição de senha;
-- controle de acesso por função e permissão;
-- painel administrativo;
-- CRM de leads e atividades;
-- ingestão e gestão de books e mídia;
-- APIs administrativas protegidas;
-- sitemap, robots e recursos de SEO;
-- motor de recomendações;
-- trilha de auditoria.
-
-## Requisitos
-
-- Node.js 22;
-- PostgreSQL 16;
-- Redis 7;
-- variáveis de ambiente baseadas em `.env.example`.
-
-## Executar localmente
-
+## Executar
 ```bash
-cp .env.example .env
-npm ci
-npm run db:generate
-npm run db:deploy
-npm run db:seed
+npm install
 npm run dev
 ```
 
-## Qualidade
+## Ainda não implementado
+Autenticação, banco de dados, upload de books, extração por IA, CRM real, persistência de leads e gestão de permissões.
 
-```bash
-npm run quality
-```
 
-## Recuperação de senha em produção
-
-Configure `APP_URL`, `EMAIL_FROM` e `RESEND_API_KEY`. Em desenvolvimento, o fluxo redireciona diretamente para a tela de redefinição com o token temporário.
-
-## Proxy e identificação de IP
-
-Defina `TRUST_PROXY_HEADERS=true` apenas quando a aplicação estiver atrás de um proxy confiável que sobrescreva `x-forwarded-for` e `x-real-ip`.
+## V10 — Banco de dados
+PostgreSQL + Prisma, seed, persistência de leads e CRUD inicial. Consulte `DATABASE_V10.md`.

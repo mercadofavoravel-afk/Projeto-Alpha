@@ -1,7 +1,7 @@
 {
   "name": "projeto-alpha-platform",
   "private": true,
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

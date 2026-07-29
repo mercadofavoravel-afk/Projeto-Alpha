@@ -1,0 +1,3 @@
+export type RecommendationInput={objective:"LIVE"|"INVEST"|"PATRIMONY"|"SELL"|"RENT"|"OTHER";preferredBairros:string[];preferredTypes:string[];budgetMax?:number;areaMin?:number;bedroomsMin?:number;suitesMin?:number;parkingMin?:number;proximityBeach:number;proximityMetro:number;investmentFocus:number;lifestyleFocus:number};
+export type Candidate={id:string;slug:string;name:string;neighborhood:string;description:string;heroImage?:string|null;priceFrom?:number|null;areaTo?:number|null;bedroomsTo?:number|null;suitesTo?:number|null;parkingTo?:number|null;types:string[];collections:string[];highlights:string[]};
+export type Ranked=Candidate&{score:number;reasons:string[]};

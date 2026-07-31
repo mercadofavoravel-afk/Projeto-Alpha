@@ -327,7 +327,7 @@ model LoginAttempt {
 
   @@index([emailHash, createdAt])
   @@index([ipHash, createdAt])
-}model Team {
+} model Team {
   id          String   @id @default(cuid())
   name        String
   slug        String   @unique

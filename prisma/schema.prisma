@@ -327,4 +327,38 @@ model LoginAttempt {
 
   @@index([emailHash, createdAt])
   @@index([ipHash, createdAt])
+}model Team {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+
+  brokers Broker[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model Broker {
+  id          String       @id @default(cuid())
+  name        String
+  email       String?      @unique
+  phone       String       @unique
+  whatsapp    String?      @unique
+  creci       String?      @unique
+  status      BrokerStatus @default(ACTIVE)
+  isAvailable Boolean      @default(true)
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([status])
+  @@index([isAvailable])
 }

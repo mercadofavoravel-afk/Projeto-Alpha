@@ -361,4 +361,46 @@ model Broker {
   @@index([teamId])
   @@index([status])
   @@index([isAvailable])
+} model Pipeline {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+
+  stages PipelineStage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isDefault])
+  @@index([isActive])
+}
+
+model PipelineStage {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  color       String?
+  position    Int     @default(0)
+  probability Int     @default(0)
+  isWon       Boolean @default(false)
+  isLost      Boolean @default(false)
+  isActive    Boolean @default(true)
+
+  pipelineId String
+  pipeline   Pipeline @relation(
+    fields: [pipelineId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pipelineId, slug])
+  @@index([pipelineId, position])
+  @@index([isActive])
 }

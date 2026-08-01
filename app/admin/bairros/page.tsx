@@ -30,3 +30,4 @@ export default async function NeighborhoodsPage() {
 }) => <tr key={item.id}><td><b>{item.name}</b><small>/{item.slug}</small></td><td>{item._count.projects}</td><td>{calculateSeoScore(item).score}/100</td></tr>)}</tbody></table></div></div>
   </>;
 }
+

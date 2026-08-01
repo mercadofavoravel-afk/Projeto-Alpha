@@ -16,6 +16,17 @@ export default async function NeighborhoodsPage() {
       <label>Descrição SEO<textarea name="seoDescription" maxLength={180} rows={3} /></label>
       <button className="primary" type="submit">Cadastrar bairro</button>
     </form>
-    <div className="panel"><h2>Bairros cadastrados</h2><div className="table-wrap"><table><thead><tr><th>Bairro</th><th>Empreendimentos</th><th>SEO Score</th></tr></thead><tbody>{neighborhoods.map(item => <tr key={item.id}><td><b>{item.name}</b><small>/{item.slug}</small></td><td>{item._count.projects}</td><td>{calculateSeoScore(item).score}/100</td></tr>)}</tbody></table></div></div>
+    <div className="panel"><h2>Bairros cadastrados</h2><div className="table-wrap"><table><thead><tr><th>Bairro</th><th>Empreendimentos</th><th>SEO Score</th></tr></thead><tbody>{neighborhoods.map((item: {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  heroImage: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  _count: {
+    projects: number;
+  };
+}) => <tr key={item.id}><td><b>{item.name}</b><small>/{item.slug}</small></td><td>{item._count.projects}</td><td>{calculateSeoScore(item).score}/100</td></tr>)}</tbody></table></div></div>
   </>;
 }

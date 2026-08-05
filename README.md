@@ -24,3 +24,4 @@ Autenticação, banco de dados, upload de books, extração por IA, CRM real, pe
 
 ## V10 — Banco de dados
 PostgreSQL + Prisma, seed, persistência de leads e CRUD inicial. Consulte `DATABASE_V10.md`.
+

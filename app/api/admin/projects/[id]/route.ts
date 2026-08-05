@@ -20,11 +20,24 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const auth = await requireApiPermission("catalog:write");
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   const { id } = await context.params;
-  const parsed = projectEditorSchema.partial().safeParse(await request.json());
-  if (!parsed.success) return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+const parsed = projectEditorSchema
+  .innerType()
+  .partial()
+  await audit(
+  "project.updated",
+  "Project",
+  id,
+  auth.user.id,
+  { fields: Object.keys(parsed.data) },
+);
   const project = await db.project.update({ where: { id }, data: parsed.data });
   await audit({ userId: auth.user.id, action: "project.updated", entity: "Project", entityId: id, metadata: { fields: Object.keys(parsed.data) } });
-  return NextResponse.json(project);
+  await audit(
+  "project.archived",
+  "Project",
+  id,
+  auth.user.id,
+);
 }
 
 export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {

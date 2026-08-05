@@ -30,12 +30,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Atividade inválida", details: parsed.error.flatten() }, { status: 400 });
   }
   const activity = await db.leadActivity.create({ data: { ...parsed.data, leadId: id } });
-  await audit({
-    userId: auth.user.id,
-    action: "lead.activity_created",
-    entity: "Lead",
-    entityId: id,
-    metadata: { type: parsed.data.type }
-  });
-  return NextResponse.json(activity, { status: 201 });
+  await audit(
+  "lead.activity_created",
+  "Lead",
+  id,
+  authorization.user.id,
+  { type: parsed.data.type },
+);
 }

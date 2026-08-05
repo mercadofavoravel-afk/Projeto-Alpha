@@ -34,7 +34,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   "lead.activity_created",
   "Lead",
   id,
-  authorization.user.id,
+  auth.user.id,
   { type: parsed.data.type },
 );
+
+return NextResponse.json(activity, { status: 201 });
 }

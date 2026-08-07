@@ -21,6 +21,21 @@ enum LeadStatus {
   VISIT_SCHEDULED
   WON
   LOST
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  userId     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
 }
 
 enum LeadObjective {

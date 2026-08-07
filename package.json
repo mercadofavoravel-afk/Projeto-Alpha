@@ -29,7 +29,7 @@
   "dependencies": {
     "@prisma/client": "6.16.2",
     "bcryptjs": "3.0.2",
-    "next": "15.2.4",
+    "next": "15.2.8",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "server-only": "0.0.1",

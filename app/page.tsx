@@ -1,18 +1,18 @@
-import { Card } from "@/components/Card";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { JsonLd } from "@/components/JsonLd";
-import { projects } from "@/lib/projects";
-import { createMetadata, siteConfig, websiteJsonLd } from "@/lib/seo";
+import { Card } from '@/components/Card';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { JsonLd } from '@/components/JsonLd';
+import { projects } from '@/lib/projects';
+import { createMetadata, siteConfig, websiteJsonLd } from '@/lib/seo';
 
 export const metadata = createMetadata({
-  title: "Imóveis de alto padrão no Rio de Janeiro",
+  title: 'Imóveis de alto padrão no Rio de Janeiro',
   description: siteConfig.description,
-  path: "/",
+  path: '/',
   keywords: [
-    "imóveis de alto padrão Rio de Janeiro",
-    "apartamentos de luxo RJ",
-    "lançamentos imobiliários Rio",
+    'imóveis de alto padrão Rio de Janeiro',
+    'apartamentos de luxo RJ',
+    'lançamentos imobiliários Rio',
   ],
 });
 

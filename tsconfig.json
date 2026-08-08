@@ -36,11 +36,5 @@
     "middleware.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "scripts",
-    "prisma",
-    "*.test.ts",
-    "*.test.tsx"
-  ]
+  "exclude": ["node_modules", "scripts", "prisma", "*.test.ts", "*.test.tsx"]
 }

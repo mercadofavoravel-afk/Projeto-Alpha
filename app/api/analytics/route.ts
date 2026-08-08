@@ -1,8 +1,8 @@
-import { Prisma } from "@prisma/client";
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { Prisma } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { db } from "@/lib/db";
+import { db } from '@/lib/db';
 
 const analyticsEventSchema = z.object({
   name: z.string().min(2).max(120),
@@ -19,21 +19,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       {
-        error: "Evento inválido",
+        error: 'Evento inválido',
         details: parsed.error.flatten(),
       },
       { status: 400 },
     );
   }
 
-  const {
-    name,
-    path,
-    sessionKey,
-    projectId,
-    profileId,
-    metadata,
-  } = parsed.data;
+  const { name, path, sessionKey, projectId, profileId, metadata } = parsed.data;
 
   const data: Prisma.AnalyticsEventUncheckedCreateInput = {
     name,
@@ -41,9 +34,7 @@ export async function POST(request: Request) {
     sessionKey,
     projectId,
     profileId,
-    metadata: metadata
-      ? (metadata as Prisma.InputJsonValue)
-      : undefined,
+    metadata: metadata ? (metadata as Prisma.InputJsonValue) : undefined,
   };
 
   const event = await db.analyticsEvent.create({

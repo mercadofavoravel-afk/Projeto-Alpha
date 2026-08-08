@@ -1,7 +1,7 @@
-import Image from "next/image";
-import { db } from "@/lib/db";
+import Image from 'next/image';
+import { db } from '@/lib/db';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type MediaItem = {
   id: string;
@@ -25,10 +25,10 @@ export default async function MediaPage() {
     },
     orderBy: [
       {
-        projectId: "asc",
+        projectId: 'asc',
       },
       {
-        position: "asc",
+        position: 'asc',
       },
     ],
   });
@@ -39,23 +39,23 @@ export default async function MediaPage() {
       <h1>Biblioteca de mídia</h1>
 
       <div className="notice">
-        Nesta versão, os arquivos são cadastrados por URL. O upload direto será
-        integrado ao armazenamento definitivo do Projeto Alpha.
+        Nesta versão, os arquivos são cadastrados por URL. O upload direto será integrado ao
+        armazenamento definitivo do Projeto Alpha.
       </div>
 
       <div className="media-grid">
         {media.map((item: MediaItem) => (
           <article className="media-item" key={item.id}>
-            {item.kind === "IMAGE" ? (
+            {item.kind === 'IMAGE' ? (
               <Image
                 src={item.url}
-                alt={item.alt ?? ""}
+                alt={item.alt ?? ''}
                 width={640}
                 height={420}
                 sizes="(max-width: 768px) 100vw, 33vw"
                 style={{
-                  width: "100%",
-                  height: "auto",
+                  width: '100%',
+                  height: 'auto',
                 }}
               />
             ) : (

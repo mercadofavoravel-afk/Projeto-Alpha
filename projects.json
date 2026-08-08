@@ -6,24 +6,10 @@
     "description": "Frente-mar · 407 a 565 m²",
     "image": "/images/vie-01.jpg",
     "status": "Pronto / consultar disponibilidade",
-    "objectives": [
-      "Morar",
-      "Patrimônio"
-    ],
-    "types": [
-      "Apartamento",
-      "Cobertura"
-    ],
-    "collections": [
-      "Frente Mar",
-      "Prontos",
-      "Coberturas"
-    ],
-    "highlights": [
-      "Frente-mar",
-      "Vieira Souto",
-      "Grandes metragens"
-    ]
+    "objectives": ["Morar", "Patrimônio"],
+    "types": ["Apartamento", "Cobertura"],
+    "collections": ["Frente Mar", "Prontos", "Coberturas"],
+    "highlights": ["Frente-mar", "Vieira Souto", "Grandes metragens"]
   },
   {
     "slug": "parque-studios",
@@ -32,25 +18,10 @@
     "description": "Studios, double studios e coberturas",
     "image": "/images/parque-01.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
-    "types": [
-      "Studio",
-      "Double studio",
-      "Cobertura"
-    ],
-    "collections": [
-      "Studios",
-      "Investimento",
-      "Coberturas"
-    ],
-    "highlights": [
-      "Jardim de Alah",
-      "Uso flexível",
-      "Compactos premium"
-    ]
+    "objectives": ["Morar", "Investir"],
+    "types": ["Studio", "Double studio", "Cobertura"],
+    "collections": ["Studios", "Investimento", "Coberturas"],
+    "highlights": ["Jardim de Alah", "Uso flexível", "Compactos premium"]
   },
   {
     "slug": "cronos-barra",
@@ -59,10 +30,7 @@
     "description": "2, 3 e 4 quartos · rooftop e lazer",
     "image": "/images/parque-02.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -74,25 +42,10 @@
     "description": "4 e 5 suítes · 225 a 410 m²",
     "image": "/images/parque-03.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Patrimônio"
-    ],
-    "types": [
-      "Apartamento",
-      "Garden",
-      "Cobertura duplex"
-    ],
-    "collections": [
-      "Mozak",
-      "Coberturas",
-      "Lançamentos"
-    ],
-    "highlights": [
-      "Edifício boutique",
-      "Uma unidade por andar",
-      "Leblon"
-    ]
+    "objectives": ["Morar", "Patrimônio"],
+    "types": ["Apartamento", "Garden", "Cobertura duplex"],
+    "collections": ["Mozak", "Coberturas", "Lançamentos"],
+    "highlights": ["Edifício boutique", "Uma unidade por andar", "Leblon"]
   },
   {
     "slug": "be-in-rio-copacabana",
@@ -101,10 +54,7 @@
     "description": "Apartamentos, doubles e coberturas",
     "image": "/images/parque-05.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -116,10 +66,7 @@
     "description": "2 e 3 quartos · coberturas duplex",
     "image": "/images/parque-06.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -131,10 +78,7 @@
     "description": "Studios, 2 quartos e coberturas",
     "image": "/images/parque-07.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -146,10 +90,7 @@
     "description": "2 e 3 quartos, gardens e coberturas",
     "image": "/images/parque-08.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -161,10 +102,7 @@
     "description": "Gardens, compactos, doubles e 2 quartos",
     "image": "/images/parque-03.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -176,10 +114,7 @@
     "description": "2 e 3 quartos, gardens e coberturas",
     "image": "/images/parque-04.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -191,10 +126,7 @@
     "description": "Studios, gardens e coberturas",
     "image": "/images/parque-05.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -206,10 +138,7 @@
     "description": "Studios, double suítes, gardens e cobertura",
     "image": "/images/parque-04.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -221,10 +150,7 @@
     "description": "Double e triple suítes, cobertura duplex",
     "image": "/images/parque-07.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
+    "objectives": ["Morar", "Investir"],
     "types": [],
     "collections": [],
     "highlights": []
@@ -236,25 +162,10 @@
     "description": "Na quadra da praia · opções de double suites",
     "image": "/images/parque-05.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
-    "types": [
-      "Apartamento",
-      "Double suite",
-      "Cobertura"
-    ],
-    "collections": [
-      "Be.in.Rio",
-      "Investimento",
-      "Lançamentos"
-    ],
-    "highlights": [
-      "Quadra da praia",
-      "Double suites",
-      "Ipanema"
-    ]
+    "objectives": ["Morar", "Investir"],
+    "types": ["Apartamento", "Double suite", "Cobertura"],
+    "collections": ["Be.in.Rio", "Investimento", "Lançamentos"],
+    "highlights": ["Quadra da praia", "Double suites", "Ipanema"]
   },
   {
     "slug": "be-in-rio-nascimento-silva-387",
@@ -263,25 +174,9 @@
     "description": "Gardens, up gardens e opções de double suites",
     "image": "/images/parque-08.webp",
     "status": "Consultar",
-    "objectives": [
-      "Morar",
-      "Investir"
-    ],
-    "types": [
-      "Apartamento",
-      "Garden",
-      "Up garden",
-      "Double suite"
-    ],
-    "collections": [
-      "Be.in.Rio",
-      "Investimento",
-      "Lançamentos"
-    ],
-    "highlights": [
-      "Próximo à Lagoa",
-      "Gardens",
-      "Ipanema"
-    ]
+    "objectives": ["Morar", "Investir"],
+    "types": ["Apartamento", "Garden", "Up garden", "Double suite"],
+    "collections": ["Be.in.Rio", "Investimento", "Lançamentos"],
+    "highlights": ["Próximo à Lagoa", "Gardens", "Ipanema"]
   }
 ]

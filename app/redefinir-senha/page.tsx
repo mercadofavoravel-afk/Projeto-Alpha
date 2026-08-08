@@ -1,1 +1,42 @@
-import {resetPasswordAction}from"./actions";export default async function Page({searchParams}:{searchParams:Promise<{token?:string;error?:string;expired?:string}>}){const q=await searchParams;return <main className="login-shell"><form className="login-card" action={resetPasswordAction}><div className="eyebrow">Segurança</div><h1>Definir nova senha</h1>{q.error&&<div className="notice">Use ao menos 12 caracteres e repita a mesma senha.</div>}{q.expired&&<div className="notice">O link expirou ou já foi usado.</div>}<input type="hidden" name="token" value={q.token??""}/><label>Nova senha<input name="password" type="password" minLength={12} required autoComplete="new-password"/></label><label>Confirmar senha<input name="confirmation" type="password" minLength={12} required autoComplete="new-password"/></label><button className="btn">Alterar senha</button></form></main>}
+import { resetPasswordAction } from './actions';
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string; error?: string; expired?: string }>;
+}) {
+  const q = await searchParams;
+  return (
+    <main className="login-shell">
+      <form className="login-card" action={resetPasswordAction}>
+        <div className="eyebrow">Segurança</div>
+        <h1>Definir nova senha</h1>
+        {q.error && (
+          <div className="notice">Use ao menos 12 caracteres e repita a mesma senha.</div>
+        )}
+        {q.expired && <div className="notice">O link expirou ou já foi usado.</div>}
+        <input type="hidden" name="token" value={q.token ?? ''} />
+        <label>
+          Nova senha
+          <input
+            name="password"
+            type="password"
+            minLength={12}
+            required
+            autoComplete="new-password"
+          />
+        </label>
+        <label>
+          Confirmar senha
+          <input
+            name="confirmation"
+            type="password"
+            minLength={12}
+            required
+            autoComplete="new-password"
+          />
+        </label>
+        <button className="btn">Alterar senha</button>
+      </form>
+    </main>
+  );
+}

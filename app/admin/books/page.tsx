@@ -1,6 +1,6 @@
-import { db } from "@/lib/db";
+import { db } from '@/lib/db';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type BookItem = {
   id: string;
@@ -22,7 +22,7 @@ export default async function BooksPage() {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
   });
 
@@ -32,8 +32,8 @@ export default async function BooksPage() {
       <h1>Books</h1>
 
       <div className="notice">
-        A V11 registra e acompanha o workflow. O envio ao armazenamento e a
-        extração automática dependem da infraestrutura escolhida.
+        A V11 registra e acompanha o workflow. O envio ao armazenamento e a extração automática
+        dependem da infraestrutura escolhida.
       </div>
 
       <div className="table-wrap">
@@ -51,7 +51,7 @@ export default async function BooksPage() {
             {books.map((book: BookItem) => (
               <tr key={book.id}>
                 <td>{book.fileName}</td>
-                <td>{book.project?.name ?? "Não associado"}</td>
+                <td>{book.project?.name ?? 'Não associado'}</td>
                 <td>{book.status}</td>
                 <td>{book.progress}%</td>
               </tr>

@@ -1,8 +1,8 @@
-import "server-only";
+import 'server-only';
 
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
-import { db } from "@/lib/db";
+import { db } from '@/lib/db';
 
 export async function audit(
   action: string,
@@ -17,9 +17,7 @@ export async function audit(
       entityType,
       entityId,
       userId,
-      metadata: metadata
-        ? (metadata as Prisma.InputJsonValue)
-        : undefined,
+      metadata: metadata ? (metadata as Prisma.InputJsonValue) : undefined,
     },
   });
 }

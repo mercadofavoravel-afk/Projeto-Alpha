@@ -1,6 +1,7 @@
 # Projeto ALPHA V12 — Recomendação e inteligência
 
 ## Entregas
+
 - Motor de recomendação determinístico e auditável.
 - Questionário público em `/descubra`.
 - Ranking por bairro, tipologia, orçamento e preferências.
@@ -10,9 +11,11 @@
 - Painel interno de recomendações.
 
 ## Limitações
+
 O ranking depende da qualidade dos dados do catálogo. Não representa garantia de retorno financeiro. Valores, disponibilidade e condições exigem confirmação comercial.
 
 ## Migração
+
 ```bash
 npm install
 npm run db:generate

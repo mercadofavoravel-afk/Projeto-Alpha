@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { buildCanonical } from "./canonical";
-import { siteConfig } from "./site";
-import type { MetadataOptions } from "./types";
+import type { Metadata } from 'next';
+import { buildCanonical } from './canonical';
+import { siteConfig } from './site';
+import type { MetadataOptions } from './types';
 
 function resolveImage(image?: string | null) {
   if (!image) return buildCanonical(siteConfig.defaultImage);
@@ -27,13 +27,13 @@ export function createMetadata(options: MetadataOptions): Metadata {
           googleBot: {
             index: true,
             follow: true,
-            "max-image-preview": "large",
-            "max-snippet": -1,
-            "max-video-preview": -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1,
           },
         },
     openGraph: {
-      type: options.type ?? "website",
+      type: options.type ?? 'website',
       locale: siteConfig.locale,
       siteName: siteConfig.name,
       title: options.title,
@@ -42,7 +42,7 @@ export function createMetadata(options: MetadataOptions): Metadata {
       images: [{ url: image, alt: imageAlt }],
     },
     twitter: {
-      card: "summary_large_image",
+      card: 'summary_large_image',
       title: options.title,
       description: options.description,
       images: [image],

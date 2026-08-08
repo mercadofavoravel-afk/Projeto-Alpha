@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
-import { createDeveloperAction } from "./actions";
+import { db } from '@/lib/db';
+import { createDeveloperAction } from './actions';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type DeveloperItem = {
   id: string;
@@ -23,7 +23,7 @@ export default async function DevelopersPage() {
       },
     },
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
   });
 
@@ -76,15 +76,11 @@ export default async function DevelopersPage() {
 
                   <td>
                     {item.website ? (
-                      <a
-                        href={item.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={item.website} target="_blank" rel="noopener noreferrer">
                         Abrir site
                       </a>
                     ) : (
-                      "—"
+                      '—'
                     )}
                   </td>
 

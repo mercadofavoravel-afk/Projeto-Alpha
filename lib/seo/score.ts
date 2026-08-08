@@ -1,5 +1,5 @@
-import { seoRules } from "./rules";
-import type { SeoScoreResult, SeoDocument } from "./types";
+import { seoRules } from './rules';
+import type { SeoScoreResult, SeoDocument } from './types';
 
 export function calculateSeoScore(document: SeoDocument): SeoScoreResult {
   const checks = seoRules.map((rule) => ({
@@ -9,10 +9,7 @@ export function calculateSeoScore(document: SeoDocument): SeoScoreResult {
     passed: rule.validate(document),
   }));
 
-  const score = checks.reduce(
-    (total, check) => total + (check.passed ? check.points : 0),
-    0,
-  );
+  const score = checks.reduce((total, check) => total + (check.passed ? check.points : 0), 0);
   const maxScore = checks.reduce((total, check) => total + check.points, 0);
 
   return {

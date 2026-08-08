@@ -1,8 +1,8 @@
-import { db } from "@/lib/db";
-import { calculateSeoScore } from "@/lib/seo/score";
-import { createNeighborhoodAction } from "./actions";
+import { db } from '@/lib/db';
+import { calculateSeoScore } from '@/lib/seo/score';
+import { createNeighborhoodAction } from './actions';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type NeighborhoodItem = {
   id: string;
@@ -27,7 +27,7 @@ export default async function NeighborhoodsPage() {
       },
     },
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
   });
 
@@ -37,8 +37,8 @@ export default async function NeighborhoodsPage() {
       <h1>Bairros</h1>
 
       <p>
-        Cadastre a entidade territorial uma vez e reutilize-a em
-        empreendimentos, páginas locais e conteúdo SEO.
+        Cadastre a entidade territorial uma vez e reutilize-a em empreendimentos, páginas locais e
+        conteúdo SEO.
       </p>
 
       <form action={createNeighborhoodAction} className="panel form-grid">

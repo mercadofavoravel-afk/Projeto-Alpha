@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { audit } from "@/lib/audit";
-import { requireApiPermission } from "@/lib/auth";
-import { projectEditorSchema } from "@/lib/cms/project-schema";
-import { db } from "@/lib/db";
+import { audit } from '@/lib/audit';
+import { requireApiPermission } from '@/lib/auth';
+import { projectEditorSchema } from '@/lib/cms/project-schema';
+import { db } from '@/lib/db';
 
 type RouteContext = {
   params: Promise<{
@@ -11,17 +11,11 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(
-  _request: Request,
-  context: RouteContext,
-) {
-  const auth = await requireApiPermission("catalog:write");
+export async function GET(_request: Request, context: RouteContext) {
+  const auth = await requireApiPermission('catalog:write');
 
   if (!auth.ok) {
-    return NextResponse.json(
-      { error: auth.error },
-      { status: auth.status },
-    );
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const { id } = await context.params;
@@ -35,7 +29,7 @@ export async function GET(
       developer: true,
       media: {
         orderBy: {
-          position: "asc",
+          position: 'asc',
         },
       },
       typologies: true,
@@ -43,40 +37,28 @@ export async function GET(
   });
 
   if (!project) {
-    return NextResponse.json(
-      { error: "Empreendimento não encontrado" },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: 'Empreendimento não encontrado' }, { status: 404 });
   }
 
   return NextResponse.json(project);
 }
 
-export async function PATCH(
-  request: Request,
-  context: RouteContext,
-) {
-  const auth = await requireApiPermission("catalog:write");
+export async function PATCH(request: Request, context: RouteContext) {
+  const auth = await requireApiPermission('catalog:write');
 
   if (!auth.ok) {
-    return NextResponse.json(
-      { error: auth.error },
-      { status: auth.status },
-    );
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const { id } = await context.params;
   const body: unknown = await request.json();
 
-  const parsed = projectEditorSchema
-    .innerType()
-    .partial()
-    .safeParse(body);
+  const parsed = projectEditorSchema.innerType().partial().safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
       {
-        error: "Dados inválidos",
+        error: 'Dados inválidos',
         details: parsed.error.flatten(),
       },
       { status: 400 },
@@ -90,30 +72,18 @@ export async function PATCH(
     data: parsed.data,
   });
 
-  await audit(
-    "project.updated",
-    "Project",
-    id,
-    auth.user.id,
-    {
-      fields: Object.keys(parsed.data),
-    },
-  );
+  await audit('project.updated', 'Project', id, auth.user.id, {
+    fields: Object.keys(parsed.data),
+  });
 
   return NextResponse.json(project);
 }
 
-export async function DELETE(
-  _request: Request,
-  context: RouteContext,
-) {
-  const auth = await requireApiPermission("catalog:write");
+export async function DELETE(_request: Request, context: RouteContext) {
+  const auth = await requireApiPermission('catalog:write');
 
   if (!auth.ok) {
-    return NextResponse.json(
-      { error: auth.error },
-      { status: auth.status },
-    );
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const { id } = await context.params;
@@ -123,20 +93,14 @@ export async function DELETE(
       id,
     },
     data: {
-      publishStatus: "ARCHIVED",
+      publishStatus: 'ARCHIVED',
     },
   });
 
-  await audit(
-    "project.archived",
-    "Project",
-    id,
-    auth.user.id,
-  );
+  await audit('project.archived', 'Project', id, auth.user.id);
 
   return NextResponse.json({
     ok: true,
     project,
   });
 }
-

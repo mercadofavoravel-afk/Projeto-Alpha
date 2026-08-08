@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { JsonLd } from "@/components/JsonLd";
-import { getSiteUrl, organizationJsonLd, siteConfig } from "@/lib/seo";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { JsonLd } from '@/components/JsonLd';
+import { getSiteUrl, organizationJsonLd, siteConfig } from '@/lib/seo';
+import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.shortName,
-  category: "real estate",
+  category: 'real estate',
   formatDetection: { email: false, address: false, telephone: false },
 };
 

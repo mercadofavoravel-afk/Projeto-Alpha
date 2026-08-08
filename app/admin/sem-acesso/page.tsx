@@ -1,1 +1,13 @@
-import Link from "next/link";export default function Page(){return <section><div className="eyebrow">Acesso restrito</div><h1>Você não possui permissão para esta área.</h1><p>Solicite ao administrador uma função compatível com a atividade.</p><Link className="btn" href="/admin">Voltar ao painel</Link></section>}
+import Link from 'next/link';
+export default function Page() {
+  return (
+    <section>
+      <div className="eyebrow">Acesso restrito</div>
+      <h1>Você não possui permissão para esta área.</h1>
+      <p>Solicite ao administrador uma função compatível com a atividade.</p>
+      <Link className="btn" href="/admin">
+        Voltar ao painel
+      </Link>
+    </section>
+  );
+}

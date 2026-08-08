@@ -1,4 +1,4 @@
-import { serializeJsonLd, type JsonLdValue } from "@/lib/seo/structured-data";
+import { serializeJsonLd, type JsonLdValue } from '@/lib/seo/structured-data';
 
 export function JsonLd({ data }: { data: JsonLdValue }) {
   return (

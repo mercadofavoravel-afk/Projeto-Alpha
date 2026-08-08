@@ -1,1 +1,5 @@
-import {NextResponse} from "next/server";import {projects} from "@/lib/projects";export async function GET(){return NextResponse.json({data:projects,total:projects.length})}
+import { NextResponse } from 'next/server';
+import { projects } from '@/lib/projects';
+export async function GET() {
+  return NextResponse.json({ data: projects, total: projects.length });
+}

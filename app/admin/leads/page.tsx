@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { db } from "@/lib/db";
+import Link from 'next/link';
+import { db } from '@/lib/db';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type LeadItem = {
   id: string;
@@ -24,7 +24,7 @@ export default async function LeadsPage() {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
     take: 100,
   });
@@ -50,9 +50,7 @@ export default async function LeadsPage() {
             {leads.map((lead: LeadItem) => (
               <tr key={lead.id}>
                 <td>
-                  <Link href={`/admin/leads/${lead.id}`}>
-                    {lead.name}
-                  </Link>
+                  <Link href={`/admin/leads/${lead.id}`}>{lead.name}</Link>
                 </td>
                 <td>{lead.phone}</td>
                 <td>{lead.objective}</td>

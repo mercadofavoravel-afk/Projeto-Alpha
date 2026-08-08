@@ -1,1 +1,35 @@
-import {Header} from "@/components/Header";import {Footer} from "@/components/Footer";import {Card} from "@/components/Card";import {projects} from "@/lib/projects";export default function Home(){return <><Header/><section className="hero"><img src="/images/vie-01.jpg" alt="Rio"/><div className="wrap content"><div className="eyebrow">Projeto ALPHA V9</div><h1>Uma plataforma para descobrir imóveis extraordinários.</h1><p>Fonte única de dados para páginas, busca, coleções, SEO e CRM.</p></div></section><section className="section"><div className="wrap"><div className="head"><div><div className="eyebrow">Destaques</div><h2>Curadoria conectada aos dados.</h2></div></div><div className="grid">{projects.slice(0,6).map(p=><Card key={p.slug} p={p}/>)}</div></div></section><Footer/></>}
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { Card } from '@/components/Card';
+import { projects } from '@/lib/projects';
+export default function Home() {
+  return (
+    <>
+      <Header />
+      <section className="hero">
+        <img src="/images/vie-01.jpg" alt="Rio" />
+        <div className="wrap content">
+          <div className="eyebrow">Projeto ALPHA V9</div>
+          <h1>Uma plataforma para descobrir imóveis extraordinários.</h1>
+          <p>Fonte única de dados para páginas, busca, coleções, SEO e CRM.</p>
+        </div>
+      </section>
+      <section className="section">
+        <div className="wrap">
+          <div className="head">
+            <div>
+              <div className="eyebrow">Destaques</div>
+              <h2>Curadoria conectada aos dados.</h2>
+            </div>
+          </div>
+          <div className="grid">
+            {projects.slice(0, 6).map((p) => (
+              <Card key={p.slug} p={p} />
+            ))}
+          </div>
+        </div>
+      </section>
+      <Footer />
+    </>
+  );
+}

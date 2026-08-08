@@ -1,17 +1,15 @@
-const DEFAULT_SITE_URL = "http://localhost:3000";
+const DEFAULT_SITE_URL = 'http://localhost:3000';
 
 export function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL;
-  return configuredUrl.replace(/\/+$/, "");
+  return configuredUrl.replace(/\/+$/, '');
 }
 
-export function buildCanonical(path = "/") {
+export function buildCanonical(path = '/') {
   const normalizedPath = `/${path}`
-    .replace(/^\/+/, "/")
-    .replace(/\/{2,}/g, "/")
-    .replace(/\/$/, "");
+    .replace(/^\/+/, '/')
+    .replace(/\/{2,}/g, '/')
+    .replace(/\/$/, '');
 
-  return normalizedPath === ""
-    ? `${getSiteUrl()}/`
-    : `${getSiteUrl()}${normalizedPath}`;
+  return normalizedPath === '' ? `${getSiteUrl()}/` : `${getSiteUrl()}${normalizedPath}`;
 }

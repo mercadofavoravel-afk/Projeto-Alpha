@@ -1,1 +1,15 @@
-export function Footer(){return <footer className="footer"><div className="wrap footergrid"><div><b>IMÓVEIS DE ALTO PADRÃO RIO</b><p>Curadoria imobiliária premium.</p></div><div>Empreendimentos</div><div>Coleções</div><div>Contato</div></div></footer>}
+export function Footer() {
+  return (
+    <footer className="footer">
+      <div className="wrap footergrid">
+        <div>
+          <b>IMÓVEIS DE ALTO PADRÃO RIO</b>
+          <p>Curadoria imobiliária premium.</p>
+        </div>
+        <div>Empreendimentos</div>
+        <div>Coleções</div>
+        <div>Contato</div>
+      </div>
+    </footer>
+  );
+}

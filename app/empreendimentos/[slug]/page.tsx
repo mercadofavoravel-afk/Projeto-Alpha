@@ -1,15 +1,11 @@
-import type { Metadata } from "next";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { JsonLd } from "@/components/JsonLd";
-import { TrackProjectView } from "@/components/TrackProjectView";
-import { getProject, projects } from "@/lib/projects";
-import {
-  breadcrumbJsonLd,
-  createMetadata,
-  projectJsonLd,
-} from "@/lib/seo";
-import { notFound } from "next/navigation";
+import type { Metadata } from 'next';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { JsonLd } from '@/components/JsonLd';
+import { TrackProjectView } from '@/components/TrackProjectView';
+import { getProject, projects } from '@/lib/projects';
+import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
+import { notFound } from 'next/navigation';
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -25,8 +21,8 @@ export async function generateMetadata({
 
   if (!project) {
     return createMetadata({
-      title: "Empreendimento não encontrado",
-      description: "O empreendimento solicitado não está disponível.",
+      title: 'Empreendimento não encontrado',
+      description: 'O empreendimento solicitado não está disponível.',
       path: `/empreendimentos/${slug}`,
       noIndex: true,
     });
@@ -44,11 +40,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
@@ -56,8 +48,8 @@ export default async function Page({
   const description = `${project.name}, em ${project.neighborhood}: ${project.description}.`;
   const schemas = [
     breadcrumbJsonLd([
-      { name: "Início", path: "/" },
-      { name: "Empreendimentos", path: "/empreendimentos" },
+      { name: 'Início', path: '/' },
+      { name: 'Empreendimentos', path: '/empreendimentos' },
       { name: project.name, path: `/empreendimentos/${project.slug}` },
     ]),
     projectJsonLd({ ...project, description }),

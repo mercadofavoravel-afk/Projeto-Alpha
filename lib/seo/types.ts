@@ -36,5 +36,5 @@ export type MetadataOptions = {
   imageAlt?: string;
   keywords?: string[];
   noIndex?: boolean;
-  type?: "website" | "article";
+  type?: 'website' | 'article';
 };

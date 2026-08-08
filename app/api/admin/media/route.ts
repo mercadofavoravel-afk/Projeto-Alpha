@@ -1,1 +1,35 @@
-import{NextResponse}from"next/server";import{z}from"zod";import{db}from"@/lib/db";import{requireApiPermission}from"@/lib/auth";const schema=z.object({projectId:z.string().cuid(),kind:z.enum(["IMAGE","VIDEO","FLOOR_PLAN","DOCUMENT"]),url:z.string().url(),alt:z.string().trim().max(180).optional(),caption:z.string().trim().max(500).optional(),position:z.coerce.number().int().nonnegative().default(0)});export async function GET(request:Request){const auth=await requireApiPermission("media:write");if(!auth.ok)return NextResponse.json({error:auth.error},{status:auth.status});const projectId=new URL(request.url).searchParams.get("projectId");return NextResponse.json(await db.media.findMany({where:projectId?{projectId}:{},include:{project:{select:{name:true}}},orderBy:[{projectId:"asc"},{position:"asc"}]}))}export async function POST(request:Request){const auth=await requireApiPermission("media:write");if(!auth.ok)return NextResponse.json({error:auth.error},{status:auth.status});const parsed=schema.safeParse(await request.json());if(!parsed.success)return NextResponse.json({error:"Mídia inválida",details:parsed.error.flatten()},{status:400});return NextResponse.json(await db.media.create({data:parsed.data}),{status:201})}
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { db } from '@/lib/db';
+import { requireApiPermission } from '@/lib/auth';
+const schema = z.object({
+  projectId: z.string().cuid(),
+  kind: z.enum(['IMAGE', 'VIDEO', 'FLOOR_PLAN', 'DOCUMENT']),
+  url: z.string().url(),
+  alt: z.string().trim().max(180).optional(),
+  caption: z.string().trim().max(500).optional(),
+  position: z.coerce.number().int().nonnegative().default(0),
+});
+export async function GET(request: Request) {
+  const auth = await requireApiPermission('media:write');
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const projectId = new URL(request.url).searchParams.get('projectId');
+  return NextResponse.json(
+    await db.media.findMany({
+      where: projectId ? { projectId } : {},
+      include: { project: { select: { name: true } } },
+      orderBy: [{ projectId: 'asc' }, { position: 'asc' }],
+    }),
+  );
+}
+export async function POST(request: Request) {
+  const auth = await requireApiPermission('media:write');
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const parsed = schema.safeParse(await request.json());
+  if (!parsed.success)
+    return NextResponse.json(
+      { error: 'Mídia inválida', details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  return NextResponse.json(await db.media.create({ data: parsed.data }), { status: 201 });
+}

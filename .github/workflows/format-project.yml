@@ -1,0 +1,47 @@
+name: Projeto ALPHA - Format Project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: Format and Commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Format project
+        run: npm run format
+
+      - name: Verify formatting
+        run: npm run format:check
+
+      - name: Commit formatted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "Nenhuma alteração de formatação necessária."
+            exit 0
+          fi
+
+          git add .
+          git commit -m "style: format project with Prettier"
+          git push origin main

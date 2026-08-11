@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Card } from '@/components/Card';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
@@ -21,14 +22,25 @@ export default function Home() {
     <>
       <JsonLd data={websiteJsonLd()} />
       <Header />
+
       <section className="hero">
-        <img src="/images/vie-01.jpg" alt="Imóvel de alto padrão no Rio de Janeiro" />
+        <Image
+          src="/images/vie-01.jpg"
+          alt="Imóvel de alto padrão no Rio de Janeiro"
+          fill
+          priority
+          sizes="100vw"
+        />
+
         <div className="wrap content">
           <div className="eyebrow">Projeto ALPHA</div>
           <h1>Uma plataforma para descobrir imóveis extraordinários.</h1>
-          <p>Fonte única de dados para páginas, busca, coleções, SEO e CRM.</p>
+          <p>
+            Fonte única de dados para páginas, busca, coleções, SEO e CRM.
+          </p>
         </div>
       </section>
+
       <section className="section">
         <div className="wrap">
           <div className="head">
@@ -37,6 +49,7 @@ export default function Home() {
               <h2>Curadoria conectada aos dados.</h2>
             </div>
           </div>
+
           <div className="grid">
             {projects.slice(0, 6).map((project) => (
               <Card key={project.slug} p={project} />
@@ -44,6 +57,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
       <Footer />
     </>
   );

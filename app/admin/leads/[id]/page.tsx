@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
+import { ActivityForm } from './ActivityForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,19 @@ function formatDate(value: Date | null | undefined) {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(value);
+}
+
+function activityLabel(type: string) {
+  const labels: Record<string, string> = {
+    NOTE: 'Nota',
+    CALL: 'Ligação',
+    WHATSAPP: 'WhatsApp',
+    EMAIL: 'E-mail',
+    VISIT: 'Visita',
+    TASK: 'Tarefa',
+  };
+
+  return labels[type] || type;
 }
 
 export default async function LeadDetailPage({
@@ -67,9 +81,7 @@ export default async function LeadDetailPage({
       <div className="head">
         <div>
           <h1>{lead.name}</h1>
-          <p>
-            Lead criado em {formatDate(lead.createdAt)}
-          </p>
+          <p>Lead criado em {formatDate(lead.createdAt)}</p>
         </div>
 
         <Link className="btn" href="/admin/leads">
@@ -159,6 +171,13 @@ export default async function LeadDetailPage({
       )}
 
       <section className="admin-card">
+        <div className="eyebrow">Nova atividade</div>
+        <h2>Registrar acompanhamento</h2>
+
+        <ActivityForm leadId={lead.id} />
+      </section>
+
+      <section className="admin-card">
         <div className="head">
           <div>
             <div className="eyebrow">Histórico</div>
@@ -173,14 +192,11 @@ export default async function LeadDetailPage({
         ) : (
           <div className="timeline">
             {lead.activities.map((activity) => (
-              <article
-                className="timeline-item"
-                key={activity.id}
-              >
+              <article className="timeline-item" key={activity.id}>
                 <div className="timeline-marker" />
 
                 <div>
-                  <strong>{activity.type}</strong>
+                  <strong>{activityLabel(activity.type)}</strong>
 
                   <div className="timeline-meta">
                     {formatDate(activity.createdAt)}
@@ -189,15 +205,12 @@ export default async function LeadDetailPage({
                   {activity.note && <p>{activity.note}</p>}
 
                   {activity.dueAt && (
-                    <p>
-                      Prazo: {formatDate(activity.dueAt)}
-                    </p>
+                    <p>Prazo: {formatDate(activity.dueAt)}</p>
                   )}
 
                   {activity.completedAt && (
                     <p>
-                      Concluído em:{' '}
-                      {formatDate(activity.completedAt)}
+                      Concluído em: {formatDate(activity.completedAt)}
                     </p>
                   )}
                 </div>

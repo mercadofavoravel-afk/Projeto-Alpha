@@ -1,16 +1,23 @@
 import { z } from 'zod';
+
 export const leadSchema = z.object({
   name: z.string().trim().min(2).max(120),
   phone: z.string().trim().min(8).max(30),
   email: z.string().email().optional().or(z.literal('')),
-  objective: z.enum(['LIVE', 'INVEST', 'PATRIMONY', 'SELL', 'RENT', 'OTHER']).default('OTHER'),
+  objective: z
+    .enum(['LIVE', 'INVEST', 'PATRIMONY', 'SELL', 'RENT', 'OTHER'])
+    .default('OTHER'),
   neighborhood: z.string().trim().max(120).optional(),
   budgetMin: z.coerce.number().nonnegative().optional(),
   budgetMax: z.coerce.number().nonnegative().optional(),
   message: z.string().trim().max(2000).optional(),
   source: z.string().trim().max(120).optional(),
+  utmSource: z.string().trim().max(200).optional(),
+  utmMedium: z.string().trim().max(200).optional(),
+  utmCampaign: z.string().trim().max(200).optional(),
   consent: z.literal(true),
 });
+
 export const projectSchema = z.object({
   name: z.string().trim().min(2).max(180),
   slug: z

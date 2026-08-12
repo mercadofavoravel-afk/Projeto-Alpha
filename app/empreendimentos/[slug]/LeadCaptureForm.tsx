@@ -8,6 +8,17 @@ type LeadCaptureFormProps = {
   neighborhood: string;
 };
 
+function getSessionKey() {
+  let key = localStorage.getItem('alpha_session_key');
+
+  if (!key) {
+    key = crypto.randomUUID();
+    localStorage.setItem('alpha_session_key', key);
+  }
+
+  return key;
+}
+
 export function LeadCaptureForm({
   projectName,
   projectSlug,
@@ -33,6 +44,7 @@ export function LeadCaptureForm({
 
     try {
       const params = new URLSearchParams(window.location.search);
+      const sessionKey = getSessionKey();
 
       const response = await fetch('/api/leads', {
         method: 'POST',
@@ -62,6 +74,28 @@ export function LeadCaptureForm({
           data.error || 'Não foi possível enviar seus dados.',
         );
       }
+
+      void fetch('/api/analytics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        keepalive: true,
+        body: JSON.stringify({
+          name: 'lead_submitted',
+          path: window.location.pathname,
+          sessionKey,
+          metadata: {
+            leadId: data.leadId,
+            projectSlug,
+            neighborhood,
+            objective,
+            utmSource: params.get('utm_source') || undefined,
+            utmMedium: params.get('utm_medium') || undefined,
+            utmCampaign: params.get('utm_campaign') || undefined,
+          },
+        }),
+      }).catch(() => undefined);
 
       setName('');
       setPhone('');

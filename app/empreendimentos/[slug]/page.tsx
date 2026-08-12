@@ -11,6 +11,7 @@ import {
   createMetadata,
   projectJsonLd,
 } from '@/lib/seo';
+import { LeadCaptureForm } from './LeadCaptureForm';
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -115,6 +116,28 @@ export default async function Page({
               </span>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="head">
+            <div>
+              <div className="eyebrow">Atendimento</div>
+              <h2>Receba informações sobre {project.name}.</h2>
+            </div>
+
+            <p>
+              Envie seus dados para receber informações comerciais,
+              disponibilidade e próximos passos.
+            </p>
+          </div>
+
+          <LeadCaptureForm
+            projectName={project.name}
+            projectSlug={project.slug}
+            neighborhood={project.neighborhood}
+          />
         </div>
       </section>
 

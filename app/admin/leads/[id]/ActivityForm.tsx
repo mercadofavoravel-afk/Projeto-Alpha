@@ -1,236 +1,132 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { db } from '@/lib/db';
-import { requirePermission } from '@/lib/auth';
-import { ActivityForm } from './ActivityForm';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-function formatMoney(value: unknown) {
-  if (value === null || value === undefined) {
-    return 'Não informado';
-  }
+const activityTypes = [
+  { value: 'NOTE', label: 'Nota' },
+  { value: 'CALL', label: 'Ligação' },
+  { value: 'WHATSAPP', label: 'WhatsApp' },
+  { value: 'EMAIL', label: 'E-mail' },
+  { value: 'VISIT', label: 'Visita' },
+  { value: 'TASK', label: 'Tarefa' },
+];
 
-  const numeric = Number(value);
+export function ActivityForm({ leadId }: { leadId: string }) {
+  const router = useRouter();
 
-  if (!Number.isFinite(numeric)) {
-    return 'Não informado';
-  }
+  const [type, setType] = useState('NOTE');
+  const [note, setNote] = useState('');
+  const [dueAt, setDueAt] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    maximumFractionDigits: 0,
-  }).format(numeric);
-}
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-function formatDate(value: Date | null | undefined) {
-  if (!value) {
-    return '—';
-  }
+    setLoading(true);
+    setMessage('');
+    setError('');
 
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(value);
-}
-
-function activityLabel(type: string) {
-  const labels: Record<string, string> = {
-    NOTE: 'Nota',
-    CALL: 'Ligação',
-    WHATSAPP: 'WhatsApp',
-    EMAIL: 'E-mail',
-    VISIT: 'Visita',
-    TASK: 'Tarefa',
-  };
-
-  return labels[type] || type;
-}
-
-export default async function LeadDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  await requirePermission('crm:read');
-
-  const { id } = await params;
-
-  const lead = await db.lead.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      activities: {
-        orderBy: {
-          createdAt: 'desc',
+    try {
+      const response = await fetch(
+        `/api/admin/leads/${leadId}/activities`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type,
+            note: note.trim() || undefined,
+            dueAt: dueAt || undefined,
+          }),
         },
-      },
-    },
-  });
+      );
 
-  if (!lead) {
-    notFound();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || 'Não foi possível registrar a atividade.',
+        );
+      }
+
+      setNote('');
+      setDueAt('');
+      setMessage('Atividade registrada com sucesso.');
+
+      router.refresh();
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Erro inesperado ao registrar a atividade.',
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <>
-      <div className="eyebrow">CRM</div>
+    <form className="quiz" onSubmit={submit}>
+      <div className="quiz-block">
+        <label htmlFor="activity-type">Tipo de atividade</label>
 
-      <div className="head">
-        <div>
-          <h1>{lead.name}</h1>
-          <p>
-            Lead criado em {formatDate(lead.createdAt)}
-          </p>
-        </div>
-
-        <Link className="btn" href="/admin/leads">
-          Voltar para leads
-        </Link>
+        <select
+          id="activity-type"
+          value={type}
+          onChange={(event) => setType(event.target.value)}
+        >
+          {activityTypes.map((activityType) => (
+            <option
+              key={activityType.value}
+              value={activityType.value}
+            >
+              {activityType.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="editor-grid">
-        <section className="admin-card">
-          <div className="eyebrow">Contato</div>
+      <div className="quiz-block">
+        <label htmlFor="activity-note">Observação</label>
 
-          <dl className="detail-list">
-            <div>
-              <dt>Telefone</dt>
-              <dd>{lead.phone}</dd>
-            </div>
-
-            <div>
-              <dt>E-mail</dt>
-              <dd>{lead.email || 'Não informado'}</dd>
-            </div>
-
-            <div>
-              <dt>Objetivo</dt>
-              <dd>{lead.objective}</dd>
-            </div>
-
-            <div>
-              <dt>Status</dt>
-              <dd>{lead.status}</dd>
-            </div>
-
-            <div>
-              <dt>Bairro</dt>
-              <dd>{lead.neighborhood || 'Não informado'}</dd>
-            </div>
-
-            <div>
-              <dt>Orçamento mínimo</dt>
-              <dd>{formatMoney(lead.budgetMin)}</dd>
-            </div>
-
-            <div>
-              <dt>Orçamento máximo</dt>
-              <dd>{formatMoney(lead.budgetMax)}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="admin-card">
-          <div className="eyebrow">Origem</div>
-
-          <dl className="detail-list">
-            <div>
-              <dt>Fonte</dt>
-              <dd>{lead.source || 'Não informado'}</dd>
-            </div>
-
-            <div>
-              <dt>UTM Source</dt>
-              <dd>{lead.utmSource || '—'}</dd>
-            </div>
-
-            <div>
-              <dt>UTM Medium</dt>
-              <dd>{lead.utmMedium || '—'}</dd>
-            </div>
-
-            <div>
-              <dt>UTM Campaign</dt>
-              <dd>{lead.utmCampaign || '—'}</dd>
-            </div>
-
-            <div>
-              <dt>Consentimento</dt>
-              <dd>{lead.consent ? 'Sim' : 'Não'}</dd>
-            </div>
-          </dl>
-        </section>
+        <textarea
+          id="activity-note"
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          maxLength={2000}
+          rows={5}
+          placeholder="Ex.: cliente pediu retorno amanhã pela manhã."
+        />
       </div>
 
-      {lead.message && (
-        <section className="admin-card">
-          <div className="eyebrow">Mensagem</div>
-          <p>{lead.message}</p>
-        </section>
+      <div className="quiz-block">
+        <label htmlFor="activity-due">
+          Prazo ou data do próximo contato
+        </label>
+
+        <input
+          id="activity-due"
+          type="datetime-local"
+          value={dueAt}
+          onChange={(event) => setDueAt(event.target.value)}
+        />
+      </div>
+
+      <button className="btn" type="submit" disabled={loading}>
+        {loading ? 'Salvando...' : 'Registrar atividade'}
+      </button>
+
+      {message && <p role="status">{message}</p>}
+
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
       )}
-
-      <section className="admin-card">
-        <div className="eyebrow">Nova atividade</div>
-        <h2>Registrar acompanhamento</h2>
-
-        <ActivityForm leadId={lead.id} />
-      </section>
-
-      <section className="admin-card">
-        <div className="head">
-          <div>
-            <div className="eyebrow">Histórico</div>
-            <h2>Atividades</h2>
-          </div>
-
-          <span>{lead.activities.length} registros</span>
-        </div>
-
-        {lead.activities.length === 0 ? (
-          <p>Nenhuma atividade registrada para este lead.</p>
-        ) : (
-          <div className="timeline">
-            {lead.activities.map((activity) => (
-              <article
-                className="timeline-item"
-                key={activity.id}
-              >
-                <div className="timeline-marker" />
-
-                <div>
-                  <strong>
-                    {activityLabel(activity.type)}
-                  </strong>
-
-                  <div className="timeline-meta">
-                    {formatDate(activity.createdAt)}
-                  </div>
-
-                  {activity.note && (
-                    <p>{activity.note}</p>
-                  )}
-
-                  {activity.dueAt && (
-                    <p>
-                      Prazo: {formatDate(activity.dueAt)}
-                    </p>
-                  )}
-
-                  {activity.completedAt && (
-                    <p>
-                      Concluído em:{' '}
-                      {formatDate(activity.completedAt)}
-                    </p>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    </>
+    </form>
   );
 }

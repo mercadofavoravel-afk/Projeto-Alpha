@@ -1,18 +1,57 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireApiPermission } from '@/lib/auth';
 import { leadSchema } from '@/lib/validation';
+
 export async function GET() {
-  const leads = await db.lead.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
-  return NextResponse.json({ data: leads, total: leads.length });
+  const auth = await requireApiPermission('crm:read');
+
+  if (!auth.ok) {
+    return NextResponse.json(
+      { error: auth.error },
+      { status: auth.status },
+    );
+  }
+
+  const leads = await db.lead.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 100,
+  });
+
+  return NextResponse.json({
+    data: leads,
+    total: leads.length,
+  });
 }
+
 export async function POST(request: Request) {
   const payload = await request.json();
   const parsed = leadSchema.safeParse(payload);
-  if (!parsed.success)
+
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Dados inválidos', details: parsed.error.flatten() },
+      {
+        error: 'Dados inválidos',
+        details: parsed.error.flatten(),
+      },
       { status: 400 },
     );
-  const lead = await db.lead.create({ data: { ...parsed.data, email: parsed.data.email || null } });
-  return NextResponse.json({ ok: true, lead }, { status: 201 });
+  }
+
+  const lead = await db.lead.create({
+    data: {
+      ...parsed.data,
+      email: parsed.data.email || null,
+    },
+  });
+
+  return NextResponse.json(
+    {
+      ok: true,
+      leadId: lead.id,
+    },
+    { status: 201 },
+  );
 }

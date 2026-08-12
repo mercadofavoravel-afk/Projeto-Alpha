@@ -2,20 +2,44 @@ import type { MetadataRoute } from 'next';
 import { projects } from '@/lib/projects';
 import { buildCanonical } from '@/lib/seo';
 
-const staticRoutes = ['/', '/empreendimentos', '/colecoes', '/buscar', '/descubra'] as const;
+const staticRoutes = [
+  {
+    path: '/',
+    changeFrequency: 'weekly' as const,
+    priority: 1,
+  },
+  {
+    path: '/empreendimentos',
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  },
+  {
+    path: '/colecoes',
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  },
+  {
+    path: '/buscar',
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  },
+  {
+    path: '/descubra',
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  },
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
   return [
-    ...staticRoutes.map((path) => ({
-      url: buildCanonical(path),
-      lastModified: now,
-      changeFrequency: path === '/' ? ('weekly' as const) : ('monthly' as const),
-      priority: path === '/' ? 1 : 0.7,
+    ...staticRoutes.map((route) => ({
+      url: buildCanonical(route.path),
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
     })),
+
     ...projects.map((project) => ({
       url: buildCanonical(`/empreendimentos/${project.slug}`),
-      lastModified: now,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     })),

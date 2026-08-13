@@ -1698,3 +1698,97 @@ td small {
     row-gap: 45px;
   }
 }
+/* Luxury projects index */
+
+.projects-hero {
+  padding: 120px 0 90px;
+  background: #f4efe6;
+}
+
+.projects-hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 90px;
+  align-items: end;
+}
+
+.projects-hero h1 {
+  max-width: 860px;
+  margin: 16px 0 0;
+  font: 500 clamp(3.2rem, 6vw, 6rem) / 0.98 Georgia, serif;
+  letter-spacing: -0.045em;
+}
+
+.projects-hero-copy p {
+  margin: 0;
+  color: var(--m);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.projects-hero-copy span {
+  display: block;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--l);
+  color: #887550;
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.projects-section {
+  padding: 90px 0 115px;
+  background: #e9e3d9;
+}
+
+.projects-intro {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 70px;
+  align-items: end;
+  margin-bottom: 55px;
+}
+
+.projects-intro h2 {
+  max-width: 720px;
+  margin: 12px 0 0;
+  font: 500 clamp(2.5rem, 4vw, 4rem) / 1 Georgia, serif;
+  letter-spacing: -0.035em;
+}
+
+.projects-intro > p {
+  margin: 0;
+  color: var(--m);
+  line-height: 1.75;
+}
+
+.projects-grid {
+  row-gap: 65px;
+}
+
+@media (max-width: 900px) {
+  .projects-hero-grid,
+  .projects-intro {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+}
+
+@media (max-width: 620px) {
+  .projects-hero {
+    padding: 80px 0 60px;
+  }
+
+  .projects-section {
+    padding: 65px 0 80px;
+  }
+
+  .projects-intro {
+    margin-bottom: 40px;
+  }
+
+  .projects-grid {
+    row-gap: 45px;
+  }
+}

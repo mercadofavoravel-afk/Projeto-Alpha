@@ -1192,3 +1192,77 @@ td small {
     padding: 25px 20px;
   }
 }
+/* Concierge form refinement */
+
+.concierge-form-intro {
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(22, 34, 29, 0.12);
+}
+
+.concierge-form-intro span {
+  display: block;
+  color: #887550;
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.concierge-form-intro p {
+  max-width: 520px;
+  margin: 10px 0 0;
+  color: var(--m);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.concierge-form .quiz-block {
+  margin-bottom: 20px;
+}
+
+.concierge-form .quiz-block > label {
+  margin-bottom: 7px;
+  color: #6d685f;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.concierge-form input::placeholder,
+.concierge-form textarea::placeholder {
+  color: #a7a197;
+}
+
+.concierge-consent {
+  margin-top: 28px;
+}
+
+.concierge-consent label {
+  color: #706b63;
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.concierge-submit {
+  width: 100%;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.concierge-privacy-note {
+  margin-top: 13px;
+  color: #8d877e;
+  font-size: 0.65rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.concierge-success {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-left: 3px solid #8a7548;
+  background: rgba(255, 255, 255, 0.58);
+  color: #374239;
+  line-height: 1.6;
+}

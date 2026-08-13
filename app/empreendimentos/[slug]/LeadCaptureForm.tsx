@@ -71,7 +71,7 @@ export function LeadCaptureForm({
 
       if (!response.ok) {
         throw new Error(
-          data.error || 'Não foi possível enviar seus dados.',
+          data.error || 'Não foi possível enviar sua solicitação.',
         );
       }
 
@@ -105,13 +105,13 @@ export function LeadCaptureForm({
       setConsent(false);
 
       setSuccess(
-        `Recebemos seu interesse em ${projectName}. Nossa equipe poderá entrar em contato com você.`,
+        `Sua solicitação sobre ${projectName} foi recebida. Nossa equipe fará o contato de forma reservada.`,
       );
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : 'Erro inesperado ao enviar seus dados.',
+          : 'Não foi possível concluir sua solicitação neste momento.',
       );
     } finally {
       setLoading(false);
@@ -119,7 +119,15 @@ export function LeadCaptureForm({
   }
 
   return (
-    <form className="quiz" onSubmit={submit}>
+    <form className="quiz concierge-form" onSubmit={submit}>
+      <div className="concierge-form-intro">
+        <span>Solicitação de atendimento</span>
+        <p>
+          Preencha seus dados para receber informações comerciais e
+          disponibilidade deste empreendimento.
+        </p>
+      </div>
+
       <div className="quiz-block">
         <label htmlFor="lead-name">Nome</label>
 
@@ -128,6 +136,7 @@ export function LeadCaptureForm({
           value={name}
           onChange={(event) => setName(event.target.value)}
           autoComplete="name"
+          placeholder="Seu nome"
           required
           minLength={2}
           maxLength={120}
@@ -142,6 +151,7 @@ export function LeadCaptureForm({
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
           autoComplete="tel"
+          placeholder="Seu contato preferencial"
           required
           minLength={8}
           maxLength={30}
@@ -157,26 +167,29 @@ export function LeadCaptureForm({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
+          placeholder="Seu e-mail"
         />
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-objective">Objetivo</label>
+        <label htmlFor="lead-objective">Interesse principal</label>
 
         <select
           id="lead-objective"
           value={objective}
           onChange={(event) => setObjective(event.target.value)}
         >
-          <option value="LIVE">Morar</option>
-          <option value="INVEST">Investir</option>
+          <option value="LIVE">Residência</option>
+          <option value="INVEST">Investimento</option>
           <option value="PATRIMONY">Patrimônio</option>
-          <option value="OTHER">Outro</option>
+          <option value="OTHER">Outro perfil</option>
         </select>
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-budget">Orçamento máximo</label>
+        <label htmlFor="lead-budget">
+          Faixa de investimento
+        </label>
 
         <input
           id="lead-budget"
@@ -185,12 +198,14 @@ export function LeadCaptureForm({
           onChange={(event) =>
             setBudgetMax(event.target.value.replace(/\D/g, ''))
           }
-          placeholder="Ex.: 3000000"
+          placeholder="Valor máximo previsto"
         />
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-message">Mensagem</label>
+        <label htmlFor="lead-message">
+          Como podemos ajudar?
+        </label>
 
         <textarea
           id="lead-message"
@@ -198,11 +213,11 @@ export function LeadCaptureForm({
           onChange={(event) => setMessage(event.target.value)}
           maxLength={2000}
           rows={5}
-          placeholder={`Quero receber mais informações sobre ${projectName}.`}
+          placeholder={`Gostaria de receber informações reservadas sobre ${projectName}.`}
         />
       </div>
 
-      <div className="quiz-block">
+      <div className="quiz-block concierge-consent">
         <label>
           <input
             type="checkbox"
@@ -210,15 +225,23 @@ export function LeadCaptureForm({
             onChange={(event) => setConsent(event.target.checked)}
             required
           />{' '}
-          Autorizo o contato da equipe sobre este empreendimento.
+          Autorizo o contato da equipe para este atendimento.
         </label>
       </div>
 
-      <button className="btn" type="submit" disabled={loading}>
-        {loading ? 'Enviando...' : 'Quero receber informações'}
+      <button className="btn concierge-submit" type="submit" disabled={loading}>
+        {loading ? 'Enviando solicitação...' : 'Solicitar atendimento'}
       </button>
 
-      {success && <p role="status">{success}</p>}
+      <div className="concierge-privacy-note">
+        Seus dados serão utilizados exclusivamente para este atendimento.
+      </div>
+
+      {success && (
+        <p className="concierge-success" role="status">
+          {success}
+        </p>
+      )}
 
       {error && (
         <p className="form-error" role="alert">

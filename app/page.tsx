@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card } from '@/components/Card';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
@@ -23,40 +24,83 @@ export default function Home() {
       <JsonLd data={websiteJsonLd()} />
       <Header />
 
-      <section className="hero">
-        <Image
-          src="/images/vie-01.jpg"
-          alt="Imóvel de alto padrão no Rio de Janeiro"
-          fill
-          priority
-          sizes="100vw"
-        />
+      <main>
+        <section className="hero hero-home">
+          <Image
+            src="/images/vie-01.jpg"
+            alt="Residência de alto padrão no Rio de Janeiro"
+            fill
+            priority
+            sizes="100vw"
+          />
 
-        <div className="wrap content">
-          <div className="eyebrow">Projeto ALPHA</div>
-          <h1>Uma plataforma para descobrir imóveis extraordinários.</h1>
-          <p>
-            Fonte única de dados para páginas, busca, coleções, SEO e CRM.
-          </p>
-        </div>
-      </section>
+          <div className="wrap content">
+            <div className="eyebrow">Rio de Janeiro · Curadoria imobiliária</div>
 
-      <section className="section">
-        <div className="wrap">
-          <div className="head">
+            <h1>
+              Endereços extraordinários.
+              <br />
+              Escolhas à altura.
+            </h1>
+
+            <p>
+              Uma seleção criteriosa de residências e empreendimentos
+              excepcionais nos endereços mais desejados do Rio de Janeiro.
+            </p>
+
+            <Link className="hero-link" href="/descubra">
+              Descobrir imóveis
+            </Link>
+          </div>
+        </section>
+
+        <section className="section section-intro">
+          <div className="wrap luxury-intro">
+            <div className="eyebrow">Seleção privada</div>
+
             <div>
-              <div className="eyebrow">Destaques</div>
-              <h2>Curadoria conectada aos dados.</h2>
+              <h2>
+                Imóveis escolhidos por localização, arquitetura e
+                singularidade.
+              </h2>
+
+              <p>
+                Nossa curadoria reúne propriedades para quem procura mais do
+                que metragem: vista, endereço, privacidade, desenho e valor
+                patrimonial.
+              </p>
             </div>
           </div>
+        </section>
 
-          <div className="grid">
-            {projects.slice(0, 6).map((project) => (
-              <Card key={project.slug} p={project} />
-            ))}
+        <section className="section featured-section">
+          <div className="wrap">
+            <div className="head">
+              <div>
+                <div className="eyebrow">Destaques</div>
+                <h2>Uma curadoria para poucos endereços.</h2>
+              </div>
+
+              <p>
+                Conheça uma seleção de empreendimentos em regiões emblemáticas
+                do Rio de Janeiro.
+              </p>
+            </div>
+
+            <div className="grid">
+              {projects.slice(0, 6).map((project) => (
+                <Card key={project.slug} p={project} />
+              ))}
+            </div>
+
+            <div className="section-action">
+              <Link className="text-link" href="/empreendimentos">
+                Ver todos os empreendimentos
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
     </>

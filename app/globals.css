@@ -1792,3 +1792,66 @@ td small {
     row-gap: 45px;
   }
 }
+/* Premium mobile navigation */
+
+@media (max-width: 900px) {
+  .luxury-header .nav {
+    min-height: auto;
+    padding: 18px 0 14px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .luxury-header .links {
+    display: flex;
+    order: 3;
+    width: 100%;
+    gap: 22px;
+    padding-top: 13px;
+    overflow-x: auto;
+    border-top: 1px solid rgba(23, 49, 40, 0.12);
+    scrollbar-width: none;
+  }
+
+  .luxury-header .links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .luxury-nav-links a {
+    flex: 0 0 auto;
+    padding: 5px 0 10px;
+    white-space: nowrap;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .luxury-nav-links a::after {
+    bottom: 4px;
+  }
+
+  .luxury-brand {
+    flex: 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .luxury-header .nav {
+    padding-top: 15px;
+  }
+
+  .luxury-brand {
+    font-size: 0.72rem;
+  }
+
+  .luxury-brand small {
+    font-size: 0.5rem;
+  }
+
+  .luxury-header .links {
+    gap: 18px;
+  }
+
+  .luxury-nav-links a {
+    font-size: 0.66rem;
+  }
+}

@@ -7,7 +7,7 @@ import { Search } from './Search';
 export const metadata = createMetadata({
   title: 'Buscar imóveis de alto padrão no Rio de Janeiro',
   description:
-    'Busque imóveis de alto padrão no Rio de Janeiro por nome, bairro, tipologia e características.',
+    'Explore uma seleção de imóveis de alto padrão no Rio de Janeiro por empreendimento, bairro, tipologia e características.',
   path: '/buscar',
   keywords: [
     'buscar imóveis Rio de Janeiro',
@@ -37,25 +37,50 @@ export default async function BuscarPage({
       <Header />
 
       <main>
-        <section className="section">
+        <section className="search-hero">
+          <div className="wrap search-hero-grid">
+            <div>
+              <div className="eyebrow">Portfólio selecionado</div>
+
+              <h1>
+                Encontre um endereço à altura das suas escolhas.
+              </h1>
+            </div>
+
+            <div className="search-hero-copy">
+              <p>
+                Explore nossa curadoria por empreendimento, bairro ou
+                características relevantes para o seu estilo de vida.
+              </p>
+
+              <span>
+                Uma seleção criteriosa nos endereços mais desejados do Rio.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="search-experience">
           <div className="wrap">
-            <div className="head">
+            <div className="search-intro">
               <div>
-                <div className="eyebrow">Busca</div>
-                <h1>Encontre seu próximo imóvel.</h1>
+                <div className="eyebrow">Explorar portfólio</div>
+                <h2>Refine sua seleção.</h2>
               </div>
 
               <p>
-                Pesquise o catálogo por empreendimento,
-                bairro ou características.
+                Comece por um endereço, empreendimento ou atributo.
+                Os resultados são atualizados conforme suas escolhas.
               </p>
             </div>
 
-            <Search
-              projects={projects}
-              initialQuery={initialQuery}
-              initialNeighborhood={initialNeighborhood}
-            />
+            <div className="search-shell">
+              <Search
+                projects={projects}
+                initialQuery={initialQuery}
+                initialNeighborhood={initialNeighborhood}
+              />
+            </div>
           </div>
         </section>
       </main>

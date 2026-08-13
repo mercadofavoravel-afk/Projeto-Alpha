@@ -86,60 +86,120 @@ export default async function Page({
       <TrackProjectView projectSlug={project.slug} />
       <Header />
 
-      <section className="hero">
-        <Image
-          src={project.image}
-          alt={`${project.name}, ${project.neighborhood}`}
-          fill
-          priority
-          sizes="100vw"
-        />
+      <main>
+        <section className="hero property-hero">
+          <Image
+            src={project.image}
+            alt={`${project.name}, ${project.neighborhood}`}
+            fill
+            priority
+            sizes="100vw"
+          />
 
-        <div className="wrap content">
-          <div className="eyebrow">{project.neighborhood}</div>
-          <h1>{project.name}</h1>
-          <p>{project.description}</p>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="wrap">
-          <div className="notice">
-            Valores, disponibilidade e condições comerciais devem ser
-            confirmados.
-          </div>
-
-          <div className="tags">
-            {project.types.map((type) => (
-              <span className="tag" key={type}>
-                {type}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="wrap">
-          <div className="head">
-            <div>
-              <div className="eyebrow">Atendimento</div>
-              <h2>Receba informações sobre {project.name}.</h2>
+          <div className="wrap content property-hero-content">
+            <div className="eyebrow">
+              {project.neighborhood} · Rio de Janeiro
             </div>
 
-            <p>
-              Envie seus dados para receber informações comerciais,
-              disponibilidade e próximos passos.
-            </p>
-          </div>
+            <h1>{project.name}</h1>
 
-          <LeadCaptureForm
-            projectName={project.name}
-            projectSlug={project.slug}
-            neighborhood={project.neighborhood}
-          />
-        </div>
-      </section>
+            <p>{project.description}</p>
+          </div>
+        </section>
+
+        <section className="property-overview">
+          <div className="wrap property-overview-grid">
+            <div>
+              <div className="eyebrow">O empreendimento</div>
+
+              <h2>
+                Um endereço singular em {project.neighborhood}.
+              </h2>
+            </div>
+
+            <div className="property-overview-copy">
+              <p>{project.description}</p>
+
+              <p className="property-disclaimer">
+                Informações comerciais, disponibilidade e condições
+                estão sujeitas à confirmação.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="property-details">
+          <div className="wrap">
+            <div className="property-detail-grid">
+              <div className="property-detail-item">
+                <span>Localização</span>
+                <strong>{project.neighborhood}</strong>
+              </div>
+
+              <div className="property-detail-item">
+                <span>Status</span>
+                <strong>{project.status}</strong>
+              </div>
+
+              <div className="property-detail-item">
+                <span>Tipologias</span>
+                <strong>{project.types.join(' · ')}</strong>
+              </div>
+
+              <div className="property-detail-item">
+                <span>Perfil</span>
+                <strong>
+                  {project.collections.length > 0
+                    ? project.collections.join(' · ')
+                    : 'Curadoria residencial'}
+                </strong>
+              </div>
+            </div>
+
+            {project.highlights.length > 0 && (
+              <div className="property-highlights">
+                <div className="eyebrow">Destaques</div>
+
+                <div className="property-highlights-list">
+                  {project.highlights.map((highlight) => (
+                    <span key={highlight}>{highlight}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="property-concierge">
+          <div className="wrap property-concierge-grid">
+            <div className="property-concierge-intro">
+              <div className="eyebrow">Atendimento reservado</div>
+
+              <h2>
+                Conheça {project.name} com acompanhamento personalizado.
+              </h2>
+
+              <p>
+                Compartilhe seus dados para receber informações de
+                disponibilidade, condições comerciais e uma seleção
+                orientada ao seu perfil.
+              </p>
+
+              <div className="property-concierge-note">
+                Atendimento individual, confidencial e sem compromisso.
+              </div>
+            </div>
+
+            <div className="property-concierge-form">
+              <LeadCaptureForm
+                projectName={project.name}
+                projectSlug={project.slug}
+                neighborhood={project.neighborhood}
+              />
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </>

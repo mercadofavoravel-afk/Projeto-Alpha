@@ -6,7 +6,7 @@ import { RecommendationQuiz } from './RecommendationQuiz';
 export const metadata = createMetadata({
   title: 'Descubra o imóvel ideal',
   description:
-    'Informe suas prioridades e receba uma seleção explicável de imóveis de alto padrão no Rio de Janeiro alinhados ao seu momento e objetivo.',
+    'Informe suas prioridades e receba uma seleção personalizada de imóveis de alto padrão no Rio de Janeiro, alinhada ao seu perfil, momento e objetivo.',
   path: '/descubra',
 });
 
@@ -14,21 +14,61 @@ export default function Page() {
   return (
     <>
       <Header />
-      <section className="section">
-        <div className="wrap">
-          <div className="head">
+
+      <main>
+        <section className="discovery-hero">
+          <div className="wrap discovery-hero-grid">
             <div>
-              <div className="eyebrow">Recomendação ALPHA</div>
-              <h1>Descubra imóveis alinhados ao seu momento.</h1>
+              <div className="eyebrow">Curadoria personalizada</div>
+
+              <h1>
+                Seu próximo endereço começa pelo seu perfil.
+              </h1>
             </div>
-            <p>
-              Informe prioridades e receba uma seleção explicável. Valores e disponibilidade exigem
-              confirmação.
-            </p>
+
+            <div className="discovery-hero-copy">
+              <p>
+                Compartilhe suas preferências, prioridades e objetivos.
+                A partir delas, apresentamos uma seleção de imóveis com
+                maior aderência ao seu momento.
+              </p>
+
+              <span>
+                Uma experiência de descoberta, não uma busca genérica.
+              </span>
+            </div>
           </div>
-          <RecommendationQuiz />
-        </div>
-      </section>
+        </section>
+
+        <section className="discovery-experience">
+          <div className="wrap discovery-experience-grid">
+            <div className="discovery-guidance">
+              <div className="eyebrow">Como funciona</div>
+
+              <h2>
+                Critérios que ajudam a revelar o imóvel certo.
+              </h2>
+
+              <p>
+                Localização, tipologia, orçamento, estilo de vida e
+                objetivo patrimonial são combinados para formar uma
+                seleção mais relevante.
+              </p>
+
+              <div className="discovery-principles">
+                <span>Curadoria orientada</span>
+                <span>Seleção explicável</span>
+                <span>Atendimento reservado</span>
+              </div>
+            </div>
+
+            <div className="discovery-quiz-shell">
+              <RecommendationQuiz />
+            </div>
+          </div>
+        </section>
+      </main>
+
       <Footer />
     </>
   );

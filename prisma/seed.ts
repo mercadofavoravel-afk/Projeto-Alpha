@@ -1,5 +1,6 @@
 import { PrismaClient, PublishStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import data from '../data/projects.json';
 
 const prisma = new PrismaClient();
@@ -11,6 +12,20 @@ const slugify = (value: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+
+function databaseFingerprint() {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    return 'missing';
+  }
+
+  return crypto
+    .createHash('sha256')
+    .update(databaseUrl)
+    .digest('hex')
+    .slice(0, 12);
+}
 
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -25,7 +40,9 @@ async function main() {
   }
 
   if (adminPassword.length < 8) {
-    throw new Error('ADMIN_PASSWORD deve ter pelo menos 8 caracteres.');
+    throw new Error(
+      'ADMIN_PASSWORD deve ter pelo menos 8 caracteres.',
+    );
   }
 
   const passwordHash = await bcrypt.hash(adminPassword, 12);
@@ -47,6 +64,25 @@ async function main() {
       role: 'ADMIN',
       isActive: true,
     },
+  });
+
+  const adminAfterUpsert = await prisma.user.findUnique({
+    where: {
+      email: adminEmail,
+    },
+    select: {
+      id: true,
+      role: true,
+      isActive: true,
+    },
+  });
+
+  console.log('[ADMIN_SEED_DIAG]', {
+    createdOrUpdated: true,
+    userExistsAfterUpsert: Boolean(adminAfterUpsert),
+    isActive: Boolean(adminAfterUpsert?.isActive),
+    isAdmin: adminAfterUpsert?.role === 'ADMIN',
+    databaseFingerprint: databaseFingerprint(),
   });
 
   for (const projectData of data) {

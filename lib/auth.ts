@@ -19,6 +19,20 @@ function hash(value: string) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
+function databaseFingerprint() {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    return 'missing';
+  }
+
+  return crypto
+    .createHash('sha256')
+    .update(databaseUrl)
+    .digest('hex')
+    .slice(0, 12);
+}
+
 async function requestFingerprint() {
   const h = await headers();
   const trustProxyHeaders = process.env.TRUST_PROXY_HEADERS === 'true';
@@ -71,6 +85,7 @@ export async function login(emailInput: string, password: string) {
       rateLimited: true,
       failedForAccount,
       failedForIp,
+      databaseFingerprint: databaseFingerprint(),
     });
 
     return {
@@ -95,6 +110,7 @@ export async function login(emailInput: string, password: string) {
     userFound,
     isActive,
     passwordMatch,
+    databaseFingerprint: databaseFingerprint(),
   });
 
   const valid = userFound && isActive && passwordMatch;

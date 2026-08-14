@@ -19,20 +19,6 @@ function hash(value: string) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
-function databaseFingerprint() {
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    return 'missing';
-  }
-
-  return crypto
-    .createHash('sha256')
-    .update(databaseUrl)
-    .digest('hex')
-    .slice(0, 12);
-}
-
 async function requestFingerprint() {
   const h = await headers();
   const trustProxyHeaders = process.env.TRUST_PROXY_HEADERS === 'true';
@@ -80,14 +66,6 @@ export async function login(emailInput: string, password: string) {
     failedForAccount >= maxAttempts ||
     failedForIp >= maxIpAttempts
   ) {
-    console.log('[AUTH_DIAG]', {
-      stage: 'rate-limit',
-      rateLimited: true,
-      failedForAccount,
-      failedForIp,
-      databaseFingerprint: databaseFingerprint(),
-    });
-
     return {
       ok: false as const,
       reason: 'RATE_LIMITED' as const,
@@ -98,22 +76,10 @@ export async function login(emailInput: string, password: string) {
     where: { email },
   });
 
-  const userFound = Boolean(user);
-  const isActive = Boolean(user?.isActive);
-
-  const passwordMatch = user
-    ? await bcrypt.compare(password, user.passwordHash)
-    : false;
-
-  console.log('[AUTH_DIAG]', {
-    stage: 'credentials',
-    userFound,
-    isActive,
-    passwordMatch,
-    databaseFingerprint: databaseFingerprint(),
-  });
-
-  const valid = userFound && isActive && passwordMatch;
+  const valid = Boolean(
+    user?.isActive &&
+      (await bcrypt.compare(password, user.passwordHash)),
+  );
 
   await db.loginAttempt.create({
     data: {

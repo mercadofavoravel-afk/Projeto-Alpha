@@ -4,8 +4,8 @@ import data from '../data/projects.json';
 
 const prisma = new PrismaClient();
 
-const slugify = (v: string) =>
-  v
+const slugify = (value: string) =>
+  value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -13,13 +13,27 @@ const slugify = (v: string) =>
     .replace(/(^-|-$)/g, '');
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL ?? 'admin@example.com';
-  const password = process.env.ADMIN_PASSWORD ?? 'change-me';
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  if (!adminEmail) {
+    throw new Error('ADMIN_EMAIL não está configurado.');
+  }
+
+  if (!adminPassword) {
+    throw new Error('ADMIN_PASSWORD não está configurado.');
+  }
+
+  if (adminPassword.length < 8) {
+    throw new Error('ADMIN_PASSWORD deve ter pelo menos 8 caracteres.');
+  }
+
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
 
   await prisma.user.upsert({
-    where: { email },
+    where: {
+      email: adminEmail,
+    },
     update: {
       name: 'Administrador ALPHA',
       passwordHash,
@@ -27,7 +41,7 @@ async function main() {
       isActive: true,
     },
     create: {
-      email,
+      email: adminEmail,
       name: 'Administrador ALPHA',
       passwordHash,
       role: 'ADMIN',
@@ -35,75 +49,85 @@ async function main() {
     },
   });
 
-  for (const s of data) {
-    const n = await prisma.neighborhood.upsert({
-      where: { slug: slugify(s.neighborhood) },
-      update: { name: s.neighborhood },
-      create: {
-        slug: slugify(s.neighborhood),
-        name: s.neighborhood,
+  for (const projectData of data) {
+    const neighborhood = await prisma.neighborhood.upsert({
+      where: {
+        slug: slugify(projectData.neighborhood),
       },
-    });
-
-    const p = await prisma.project.upsert({
-      where: { slug: s.slug },
       update: {
-        name: s.name,
-        description: s.description,
-        heroImage: s.image,
-        statusLabel: s.status,
-        neighborhoodId: n.id,
+        name: projectData.neighborhood,
+      },
+      create: {
+        slug: slugify(projectData.neighborhood),
+        name: projectData.neighborhood,
+      },
+    });
+
+    const project = await prisma.project.upsert({
+      where: {
+        slug: projectData.slug,
+      },
+      update: {
+        name: projectData.name,
+        description: projectData.description,
+        heroImage: projectData.image,
+        statusLabel: projectData.status,
+        neighborhoodId: neighborhood.id,
         publishStatus: PublishStatus.REVIEW,
       },
       create: {
-        slug: s.slug,
-        name: s.name,
-        description: s.description,
-        heroImage: s.image,
-        statusLabel: s.status,
-        neighborhoodId: n.id,
+        slug: projectData.slug,
+        name: projectData.name,
+        description: projectData.description,
+        heroImage: projectData.image,
+        statusLabel: projectData.status,
+        neighborhoodId: neighborhood.id,
         publishStatus: PublishStatus.REVIEW,
       },
     });
 
-    for (const cName of s.collections) {
-      const c = await prisma.collection.upsert({
-        where: { slug: slugify(cName) },
-        update: { name: cName },
+    for (const collectionName of projectData.collections) {
+      const collection = await prisma.collection.upsert({
+        where: {
+          slug: slugify(collectionName),
+        },
+        update: {
+          name: collectionName,
+        },
         create: {
-          slug: slugify(cName),
-          name: cName,
+          slug: slugify(collectionName),
+          name: collectionName,
         },
       });
 
       await prisma.projectCollection.upsert({
         where: {
           projectId_collectionId: {
-            projectId: p.id,
-            collectionId: c.id,
+            projectId: project.id,
+            collectionId: collection.id,
           },
         },
         update: {},
         create: {
-          projectId: p.id,
-          collectionId: c.id,
+          projectId: project.id,
+          collectionId: collection.id,
         },
       });
     }
 
-    for (const t of s.types) {
-      const exists = await prisma.typology.findFirst({
+    for (const typologyName of projectData.types) {
+      const existingTypology = await prisma.typology.findFirst({
         where: {
-          projectId: p.id,
-          name: t,
+          projectId: project.id,
+          name: typologyName,
         },
       });
 
-      if (!exists) {
+      if (!existingTypology) {
         await prisma.typology.create({
           data: {
-            name: t,
-            projectId: p.id,
+            name: typologyName,
+            projectId: project.id,
           },
         });
       }
@@ -113,4 +137,8 @@ async function main() {
 
 main()
   .then(() => console.log('Seed concluído.'))
+  .catch((error) => {
+    console.error('Erro ao executar seed:', error);
+    process.exitCode = 1;
+  })
   .finally(() => prisma.$disconnect());

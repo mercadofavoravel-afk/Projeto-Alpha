@@ -75,7 +75,7 @@ async function main() {
         heroImage: projectData.image,
         statusLabel: projectData.status,
         neighborhoodId: neighborhood.id,
-        publishStatus: PublishStatus.REVIEW,
+        publishStatus: PublishStatus.PUBLISHED,
       },
       create: {
         slug: projectData.slug,
@@ -84,7 +84,7 @@ async function main() {
         heroImage: projectData.image,
         statusLabel: projectData.status,
         neighborhoodId: neighborhood.id,
-        publishStatus: PublishStatus.REVIEW,
+        publishStatus: PublishStatus.PUBLISHED,
       },
     });
 

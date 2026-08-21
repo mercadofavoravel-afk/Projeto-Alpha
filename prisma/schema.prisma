@@ -139,16 +139,24 @@ model User {
 }
 
 model Neighborhood {
-  id             String    @id @default(cuid())
-  slug           String    @unique
-  name           String    @unique
-  description    String?
-  heroImage      String?
-  seoTitle       String?
-  seoDescription String?
-  projects       Project[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  slug                  String    @unique
+  name                  String    @unique
+  description           String?
+  heroImage             String?
+  experienceTitle       String?
+  experienceDescription String?
+  highlights            Json?
+  videoUrl              String?
+  videoTitle            String?
+  ctaTitle               String?
+  ctaDescription         String?
+  faq                    Json?
+  seoTitle               String?
+  seoDescription         String?
+  projects               Project[]
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 }
 
 model Developer {
@@ -385,7 +393,7 @@ model RecommendationProfile {
   proximityBeach   Int                  @default(0)
   proximityMetro   Int                  @default(0)
   investmentFocus  Int                  @default(0)
-  lifestyleFocus   Int                  @default(0)
+  lifestyleFocus  Int                  @default(0)
   status           RecommendationStatus @default(ACTIVE)
   results          RecommendationResult[]
   events           AnalyticsEvent[]

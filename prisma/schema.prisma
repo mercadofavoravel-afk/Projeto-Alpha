@@ -21,6 +21,54 @@ enum LeadStatus {
   VISIT_SCHEDULED
   WON
   LOST
+enum DiscoveryCandidateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IMPORTED
+}
+
+enum DiscoveryCandidateKind {
+  PROJECT
+  NEIGHBORHOOD
+  DOCUMENT
+  ARTICLE
+  DEVELOPER
+  OTHER
+}
+
+model DiscoveryCandidate {
+  id                String                   @id @default(cuid())
+  url               String                   @unique
+  title             String?
+  kind              DiscoveryCandidateKind
+  score             Int                      @default(0)
+  status            DiscoveryCandidateStatus @default(PENDING)
+
+  sourceRootId      String
+  sourceRootName    String
+  sourceRootUrl     String
+  sourceRootKind    String?
+
+  importedProjectId String?
+  metadata          Json?
+
+  firstSeenAt       DateTime                 @default(now())
+  lastSeenAt        DateTime                 @default(now())
+  reviewedAt        DateTime?
+  importedAt        DateTime?
+
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@index([status])
+  @@index([kind])
+  @@index([score])
+  @@index([sourceRootId])
+  @@index([importedProjectId])
+  @@index([lastSeenAt])
+}
+
 }
 
 enum LeadObjective {

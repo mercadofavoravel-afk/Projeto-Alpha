@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
@@ -69,13 +70,17 @@ function faqToText(value: unknown) {
     .join('\n');
 }
 
-function parseHighlights(value: string): HighlightItem[] {
+function parseHighlights(
+  value: string,
+): HighlightItem[] {
   return value
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [title, ...descriptionParts] = line.split('|');
+      const [title, ...descriptionParts] =
+        line.split('|');
+
       const description = descriptionParts
         .join('|')
         .trim();
@@ -87,7 +92,9 @@ function parseHighlights(value: string): HighlightItem[] {
           : {}),
       };
     })
-    .filter((item) => item.title.length > 0);
+    .filter(
+      (item) => item.title.length > 0,
+    );
 }
 
 function parseFaq(value: string): FaqItem[] {
@@ -96,11 +103,14 @@ function parseFaq(value: string): FaqItem[] {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [question, ...answerParts] = line.split('|');
+      const [question, ...answerParts] =
+        line.split('|');
 
       return {
         question: question.trim(),
-        answer: answerParts.join('|').trim(),
+        answer: answerParts
+          .join('|')
+          .trim(),
       };
     })
     .filter(
@@ -126,12 +136,18 @@ async function updateNeighborhoodAction(
 ) {
   'use server';
 
-  await requirePermission('catalog:write');
+  await requirePermission(
+    'catalog:write',
+  );
 
-  const id = String(formData.get('id') ?? '');
+  const id = String(
+    formData.get('id') ?? '',
+  );
+
   const slug = String(
     formData.get('slug') ?? '',
   ).trim();
+
   const name = String(
     formData.get('name') ?? '',
   ).trim();
@@ -143,7 +159,9 @@ async function updateNeighborhoodAction(
   }
 
   const highlights = parseHighlights(
-    String(formData.get('highlights') ?? ''),
+    String(
+      formData.get('highlights') ?? '',
+    ),
   );
 
   const faq = parseFaq(
@@ -154,6 +172,7 @@ async function updateNeighborhoodAction(
     where: {
       id,
     },
+
     data: {
       name,
       slug,
@@ -173,10 +192,11 @@ async function updateNeighborhoodAction(
         'experienceTitle',
       ),
 
-      experienceDescription: optionalString(
-        formData,
-        'experienceDescription',
-      ),
+      experienceDescription:
+        optionalString(
+          formData,
+          'experienceDescription',
+        ),
 
       highlights:
         highlights.length > 0
@@ -220,10 +240,19 @@ async function updateNeighborhoodAction(
     },
   });
 
-  revalidatePath('/admin/bairros');
-  revalidatePath(`/admin/bairros/${id}`);
+  revalidatePath(
+    '/admin/bairros',
+  );
+
+  revalidatePath(
+    `/admin/bairros/${id}`,
+  );
+
   revalidatePath('/bairros');
-  revalidatePath(`/bairros/${slug}`);
+
+  revalidatePath(
+    `/bairros/${slug}`,
+  );
 }
 
 export default async function NeighborhoodEditorPage({
@@ -233,7 +262,9 @@ export default async function NeighborhoodEditorPage({
     id: string;
   }>;
 }) {
-  await requirePermission('catalog:write');
+  await requirePermission(
+    'catalog:write',
+  );
 
   const { id } = await params;
 
@@ -242,6 +273,7 @@ export default async function NeighborhoodEditorPage({
       where: {
         id,
       },
+
       include: {
         _count: {
           select: {
@@ -255,9 +287,10 @@ export default async function NeighborhoodEditorPage({
     notFound();
   }
 
-  const highlightsText = highlightsToText(
-    neighborhood.highlights,
-  );
+  const highlightsText =
+    highlightsToText(
+      neighborhood.highlights,
+    );
 
   const faqText = faqToText(
     neighborhood.faq,
@@ -271,11 +304,14 @@ export default async function NeighborhoodEditorPage({
 
       <div className="head">
         <div>
-          <h1>{neighborhood.name}</h1>
+          <h1>
+            {neighborhood.name}
+          </h1>
 
           <p>
-            Construa a experiência editorial, comercial e
-            de SEO desta localização.
+            Construa a experiência
+            editorial, comercial e de SEO
+            desta localização.
           </p>
         </div>
 
@@ -289,13 +325,15 @@ export default async function NeighborhoodEditorPage({
       </div>
 
       <p>
-        <a href="/admin/bairros">
+        <Link href="/admin/bairros">
           ← Voltar aos bairros
-        </a>
+        </Link>
       </p>
 
       <form
-        action={updateNeighborhoodAction}
+        action={
+          updateNeighborhoodAction
+        }
         className="editor-form"
       >
         <input
@@ -309,11 +347,14 @@ export default async function NeighborhoodEditorPage({
             Identidade
           </div>
 
-          <h2>Informações principais</h2>
+          <h2>
+            Informações principais
+          </h2>
 
           <div className="editor-grid">
             <label>
               Nome do bairro
+
               <input
                 name="name"
                 defaultValue={
@@ -325,6 +366,7 @@ export default async function NeighborhoodEditorPage({
 
             <label>
               Slug
+
               <input
                 name="slug"
                 defaultValue={
@@ -336,6 +378,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Imagem principal
+
               <input
                 name="heroImage"
                 defaultValue={
@@ -348,6 +391,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Descrição principal
+
               <textarea
                 name="description"
                 rows={6}
@@ -366,11 +410,14 @@ export default async function NeighborhoodEditorPage({
             Lifestyle
           </div>
 
-          <h2>Como é viver aqui</h2>
+          <h2>
+            Como é viver aqui
+          </h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título da experiência
+
               <input
                 name="experienceTitle"
                 defaultValue={
@@ -383,6 +430,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Experiência do bairro
+
               <textarea
                 name="experienceDescription"
                 rows={9}
@@ -401,18 +449,26 @@ export default async function NeighborhoodEditorPage({
             Diferenciais
           </div>
 
-          <h2>Pontos positivos do bairro</h2>
+          <h2>
+            Pontos positivos do bairro
+          </h2>
 
           <p>
-            Use uma linha para cada destaque. Escreva o
-            título, depois <b>|</b>, depois a descrição.
+            Use uma linha para cada
+            destaque. Escreva o título,
+            depois <b>|</b>, depois a
+            descrição.
           </p>
 
           <textarea
             name="highlights"
             rows={10}
-            defaultValue={highlightsText}
-            placeholder={`Praia e orla | Acesso a uma das experiências costeiras mais desejadas do Rio.\nGastronomia | Restaurantes, cafés e serviços de alto nível próximos de casa.\nMobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
+            defaultValue={
+              highlightsText
+            }
+            placeholder={`Praia e orla | Acesso a uma das experiências costeiras mais desejadas do Rio.
+Gastronomia | Restaurantes, cafés e serviços de alto nível próximos de casa.
+Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
           />
         </section>
 
@@ -421,11 +477,14 @@ export default async function NeighborhoodEditorPage({
             Conteúdo audiovisual
           </div>
 
-          <h2>Vídeo do bairro</h2>
+          <h2>
+            Vídeo do bairro
+          </h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               URL do vídeo
+
               <input
                 name="videoUrl"
                 defaultValue={
@@ -438,6 +497,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Título do vídeo
+
               <input
                 name="videoTitle"
                 defaultValue={
@@ -455,11 +515,14 @@ export default async function NeighborhoodEditorPage({
             Conversão
           </div>
 
-          <h2>Chamada comercial</h2>
+          <h2>
+            Chamada comercial
+          </h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título da chamada
+
               <input
                 name="ctaTitle"
                 defaultValue={
@@ -472,6 +535,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Texto da chamada
+
               <textarea
                 name="ctaDescription"
                 rows={5}
@@ -490,18 +554,22 @@ export default async function NeighborhoodEditorPage({
             SEO e intenção de busca
           </div>
 
-          <h2>Perguntas frequentes</h2>
+          <h2>
+            Perguntas frequentes
+          </h2>
 
           <p>
-            Uma pergunta por linha. Use <b>|</b> entre a
-            pergunta e a resposta.
+            Uma pergunta por linha. Use{' '}
+            <b>|</b> entre a pergunta e a
+            resposta.
           </p>
 
           <textarea
             name="faq"
             rows={12}
             defaultValue={faqText}
-            placeholder={`Como é morar em ${neighborhood.name}? | Resposta editorial original e útil para quem está pesquisando a região.\nQuais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologias e o perfil predominante da oferta.`}
+            placeholder={`Como é morar em ${neighborhood.name}? | Resposta editorial original e útil para quem está pesquisando a região.
+Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologias e o perfil predominante da oferta.`}
           />
         </section>
 
@@ -510,11 +578,14 @@ export default async function NeighborhoodEditorPage({
             Google
           </div>
 
-          <h2>SEO da página</h2>
+          <h2>
+            SEO da página
+          </h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título SEO
+
               <input
                 name="seoTitle"
                 maxLength={70}
@@ -528,6 +599,7 @@ export default async function NeighborhoodEditorPage({
 
             <label className="editor-wide">
               Descrição SEO
+
               <textarea
                 name="seoDescription"
                 maxLength={180}
@@ -550,13 +622,13 @@ export default async function NeighborhoodEditorPage({
             Salvar bairro
           </button>
 
-          <a
+          <Link
             href={`/bairros/${neighborhood.slug}`}
             target="_blank"
             rel="noreferrer"
           >
             Ver página pública →
-          </a>
+          </Link>
         </div>
       </form>
 
@@ -579,7 +651,10 @@ export default async function NeighborhoodEditorPage({
 
         .editor-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(
+            2,
+            minmax(0, 1fr)
+          );
           gap: 22px;
         }
 
@@ -605,12 +680,15 @@ export default async function NeighborhoodEditorPage({
           z-index: 10;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 24px;
           padding: 18px 22px;
           background: #142026;
           color: #fff;
-          box-shadow: 0 16px 50px rgba(0,0,0,.16);
+          box-shadow:
+            0 16px 50px
+            rgba(0, 0, 0, .16);
         }
 
         .editor-save a {

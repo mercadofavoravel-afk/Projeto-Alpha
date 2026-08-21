@@ -1,8 +1,13 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import {
+  notFound,
+  redirect,
+} from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
+import { collectNeighborhoodEvidence } from '@/lib/neighborhood-evidence-collector';
+import { enrichAndStoreNeighborhood } from '@/lib/neighborhood-enrichment-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +21,12 @@ type FaqItem = {
   answer: string;
 };
 
-function highlightsToText(value: unknown) {
-  if (!Array.isArray(value)) return '';
+function highlightsToText(
+  value: unknown,
+) {
+  if (!Array.isArray(value)) {
+    return '';
+  }
 
   return value
     .map((item) => {
@@ -33,7 +42,8 @@ function highlightsToText(value: unknown) {
       ) {
         const description =
           'description' in item &&
-          typeof item.description === 'string'
+          typeof item.description ===
+            'string'
             ? item.description
             : '';
 
@@ -49,7 +59,9 @@ function highlightsToText(value: unknown) {
 }
 
 function faqToText(value: unknown) {
-  if (!Array.isArray(value)) return '';
+  if (!Array.isArray(value)) {
+    return '';
+  }
 
   return value
     .map((item) => {
@@ -58,8 +70,10 @@ function faqToText(value: unknown) {
         item !== null &&
         'question' in item &&
         'answer' in item &&
-        typeof item.question === 'string' &&
-        typeof item.answer === 'string'
+        typeof item.question ===
+          'string' &&
+        typeof item.answer ===
+          'string'
       ) {
         return `${item.question} | ${item.answer}`;
       }
@@ -78,36 +92,48 @@ function parseHighlights(
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [title, ...descriptionParts] =
-        line.split('|');
+      const [
+        title,
+        ...descriptionParts
+      ] = line.split('|');
 
-      const description = descriptionParts
-        .join('|')
-        .trim();
+      const description =
+        descriptionParts
+          .join('|')
+          .trim();
 
       return {
         title: title.trim(),
+
         ...(description
-          ? { description }
+          ? {
+              description,
+            }
           : {}),
       };
     })
     .filter(
-      (item) => item.title.length > 0,
+      (item) =>
+        item.title.length > 0,
     );
 }
 
-function parseFaq(value: string): FaqItem[] {
+function parseFaq(
+  value: string,
+): FaqItem[] {
   return value
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [question, ...answerParts] =
-        line.split('|');
+      const [
+        question,
+        ...answerParts
+      ] = line.split('|');
 
       return {
         question: question.trim(),
+
         answer: answerParts
           .join('|')
           .trim(),
@@ -158,14 +184,19 @@ async function updateNeighborhoodAction(
     );
   }
 
-  const highlights = parseHighlights(
-    String(
-      formData.get('highlights') ?? '',
-    ),
-  );
+  const highlights =
+    parseHighlights(
+      String(
+        formData.get(
+          'highlights',
+        ) ?? '',
+      ),
+    );
 
   const faq = parseFaq(
-    String(formData.get('faq') ?? ''),
+    String(
+      formData.get('faq') ?? '',
+    ),
   );
 
   await db.neighborhood.update({
@@ -187,10 +218,11 @@ async function updateNeighborhoodAction(
         'description',
       ),
 
-      experienceTitle: optionalString(
-        formData,
-        'experienceTitle',
-      ),
+      experienceTitle:
+        optionalString(
+          formData,
+          'experienceTitle',
+        ),
 
       experienceDescription:
         optionalString(
@@ -218,10 +250,11 @@ async function updateNeighborhoodAction(
         'ctaTitle',
       ),
 
-      ctaDescription: optionalString(
-        formData,
-        'ctaDescription',
-      ),
+      ctaDescription:
+        optionalString(
+          formData,
+          'ctaDescription',
+        ),
 
       faq:
         faq.length > 0
@@ -233,10 +266,11 @@ async function updateNeighborhoodAction(
         'seoTitle',
       ),
 
-      seoDescription: optionalString(
-        formData,
-        'seoDescription',
-      ),
+      seoDescription:
+        optionalString(
+          formData,
+          'seoDescription',
+        ),
     },
   });
 
@@ -255,11 +289,66 @@ async function updateNeighborhoodAction(
   );
 }
 
+async function generateNeighborhoodEnrichmentAction(
+  formData: FormData,
+) {
+  'use server';
+
+  await requirePermission(
+    'catalog:write',
+  );
+
+  const id = String(
+    formData.get('id') ?? '',
+  );
+
+  if (!id) {
+    throw new Error(
+      'ID do bairro não informado.',
+    );
+  }
+
+  const evidence =
+    await collectNeighborhoodEvidence(
+      id,
+    );
+
+  const result =
+    await enrichAndStoreNeighborhood(
+      id,
+      evidence,
+    );
+
+  revalidatePath(
+    `/admin/bairros/${id}`,
+  );
+
+  revalidatePath(
+    `/bairros/${result.neighborhoodSlug}`,
+  );
+
+  if (!result.ok) {
+    redirect(
+      `/admin/bairros/${id}?enrich=insufficient&evidenceCount=${result.evidenceCount}`,
+    );
+  }
+
+  redirect(
+    `/admin/bairros/${id}?enrich=success&evidenceCount=${result.evidenceCount}`,
+  );
+}
+
 export default async function NeighborhoodEditorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     id: string;
+  }>;
+
+  searchParams: Promise<{
+    enrich?: string;
+    evidenceCount?: string;
   }>;
 }) {
   await requirePermission(
@@ -267,6 +356,9 @@ export default async function NeighborhoodEditorPage({
   );
 
   const { id } = await params;
+
+  const query =
+    await searchParams;
 
   const neighborhood =
     await db.neighborhood.findUnique({
@@ -292,9 +384,15 @@ export default async function NeighborhoodEditorPage({
       neighborhood.highlights,
     );
 
-  const faqText = faqToText(
-    neighborhood.faq,
-  );
+  const faqText =
+    faqToText(
+      neighborhood.faq,
+    );
+
+  const evidenceCount =
+    Number(
+      query.evidenceCount ?? 0,
+    );
 
   return (
     <>
@@ -310,8 +408,8 @@ export default async function NeighborhoodEditorPage({
 
           <p>
             Construa a experiência
-            editorial, comercial e de SEO
-            desta localização.
+            editorial, comercial e de
+            SEO desta localização.
           </p>
         </div>
 
@@ -329,6 +427,118 @@ export default async function NeighborhoodEditorPage({
           ← Voltar aos bairros
         </Link>
       </p>
+
+      <section className="intelligence-card">
+        <div>
+          <div className="eyebrow">
+            Automação editorial
+          </div>
+
+          <h2>
+            Inteligência de mercado
+          </h2>
+
+          <p>
+            O Alpha pode reunir
+            automaticamente as
+            informações confiáveis que
+            já possui sobre este bairro,
+            analisar os empreendimentos
+            publicados e preencher a
+            estrutura editorial da
+            página.
+          </p>
+
+          <div className="intelligence-points">
+            <span>
+              Empreendimentos
+            </span>
+
+            <span>
+              Tipologias
+            </span>
+
+            <span>
+              Incorporadoras
+            </span>
+
+            <span>
+              Características
+            </span>
+
+            <span>
+              Materiais de origem
+            </span>
+
+            <span>
+              SEO
+            </span>
+          </div>
+        </div>
+
+        <form
+          action={
+            generateNeighborhoodEnrichmentAction
+          }
+        >
+          <input
+            type="hidden"
+            name="id"
+            value={neighborhood.id}
+          />
+
+          <button
+            className="intelligence-button"
+            type="submit"
+          >
+            Gerar com inteligência
+            de mercado
+          </button>
+
+          <small>
+            O Alpha só atualiza
+            automaticamente quando
+            encontra evidências
+            suficientes.
+          </small>
+        </form>
+      </section>
+
+      {query.enrich ===
+        'success' && (
+        <div className="automation-message success">
+          <strong>
+            Conteúdo atualizado.
+          </strong>
+
+          <span>
+            O Alpha encontrou{' '}
+            {evidenceCount}{' '}
+            evidências e atualizou
+            automaticamente a ficha
+            editorial deste bairro.
+          </span>
+        </div>
+      )}
+
+      {query.enrich ===
+        'insufficient' && (
+        <div className="automation-message warning">
+          <strong>
+            Ainda faltam evidências.
+          </strong>
+
+          <span>
+            Foram encontradas{' '}
+            {evidenceCount}{' '}
+            evidências. O Alpha não
+            publicou conteúdo genérico
+            ou inventado. Precisamos
+            ampliar as fontes de
+            inteligência deste bairro.
+          </span>
+        </div>
+      )}
 
       <form
         action={
@@ -450,7 +660,8 @@ export default async function NeighborhoodEditorPage({
           </div>
 
           <h2>
-            Pontos positivos do bairro
+            Pontos positivos do
+            bairro
           </h2>
 
           <p>
@@ -559,9 +770,9 @@ Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
           </h2>
 
           <p>
-            Uma pergunta por linha. Use{' '}
-            <b>|</b> entre a pergunta e a
-            resposta.
+            Uma pergunta por linha.
+            Use <b>|</b> entre a
+            pergunta e a resposta.
           </p>
 
           <textarea
@@ -633,6 +844,130 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
       </form>
 
       <style>{`
+        .intelligence-card {
+          margin: 32px 0 26px;
+          padding: 34px;
+          background:
+            linear-gradient(
+              135deg,
+              #101b20,
+              #1c2d34
+            );
+          color: #fff;
+          display: grid;
+          grid-template-columns:
+            1fr minmax(260px, 360px);
+          gap: 48px;
+          align-items: center;
+        }
+
+        .intelligence-card h2 {
+          margin: 0 0 12px;
+          font-family:
+            Georgia,
+            'Times New Roman',
+            serif;
+          font-size: 32px;
+          font-weight: 400;
+        }
+
+        .intelligence-card p {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .68
+            );
+          line-height: 1.7;
+          max-width: 720px;
+        }
+
+        .intelligence-points {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 22px;
+        }
+
+        .intelligence-points span {
+          padding: 8px 10px;
+          border:
+            1px solid
+            rgba(
+              255,
+              255,
+              255,
+              .16
+            );
+          font-size: 10px;
+          text-transform:
+            uppercase;
+          letter-spacing: .1em;
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .7
+            );
+        }
+
+        .intelligence-card form {
+          display: grid;
+          gap: 12px;
+        }
+
+        .intelligence-button {
+          min-height: 58px;
+          padding: 0 20px;
+          border: 0;
+          cursor: pointer;
+          background: #b4976d;
+          color: #fff;
+          text-transform:
+            uppercase;
+          letter-spacing: .12em;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .intelligence-button:hover {
+          background: #c3a77e;
+        }
+
+        .intelligence-card small {
+          color:
+            rgba(
+              255,
+              255,
+              255,
+              .5
+            );
+          line-height: 1.5;
+        }
+
+        .automation-message {
+          padding: 18px 22px;
+          margin: 0 0 26px;
+          display: grid;
+          gap: 5px;
+        }
+
+        .automation-message.success {
+          color: #185a36;
+          background: #e9f6ee;
+          border:
+            1px solid #bfdfca;
+        }
+
+        .automation-message.warning {
+          color: #765616;
+          background: #fff6df;
+          border:
+            1px solid #ead59c;
+        }
+
         .editor-form {
           display: grid;
           gap: 24px;
@@ -641,7 +976,8 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
 
         .admin-card {
           background: #fff;
-          border: 1px solid #ded8cf;
+          border:
+            1px solid #ded8cf;
           padding: 32px;
         }
 
@@ -651,10 +987,11 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
 
         .editor-grid {
           display: grid;
-          grid-template-columns: repeat(
-            2,
-            minmax(0, 1fr)
-          );
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
           gap: 22px;
         }
 
@@ -688,16 +1025,31 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
           color: #fff;
           box-shadow:
             0 16px 50px
-            rgba(0, 0, 0, .16);
+            rgba(
+              0,
+              0,
+              0,
+              .16
+            );
         }
 
         .editor-save a {
           color: #fff;
         }
 
-        @media (max-width: 800px) {
+        @media (
+          max-width: 800px
+        ) {
+          .intelligence-card {
+            grid-template-columns:
+              1fr;
+            gap: 28px;
+            padding: 24px;
+          }
+
           .editor-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
           .editor-wide {
@@ -709,8 +1061,10 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
           }
 
           .editor-save {
-            flex-direction: column;
-            align-items: stretch;
+            flex-direction:
+              column;
+            align-items:
+              stretch;
           }
         }
       `}</style>

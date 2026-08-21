@@ -2,10 +2,22 @@
 
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/Card';
-import type { Project } from '@/lib/projects';
+
+export type SearchProject = {
+  slug: string;
+  name: string;
+  description: string;
+  neighborhood: string;
+  image: string;
+  status: string;
+  objectives: string[];
+  types: string[];
+  collections: string[];
+  highlights: string[];
+};
 
 type SearchProps = {
-  projects: Project[];
+  projects: SearchProject[];
   initialQuery?: string;
   initialNeighborhood?: string;
 };
@@ -16,14 +28,20 @@ export function Search({
   initialNeighborhood = '',
 }: SearchProps) {
   const [query, setQuery] = useState(initialQuery);
-  const [neighborhood, setNeighborhood] = useState(initialNeighborhood);
+  const [neighborhood, setNeighborhood] = useState(
+    initialNeighborhood,
+  );
 
   const neighborhoods = [
-    ...new Set(projects.map((project) => project.neighborhood)),
-  ].sort();
+    ...new Set(
+      projects.map((project) => project.neighborhood),
+    ),
+  ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
   const list = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = query
+      .trim()
+      .toLocaleLowerCase('pt-BR');
 
     return projects.filter((project) => {
       const searchableText = [
@@ -31,16 +49,19 @@ export function Search({
         project.description,
         project.neighborhood,
         ...project.types,
+        ...project.collections,
         ...project.highlights,
       ]
         .join(' ')
-        .toLowerCase();
+        .toLocaleLowerCase('pt-BR');
 
       const matchesQuery =
-        !normalizedQuery || searchableText.includes(normalizedQuery);
+        !normalizedQuery ||
+        searchableText.includes(normalizedQuery);
 
       const matchesNeighborhood =
-        !neighborhood || project.neighborhood === neighborhood;
+        !neighborhood ||
+        project.neighborhood === neighborhood;
 
       return matchesQuery && matchesNeighborhood;
     });
@@ -58,7 +79,9 @@ export function Search({
           type="search"
           placeholder="Nome, bairro ou palavra-chave"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) =>
+            setQuery(event.target.value)
+          }
         />
 
         <label htmlFor="search-neighborhood">
@@ -68,12 +91,19 @@ export function Search({
         <select
           id="search-neighborhood"
           value={neighborhood}
-          onChange={(event) => setNeighborhood(event.target.value)}
+          onChange={(event) =>
+            setNeighborhood(event.target.value)
+          }
         >
-          <option value="">Todos os bairros</option>
+          <option value="">
+            Todos os bairros
+          </option>
 
           {neighborhoods.map((item) => (
-            <option key={item} value={item}>
+            <option
+              key={item}
+              value={item}
+            >
               {item}
             </option>
           ))}
@@ -81,18 +111,24 @@ export function Search({
 
         <div aria-live="polite">
           {list.length}{' '}
-          {list.length === 1 ? 'resultado' : 'resultados'}
+          {list.length === 1
+            ? 'resultado'
+            : 'resultados'}
         </div>
       </div>
 
       {list.length === 0 ? (
         <div className="notice">
-          Nenhum empreendimento encontrado com esses filtros.
+          Nenhum empreendimento encontrado com esses
+          filtros.
         </div>
       ) : (
         <div className="grid">
           {list.map((project) => (
-            <Card key={project.slug} p={project} />
+            <Card
+              key={project.slug}
+              p={project}
+            />
           ))}
         </div>
       )}

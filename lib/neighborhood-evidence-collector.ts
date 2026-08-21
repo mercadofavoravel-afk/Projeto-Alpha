@@ -77,6 +77,396 @@ function compactDescription(
     .trim()}…`;
 }
 
+function extractedText(
+  value: unknown,
+) {
+  if (
+    !value ||
+    typeof value !== 'object'
+  ) {
+    return '';
+  }
+
+  if (
+    'text' in value &&
+    typeof value.text === 'string'
+  ) {
+    return value.text
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  return '';
+}
+
+function normalizeForSearch(
+  value: string,
+) {
+  return value
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      '',
+    )
+    .toLocaleLowerCase('pt-BR');
+}
+
+function splitIntoEvidenceChunks(
+  text: string,
+) {
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((part) =>
+      part
+        .replace(/\s+/g, ' ')
+        .trim(),
+    )
+    .filter(
+      (part) => part.length >= 60,
+    );
+
+  const chunks: string[] = [];
+
+  for (const paragraph of paragraphs) {
+    if (paragraph.length <= 700) {
+      chunks.push(paragraph);
+      continue;
+    }
+
+    const sentences =
+      paragraph
+        .split(
+          /(?<=[.!?])\s+/,
+        )
+        .map((part) =>
+          part.trim(),
+        )
+        .filter(Boolean);
+
+    let current = '';
+
+    for (const sentence of sentences) {
+      const candidate =
+        current
+          ? `${current} ${sentence}`
+          : sentence;
+
+      if (
+        candidate.length > 700 &&
+        current
+      ) {
+        chunks.push(current);
+        current = sentence;
+      } else {
+        current = candidate;
+      }
+    }
+
+    if (current) {
+      chunks.push(current);
+    }
+  }
+
+  return chunks.slice(0, 120);
+}
+
+function containsAny(
+  text: string,
+  terms: string[],
+) {
+  const normalized =
+    normalizeForSearch(text);
+
+  return terms.some((term) =>
+    normalized.includes(
+      normalizeForSearch(term),
+    ),
+  );
+}
+
+function pushBookEvidence(
+  chunk: string,
+  sourceUrl: string | undefined,
+  projectName: string,
+  neighborhoodName: string,
+  groups: {
+    overview: EvidenceItem[];
+    lifestyle: EvidenceItem[];
+    mobility: EvidenceItem[];
+    beach: EvidenceItem[];
+    gastronomy: EvidenceItem[];
+    services: EvidenceItem[];
+    leisure: EvidenceItem[];
+    architecture: EvidenceItem[];
+    investment: EvidenceItem[];
+    audience: EvidenceItem[];
+  },
+) {
+  const neighborhoodMention =
+    containsAny(chunk, [
+      neighborhoodName,
+    ]);
+
+  const projectMention =
+    containsAny(chunk, [
+      projectName,
+    ]);
+
+  /*
+   * Só aproveitamos um trecho quando ele menciona
+   * explicitamente o bairro ou o empreendimento
+   * ao qual o material está vinculado.
+   */
+  if (
+    !neighborhoodMention &&
+    !projectMention
+  ) {
+    return;
+  }
+
+  const evidence = {
+    description: chunk,
+    ...(sourceUrl
+      ? { sourceUrl }
+      : {}),
+  };
+
+  const classified: Array<
+    keyof typeof groups
+  > = [];
+
+  if (
+    containsAny(chunk, [
+      'praia',
+      'orla',
+      'mar',
+      'beira-mar',
+      'beira mar',
+      'oceano',
+    ])
+  ) {
+    groups.beach.push({
+      label: 'Praia e orla',
+      ...evidence,
+    });
+
+    classified.push('beach');
+  }
+
+  if (
+    containsAny(chunk, [
+      'restaurante',
+      'restaurantes',
+      'gastronomia',
+      'gastronômico',
+      'gastronomico',
+      'café',
+      'cafés',
+      'bares',
+      'bar',
+    ])
+  ) {
+    groups.gastronomy.push({
+      label: 'Gastronomia',
+      ...evidence,
+    });
+
+    classified.push(
+      'gastronomy',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'metrô',
+      'metro',
+      'mobilidade',
+      'acesso',
+      'transporte',
+      'deslocamento',
+      'avenida',
+      'rua',
+      'ciclovia',
+    ])
+  ) {
+    groups.mobility.push({
+      label: 'Mobilidade e acesso',
+      ...evidence,
+    });
+
+    classified.push(
+      'mobility',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'shopping',
+      'mercado',
+      'supermercado',
+      'farmácia',
+      'farmacia',
+      'hospital',
+      'clínica',
+      'clinica',
+      'escola',
+      'colégio',
+      'colegio',
+      'serviço',
+      'servico',
+      'serviços',
+      'servicos',
+    ])
+  ) {
+    groups.services.push({
+      label: 'Serviços e conveniência',
+      ...evidence,
+    });
+
+    classified.push(
+      'services',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'lazer',
+      'parque',
+      'praça',
+      'praca',
+      'clube',
+      'academia',
+      'esporte',
+      'cultura',
+      'teatro',
+      'cinema',
+      'museu',
+    ])
+  ) {
+    groups.leisure.push({
+      label: 'Lazer e cultura',
+      ...evidence,
+    });
+
+    classified.push(
+      'leisure',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'arquitetura',
+      'arquitetônico',
+      'arquitetonico',
+      'fachada',
+      'design',
+      'projeto',
+      'paisagismo',
+      'contemporâneo',
+      'contemporaneo',
+    ])
+  ) {
+    groups.architecture.push({
+      label: 'Arquitetura e desenho urbano',
+      ...evidence,
+    });
+
+    classified.push(
+      'architecture',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'investimento',
+      'investidor',
+      'valorização',
+      'valorizacao',
+      'patrimônio',
+      'patrimonio',
+      'liquidez',
+      'rentabilidade',
+      'preço',
+      'preco',
+      'valor',
+      'm²',
+      'metro quadrado',
+    ])
+  ) {
+    groups.investment.push({
+      label: 'Mercado e patrimônio',
+      ...evidence,
+    });
+
+    classified.push(
+      'investment',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'morar',
+      'moradia',
+      'residencial',
+      'família',
+      'familia',
+      'perfil',
+      'estilo de vida',
+      'lifestyle',
+      'cotidiano',
+      'qualidade de vida',
+    ])
+  ) {
+    groups.lifestyle.push({
+      label: 'Estilo de vida',
+      ...evidence,
+    });
+
+    classified.push(
+      'lifestyle',
+    );
+  }
+
+  if (
+    containsAny(chunk, [
+      'quarto',
+      'quartos',
+      'suíte',
+      'suite',
+      'suítes',
+      'suites',
+      'tipologia',
+      'tipologias',
+      'planta',
+      'plantas',
+      'área',
+      'area',
+      'm²',
+    ])
+  ) {
+    groups.audience.push({
+      label: 'Perfil residencial',
+      ...evidence,
+    });
+
+    classified.push(
+      'audience',
+    );
+  }
+
+  if (
+    classified.length === 0
+  ) {
+    groups.overview.push({
+      label: `Inteligência sobre ${neighborhoodName}`,
+      ...evidence,
+    });
+  }
+}
+
 export async function collectNeighborhoodEvidence(
   neighborhoodId: string,
 ): Promise<NeighborhoodEvidence> {
@@ -89,7 +479,8 @@ export async function collectNeighborhoodEvidence(
       include: {
         projects: {
           where: {
-            publishStatus: 'PUBLISHED',
+            publishStatus:
+              'PUBLISHED',
           },
 
           include: {
@@ -127,20 +518,57 @@ export async function collectNeighborhoodEvidence(
     );
   }
 
-  const overview: EvidenceItem[] = [];
-  const lifestyle: EvidenceItem[] = [];
-  const mobility: EvidenceItem[] = [];
-  const beach: EvidenceItem[] = [];
-  const gastronomy: EvidenceItem[] = [];
-  const services: EvidenceItem[] = [];
-  const leisure: EvidenceItem[] = [];
-  const architecture: EvidenceItem[] = [];
-  const investment: EvidenceItem[] = [];
-  const audience: EvidenceItem[] = [];
+  const overview:
+    EvidenceItem[] = [];
 
-  for (const project of neighborhood.projects) {
+  const lifestyle:
+    EvidenceItem[] = [];
+
+  const mobility:
+    EvidenceItem[] = [];
+
+  const beach:
+    EvidenceItem[] = [];
+
+  const gastronomy:
+    EvidenceItem[] = [];
+
+  const services:
+    EvidenceItem[] = [];
+
+  const leisure:
+    EvidenceItem[] = [];
+
+  const architecture:
+    EvidenceItem[] = [];
+
+  const investment:
+    EvidenceItem[] = [];
+
+  const audience:
+    EvidenceItem[] = [];
+
+  const groups = {
+    overview,
+    lifestyle,
+    mobility,
+    beach,
+    gastronomy,
+    services,
+    leisure,
+    architecture,
+    investment,
+    audience,
+  };
+
+  for (
+    const project of
+    neighborhood.projects
+  ) {
     const sourceUrl =
-      safeSourceUrl(project.sourceUrl);
+      safeSourceUrl(
+        project.sourceUrl,
+      );
 
     const description =
       compactDescription(
@@ -157,11 +585,16 @@ export async function collectNeighborhoodEvidence(
       });
     }
 
-    if (project.developer?.name) {
+    if (
+      project.developer?.name
+    ) {
       architecture.push({
-        label: 'Empreendimentos e incorporadoras',
+        label:
+          'Empreendimentos e incorporadoras',
+
         description:
           `${project.name} é um empreendimento associado à incorporadora ${project.developer.name}.`,
+
         ...(sourceUrl
           ? { sourceUrl }
           : {}),
@@ -176,8 +609,8 @@ export async function collectNeighborhoodEvidence(
       project.suitesFrom ||
       project.suitesTo
     ) {
-      const characteristics: string[] =
-        [];
+      const characteristics:
+        string[] = [];
 
       if (
         project.areaFrom &&
@@ -186,7 +619,9 @@ export async function collectNeighborhoodEvidence(
         characteristics.push(
           `áreas entre ${project.areaFrom.toString()} m² e ${project.areaTo.toString()} m²`,
         );
-      } else if (project.areaFrom) {
+      } else if (
+        project.areaFrom
+      ) {
         characteristics.push(
           `áreas a partir de ${project.areaFrom.toString()} m²`,
         );
@@ -216,13 +651,19 @@ export async function collectNeighborhoodEvidence(
         );
       }
 
-      if (characteristics.length > 0) {
+      if (
+        characteristics.length >
+        0
+      ) {
         audience.push({
-          label: 'Perfil residencial',
+          label:
+            'Perfil residencial',
+
           description:
             `${project.name} apresenta ${characteristics.join(
               ', ',
             )}.`,
+
           ...(sourceUrl
             ? { sourceUrl }
             : {}),
@@ -232,16 +673,23 @@ export async function collectNeighborhoodEvidence(
 
     const typologies =
       project.typologies
-        .map((item) => item.name)
+        .map(
+          (item) => item.name,
+        )
         .filter(Boolean);
 
-    if (typologies.length > 0) {
+    if (
+      typologies.length > 0
+    ) {
       audience.push({
-        label: 'Tipologias disponíveis',
+        label:
+          'Tipologias disponíveis',
+
         description:
           `${project.name} possui tipologias como ${typologies.join(
             ', ',
           )}.`,
+
         ...(sourceUrl
           ? { sourceUrl }
           : {}),
@@ -256,13 +704,18 @@ export async function collectNeighborhoodEvidence(
         )
         .filter(Boolean);
 
-    if (amenities.length > 0) {
+    if (
+      amenities.length > 0
+    ) {
       leisure.push({
-        label: 'Lazer e comodidades',
+        label:
+          'Lazer e comodidades',
+
         description:
           `${project.name} reúne comodidades como ${amenities
             .slice(0, 8)
             .join(', ')}.`,
+
         ...(sourceUrl
           ? { sourceUrl }
           : {}),
@@ -277,13 +730,18 @@ export async function collectNeighborhoodEvidence(
         )
         .filter(Boolean);
 
-    if (collections.length > 0) {
+    if (
+      collections.length > 0
+    ) {
       lifestyle.push({
-        label: 'Perfil da curadoria',
+        label:
+          'Perfil da curadoria',
+
         description:
           `${project.name} integra as seleções ${collections.join(
             ', ',
           )}.`,
+
         ...(sourceUrl
           ? { sourceUrl }
           : {}),
@@ -294,37 +752,52 @@ export async function collectNeighborhoodEvidence(
       project.priceFrom ||
       project.priceTo
     ) {
-      const priceParts: string[] = [];
+      const priceParts:
+        string[] = [];
 
-      if (project.priceFrom) {
+      if (
+        project.priceFrom
+      ) {
         priceParts.push(
           `valor inicial cadastrado de R$ ${Number(
             project.priceFrom,
-          ).toLocaleString('pt-BR')}`,
+          ).toLocaleString(
+            'pt-BR',
+          )}`,
         );
       }
 
-      if (project.priceTo) {
+      if (
+        project.priceTo
+      ) {
         priceParts.push(
           `valor final cadastrado de R$ ${Number(
             project.priceTo,
-          ).toLocaleString('pt-BR')}`,
+          ).toLocaleString(
+            'pt-BR',
+          )}`,
         );
       }
 
       investment.push({
-        label: 'Faixa comercial cadastrada',
+        label:
+          'Faixa comercial cadastrada',
+
         description:
           `${project.name} possui ${priceParts.join(
             ' e ',
           )}. Valores e disponibilidade estão sujeitos à confirmação.`,
+
         ...(sourceUrl
           ? { sourceUrl }
           : {}),
       });
     }
 
-    for (const sourceRecord of project.sourceRecords) {
+    for (
+      const sourceRecord of
+      project.sourceRecords
+    ) {
       const recordUrl =
         safeSourceUrl(
           sourceRecord.storageUrl,
@@ -337,49 +810,97 @@ export async function collectNeighborhoodEvidence(
         overview.push({
           label:
             `Fonte: ${sourceRecord.title}`,
+
           description:
             `Material de referência associado ao empreendimento ${project.name}.`,
-          sourceUrl: recordUrl,
+
+          sourceUrl:
+            recordUrl,
         });
       }
     }
 
-    for (const book of project.bookIngestions) {
+    for (
+      const book of
+      project.bookIngestions
+    ) {
       const bookUrl =
-        safeSourceUrl(book.storageUrl);
+        safeSourceUrl(
+          book.storageUrl,
+        );
 
+      const text =
+        extractedText(
+          book.extracted,
+        );
+
+      /*
+       * Aqui está a mudança principal:
+       * quando o Book está processado e possui texto,
+       * o Alpha passa a analisar o conteúdo real.
+       */
+      if (
+        book.status ===
+          'COMPLETED' &&
+        text.length >= 80
+      ) {
+        const chunks =
+          splitIntoEvidenceChunks(
+            text,
+          );
+
+        for (
+          const chunk of chunks
+        ) {
+          pushBookEvidence(
+            chunk,
+            bookUrl,
+            project.name,
+            neighborhood.name,
+            groups,
+          );
+        }
+
+        continue;
+      }
+
+      /*
+       * Se ainda não houver texto extraído,
+       * mantemos apenas o registro da existência
+       * do material. Isso não é tratado como fato
+       * de lifestyle, mercado ou localização.
+       */
       if (
         bookUrl &&
-        book.status !== 'ERROR'
+        book.status !==
+          'FAILED'
       ) {
         overview.push({
           label:
             `Material: ${book.fileName}`,
+
           description:
             `Material de inteligência associado ao empreendimento ${project.name}.`,
-          sourceUrl: bookUrl,
+
+          sourceUrl:
+            bookUrl,
         });
       }
     }
   }
 
-  /*
-   * Estes grupos ficam vazios enquanto o banco não tiver
-   * fatos confiáveis e específicos sobre esses temas.
-   *
-   * Isso é intencional: o coletor não deve inventar
-   * informações sobre praia, mobilidade, gastronomia
-   * ou serviços apenas com base no nome do bairro.
-   */
   const existingDescription =
     compactDescription(
       neighborhood.description,
     );
 
-  if (existingDescription) {
+  if (
+    existingDescription
+  ) {
     overview.unshift({
       label:
         `Visão geral de ${neighborhood.name}`,
+
       description:
         existingDescription,
     });
@@ -390,51 +911,77 @@ export async function collectNeighborhoodEvidence(
       neighborhood.experienceDescription,
     );
 
-  if (existingExperience) {
+  if (
+    existingExperience
+  ) {
     lifestyle.unshift({
       label:
         `Experiência em ${neighborhood.name}`,
+
       description:
         existingExperience,
     });
   }
 
   return {
-    name: neighborhood.name,
+    name:
+      neighborhood.name,
 
-    city: 'Rio de Janeiro',
+    city:
+      'Rio de Janeiro',
 
-    state: 'Rio de Janeiro',
+    state:
+      'Rio de Janeiro',
 
     overview:
-      uniqueEvidence(overview),
+      uniqueEvidence(
+        overview,
+      ),
 
     lifestyle:
-      uniqueEvidence(lifestyle),
+      uniqueEvidence(
+        lifestyle,
+      ),
 
     mobility:
-      uniqueEvidence(mobility),
+      uniqueEvidence(
+        mobility,
+      ),
 
     beach:
-      uniqueEvidence(beach),
+      uniqueEvidence(
+        beach,
+      ),
 
     gastronomy:
-      uniqueEvidence(gastronomy),
+      uniqueEvidence(
+        gastronomy,
+      ),
 
     services:
-      uniqueEvidence(services),
+      uniqueEvidence(
+        services,
+      ),
 
     leisure:
-      uniqueEvidence(leisure),
+      uniqueEvidence(
+        leisure,
+      ),
 
     architecture:
-      uniqueEvidence(architecture),
+      uniqueEvidence(
+        architecture,
+      ),
 
     investment:
-      uniqueEvidence(investment),
+      uniqueEvidence(
+        investment,
+      ),
 
     audience:
-      uniqueEvidence(audience),
+      uniqueEvidence(
+        audience,
+      ),
 
     faq: [],
 
@@ -442,7 +989,9 @@ export async function collectNeighborhoodEvidence(
       neighborhood.heroImage ??
       neighborhood.projects.find(
         (project) =>
-          Boolean(project.heroImage),
+          Boolean(
+            project.heroImage,
+          ),
       )?.heroImage ??
       null,
 

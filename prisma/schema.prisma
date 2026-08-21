@@ -21,54 +21,6 @@ enum LeadStatus {
   VISIT_SCHEDULED
   WON
   LOST
-enum DiscoveryCandidateStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  IMPORTED
-}
-
-enum DiscoveryCandidateKind {
-  PROJECT
-  NEIGHBORHOOD
-  DOCUMENT
-  ARTICLE
-  DEVELOPER
-  OTHER
-}
-
-model DiscoveryCandidate {
-  id                String                   @id @default(cuid())
-  url               String                   @unique
-  title             String?
-  kind              DiscoveryCandidateKind
-  score             Int                      @default(0)
-  status            DiscoveryCandidateStatus @default(PENDING)
-
-  sourceRootId      String
-  sourceRootName    String
-  sourceRootUrl     String
-  sourceRootKind    String?
-
-  importedProjectId String?
-  metadata          Json?
-
-  firstSeenAt       DateTime                 @default(now())
-  lastSeenAt        DateTime                 @default(now())
-  reviewedAt        DateTime?
-  importedAt        DateTime?
-
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @updatedAt
-
-  @@index([status])
-  @@index([kind])
-  @@index([score])
-  @@index([sourceRootId])
-  @@index([importedProjectId])
-  @@index([lastSeenAt])
-}
-
 }
 
 enum LeadObjective {
@@ -197,14 +149,14 @@ model Neighborhood {
   highlights            Json?
   videoUrl              String?
   videoTitle            String?
-  ctaTitle               String?
-  ctaDescription         String?
-  faq                    Json?
-  seoTitle               String?
-  seoDescription         String?
-  projects               Project[]
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  ctaTitle              String?
+  ctaDescription        String?
+  faq                   Json?
+  seoTitle              String?
+  seoDescription        String?
+  projects              Project[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 model Developer {
@@ -249,7 +201,7 @@ model Project {
   neighborhoodId        String
   developerId           String?
   neighborhood          Neighborhood           @relation(fields: [neighborhoodId], references: [id])
-  developer             Developer?             @relation(fields: [developerId], references: [id])
+  developer             Developer?              @relation(fields: [developerId], references: [id])
   typologies            Typology[]
   amenities             ProjectAmenity[]
   collections           ProjectCollection[]
@@ -258,8 +210,8 @@ model Project {
   bookIngestions        BookIngestion[]
   recommendationResults RecommendationResult[]
   analyticsEvents       AnalyticsEvent[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 
   @@index([neighborhoodId])
   @@index([publishStatus])
@@ -316,7 +268,7 @@ model Collection {
 model ProjectCollection {
   projectId    String
   collectionId String
-  position     Int @default(0)
+  position     Int        @default(0)
 
   project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
@@ -426,27 +378,27 @@ model Article {
 }
 
 model RecommendationProfile {
-  id               String               @id @default(cuid())
-  sessionKey       String?              @unique
-  leadId           String?
-  objective        LeadObjective        @default(OTHER)
-  preferredBairros String[]
-  preferredTypes   String[]
-  budgetMin        Decimal?             @db.Decimal(14, 2)
-  budgetMax        Decimal?             @db.Decimal(14, 2)
-  areaMin          Decimal?             @db.Decimal(10, 2)
-  bedroomsMin      Int?
-  suitesMin        Int?
-  parkingMin       Int?
-  proximityBeach   Int                  @default(0)
-  proximityMetro   Int                  @default(0)
-  investmentFocus  Int                  @default(0)
-  lifestyleFocus  Int                  @default(0)
-  status           RecommendationStatus @default(ACTIVE)
-  results          RecommendationResult[]
-  events           AnalyticsEvent[]
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
+  id                 String               @id @default(cuid())
+  sessionKey         String?              @unique
+  leadId             String?
+  objective          LeadObjective        @default(OTHER)
+  preferredBairros   String[]
+  preferredTypes     String[]
+  budgetMin          Decimal?             @db.Decimal(14, 2)
+  budgetMax          Decimal?             @db.Decimal(14, 2)
+  areaMin            Decimal?             @db.Decimal(10, 2)
+  bedroomsMin        Int?
+  suitesMin          Int?
+  parkingMin         Int?
+  proximityBeach     Int                  @default(0)
+  proximityMetro     Int                  @default(0)
+  investmentFocus    Int                  @default(0)
+  lifestyleFocus     Int                  @default(0)
+  status             RecommendationStatus @default(ACTIVE)
+  results            RecommendationResult[]
+  events             AnalyticsEvent[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@index([leadId])
 }
@@ -589,7 +541,6 @@ model PipelineStage {
   @@index([pipelineId, position])
   @@index([isActive])
 }
-
 
 enum DiscoveryCandidateStatus {
   PENDING

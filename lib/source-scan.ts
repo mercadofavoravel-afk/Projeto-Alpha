@@ -44,6 +44,16 @@ export type SourceScanResult = {
   errors: SourceScanError[];
 };
 
+export type SourceScanBatchResult =
+  SourceScanResult & {
+    cursor: number;
+    nextCursor: number | null;
+    batchSize: number;
+    totalSources: number;
+    hasMore: boolean;
+    sourceIds: string[];
+  };
+
 type ScanOptions = {
   maxPagesPerSource?: number;
   maxDepth?: number;
@@ -52,9 +62,23 @@ type ScanOptions = {
   maxExternalDepth?: number;
 };
 
+type BatchOptions =
+  ScanOptions & {
+    cursor?: number;
+    batchSize?: number;
+  };
+
 type GatewayLink = {
   url: string;
   label: string | null;
+};
+
+type ResolvedScanOptions = {
+  maxPagesPerSource: number;
+  maxDepth: number;
+  maxExternalTargetsPerSource: number;
+  maxPagesPerExternalTarget: number;
+  maxExternalDepth: number;
 };
 
 const BLOCKED_EXTERNAL_HOSTS = [
@@ -609,11 +633,65 @@ function sortItems(
   );
 }
 
+function resolveScanOptions(
+  options: ScanOptions,
+): ResolvedScanOptions {
+  return {
+    maxPagesPerSource:
+      Math.max(
+        1,
+        Math.min(
+          options.maxPagesPerSource ??
+            40,
+          100,
+        ),
+      ),
+
+    maxDepth:
+      Math.max(
+        0,
+        Math.min(
+          options.maxDepth ??
+            2,
+          4,
+        ),
+      ),
+
+    maxExternalTargetsPerSource:
+      Math.max(
+        1,
+        Math.min(
+          options.maxExternalTargetsPerSource ??
+            8,
+          20,
+        ),
+      ),
+
+    maxPagesPerExternalTarget:
+      Math.max(
+        1,
+        Math.min(
+          options.maxPagesPerExternalTarget ??
+            12,
+          30,
+        ),
+      ),
+
+    maxExternalDepth:
+      Math.max(
+        0,
+        Math.min(
+          options.maxExternalDepth ??
+            1,
+          2,
+        ),
+      ),
+  };
+}
+
 async function scanRoot(
   root: SourceRoot,
-  options: Required<
-    ScanOptions
-  >,
+  options: ResolvedScanOptions,
 ) {
   const collected:
     SourceScanItem[] = [];
@@ -701,11 +779,8 @@ async function scanRoot(
       }
     } catch {
       /*
-       * Um destino externo individual pode
-       * bloquear crawler, exigir login ou
-       * estar temporariamente indisponível.
-       * Isso não deve interromper toda a
-       * fonte-mãe.
+       * Um destino externo individual
+       * nunca deve interromper a fonte.
        */
     }
   }
@@ -718,115 +793,13 @@ async function scanRoot(
   };
 }
 
-export async function scanAllSources(
-  options: ScanOptions = {},
-): Promise<SourceScanResult> {
-  const startedAt =
-    new Date()
-      .toISOString();
-
-  const resolvedOptions: Required<
-    ScanOptions
-  > = {
-    maxPagesPerSource:
-      Math.max(
-        1,
-        Math.min(
-          options.maxPagesPerSource ??
-            40,
-          100,
-        ),
-      ),
-
-    maxDepth:
-      Math.max(
-        0,
-        Math.min(
-          options.maxDepth ??
-            2,
-          4,
-        ),
-      ),
-
-    maxExternalTargetsPerSource:
-      Math.max(
-        1,
-        Math.min(
-          options.maxExternalTargetsPerSource ??
-            8,
-          20,
-        ),
-      ),
-
-    maxPagesPerExternalTarget:
-      Math.max(
-        1,
-        Math.min(
-          options.maxPagesPerExternalTarget ??
-            12,
-          30,
-        ),
-      ),
-
-    maxExternalDepth:
-      Math.max(
-        0,
-        Math.min(
-          options.maxExternalDepth ??
-            1,
-          2,
-        ),
-      ),
-  };
-
-  const roots =
-    getEnabledSourceRoots();
-
-  const allItems:
-    SourceScanItem[] = [];
-
-  const errors:
-    SourceScanError[] = [];
-
-  let externalTargetsScanned =
-    0;
-
-  for (
-    const root of roots
-  ) {
-    try {
-      const rootResult =
-        await scanRoot(
-          root,
-          resolvedOptions,
-        );
-
-      externalTargetsScanned +=
-        rootResult
-          .externalTargetsScanned;
-
-      allItems.push(
-        ...rootResult.items,
-      );
-    } catch (error) {
-      errors.push({
-        sourceRootId:
-          root.id,
-
-        sourceRootName:
-          root.name,
-
-        sourceRootUrl:
-          root.url,
-
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Erro desconhecido durante a varredura.',
-      });
-    }
-  }
-
+function buildResult(
+  startedAt: string,
+  roots: SourceRoot[],
+  allItems: SourceScanItem[],
+  errors: SourceScanError[],
+  externalTargetsScanned: number,
+): SourceScanResult {
   const items =
     uniqueItems(
       allItems,
@@ -909,4 +882,166 @@ export async function scanAllSources(
     other,
     errors,
   };
+}
+
+async function scanRoots(
+  roots: SourceRoot[],
+  options: ResolvedScanOptions,
+) {
+  const startedAt =
+    new Date()
+      .toISOString();
+
+  const allItems:
+    SourceScanItem[] = [];
+
+  const errors:
+    SourceScanError[] = [];
+
+  let externalTargetsScanned =
+    0;
+
+  for (
+    const root of roots
+  ) {
+    try {
+      const rootResult =
+        await scanRoot(
+          root,
+          options,
+        );
+
+      externalTargetsScanned +=
+        rootResult
+          .externalTargetsScanned;
+
+      allItems.push(
+        ...rootResult.items,
+      );
+    } catch (error) {
+      errors.push({
+        sourceRootId:
+          root.id,
+
+        sourceRootName:
+          root.name,
+
+        sourceRootUrl:
+          root.url,
+
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Erro desconhecido durante a varredura.',
+      });
+    }
+  }
+
+  return buildResult(
+    startedAt,
+    roots,
+    allItems,
+    errors,
+    externalTargetsScanned,
+  );
+}
+
+export async function scanSourceBatch(
+  options: BatchOptions = {},
+): Promise<SourceScanBatchResult> {
+  const allRoots =
+    getEnabledSourceRoots();
+
+  const totalSources =
+    allRoots.length;
+
+  const cursor =
+    Math.max(
+      0,
+      Math.min(
+        Math.floor(
+          options.cursor ??
+            0,
+        ),
+        totalSources,
+      ),
+    );
+
+  const batchSize =
+    Math.max(
+      1,
+      Math.min(
+        Math.floor(
+          options.batchSize ??
+            3,
+        ),
+        5,
+      ),
+    );
+
+  const batchRoots =
+    allRoots.slice(
+      cursor,
+      cursor + batchSize,
+    );
+
+  const resolvedOptions =
+    resolveScanOptions(
+      options,
+    );
+
+  const result =
+    await scanRoots(
+      batchRoots,
+      resolvedOptions,
+    );
+
+  const calculatedNext =
+    cursor +
+    batchRoots.length;
+
+  const hasMore =
+    calculatedNext <
+    totalSources;
+
+  return {
+    ...result,
+
+    cursor,
+
+    nextCursor:
+      hasMore
+        ? calculatedNext
+        : null,
+
+    batchSize:
+      batchRoots.length,
+
+    totalSources,
+
+    hasMore,
+
+    sourceIds:
+      batchRoots.map(
+        (root) =>
+          root.id,
+      ),
+  };
+}
+
+export async function scanAllSources(
+  options: ScanOptions = {},
+): Promise<SourceScanResult> {
+  const roots =
+    getEnabledSourceRoots();
+
+  const resolvedOptions =
+    resolveScanOptions(
+      options,
+    );
+
+  return scanRoots(
+    roots,
+    resolvedOptions,
+  );
 }

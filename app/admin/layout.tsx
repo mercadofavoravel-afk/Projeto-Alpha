@@ -52,6 +52,10 @@ export default async function AdminLayout({
             <Link href="/admin/fontes">
               Fontes
             </Link>
+
+            <Link href="/admin/discovery">
+              Discovery
+            </Link>
           </>
         )}
 

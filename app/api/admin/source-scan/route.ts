@@ -5,11 +5,16 @@ import {
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
-  scanAllSources,
+  scanSourceBatch,
   type SourceScanItem,
 } from '@/lib/source-scan';
 
 export const dynamic = 'force-dynamic';
+
+type ScanRequestBody = {
+  cursor?: number;
+  batchSize?: number;
+};
 
 function mapCandidateKind(
   kind: SourceScanItem['kind'],
@@ -53,6 +58,26 @@ async function persistCandidates(
         },
       });
 
+    const metadata = {
+      priority:
+        item.priority,
+
+      discoveredKind:
+        item.kind,
+
+      discoveredViaUrl:
+        item.discoveredViaUrl ??
+        null,
+
+      discoveredFromExternal:
+        item.discoveredFromExternal ??
+        false,
+
+      lastScanAt:
+        new Date()
+          .toISOString(),
+    };
+
     if (existing) {
       await db.discoveryCandidate.update({
         where: {
@@ -60,14 +85,16 @@ async function persistCandidates(
         },
 
         data: {
-          title: item.title,
+          title:
+            item.title,
 
           kind:
             mapCandidateKind(
               item.kind,
             ),
 
-          score: item.score,
+          score:
+            item.score,
 
           sourceRootId:
             item.sourceRootId,
@@ -84,17 +111,7 @@ async function persistCandidates(
           lastSeenAt:
             new Date(),
 
-          metadata: {
-            priority:
-              item.priority,
-
-            discoveredKind:
-              item.kind,
-
-            lastScanAt:
-              new Date()
-                .toISOString(),
-          },
+          metadata,
         },
       });
 
@@ -105,16 +122,19 @@ async function persistCandidates(
 
     await db.discoveryCandidate.create({
       data: {
-        url: item.url,
+        url:
+          item.url,
 
-        title: item.title,
+        title:
+          item.title,
 
         kind:
           mapCandidateKind(
             item.kind,
           ),
 
-        score: item.score,
+        score:
+          item.score,
 
         sourceRootId:
           item.sourceRootId,
@@ -129,17 +149,9 @@ async function persistCandidates(
           item.sourceRootKind,
 
         metadata: {
-          priority:
-            item.priority,
-
-          discoveredKind:
-            item.kind,
+          ...metadata,
 
           firstScanAt:
-            new Date()
-              .toISOString(),
-
-          lastScanAt:
             new Date()
               .toISOString(),
         },
@@ -153,11 +165,75 @@ async function persistCandidates(
     created,
     updated,
     total:
-      created + updated,
+      created +
+      updated,
   };
 }
 
-export async function POST() {
+async function getQueueSummary() {
+  const queueSummary =
+    await db.discoveryCandidate.groupBy({
+      by: [
+        'status',
+      ],
+
+      _count: {
+        _all: true,
+      },
+    });
+
+  return {
+    pending:
+      queueSummary.find(
+        (item) =>
+          item.status ===
+          'PENDING',
+      )?._count._all ??
+      0,
+
+    approved:
+      queueSummary.find(
+        (item) =>
+          item.status ===
+          'APPROVED',
+      )?._count._all ??
+      0,
+
+    rejected:
+      queueSummary.find(
+        (item) =>
+          item.status ===
+          'REJECTED',
+      )?._count._all ??
+      0,
+
+    imported:
+      queueSummary.find(
+        (item) =>
+          item.status ===
+          'IMPORTED',
+      )?._count._all ??
+      0,
+  };
+}
+
+async function readRequestBody(
+  request: Request,
+): Promise<ScanRequestBody> {
+  try {
+    const body =
+      (await request.json()) as
+        ScanRequestBody;
+
+    return body ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export async function POST(
+  request: Request,
+) {
   const auth =
     await requireApiPermission(
       'catalog:write',
@@ -166,76 +242,121 @@ export async function POST() {
   if (!auth.ok) {
     return NextResponse.json(
       {
-        error: auth.error,
+        ok: false,
+        error:
+          auth.error,
       },
       {
-        status: auth.status,
+        status:
+          auth.status,
       },
     );
   }
 
   try {
+    const body =
+      await readRequestBody(
+        request,
+      );
+
+    const cursor =
+      Number.isFinite(
+        body.cursor,
+      )
+        ? Math.max(
+            0,
+            Math.floor(
+              body.cursor ??
+                0,
+            ),
+          )
+        : 0;
+
+    const batchSize =
+      Number.isFinite(
+        body.batchSize,
+      )
+        ? Math.max(
+            1,
+            Math.min(
+              Math.floor(
+                body.batchSize ??
+                  3,
+              ),
+              3,
+            ),
+          )
+        : 3;
+
     const result =
-      await scanAllSources({
-        maxPagesPerSource: 40,
-        maxDepth: 2,
+      await scanSourceBatch({
+        cursor,
+        batchSize,
+
+        /*
+         * O lote é deliberadamente
+         * menor que a antiga varredura
+         * total para evitar timeout.
+         */
+        maxPagesPerSource:
+          30,
+
+        maxDepth:
+          2,
+
+        maxExternalTargetsPerSource:
+          5,
+
+        maxPagesPerExternalTarget:
+          8,
+
+        maxExternalDepth:
+          1,
       });
 
-    const allCandidates: SourceScanItem[] = [
-      ...result.projects,
-      ...result.neighborhoods,
-      ...result.documents,
-      ...result.articles,
-      ...result.developers,
-      ...result.other,
-    ];
+    const allCandidates:
+      SourceScanItem[] = [
+        ...result.projects,
+        ...result.neighborhoods,
+        ...result.documents,
+        ...result.articles,
+        ...result.developers,
+        ...result.other,
+      ];
 
     const persistence =
       await persistCandidates(
         allCandidates,
       );
 
-    const queueSummary =
-      await db.discoveryCandidate.groupBy({
-        by: [
-          'status',
-        ],
-
-        _count: {
-          _all: true,
-        },
-      });
-
-    const pending =
-      queueSummary.find(
-        (item) =>
-          item.status ===
-          'PENDING',
-      )?._count._all ?? 0;
-
-    const approved =
-      queueSummary.find(
-        (item) =>
-          item.status ===
-          'APPROVED',
-      )?._count._all ?? 0;
-
-    const rejected =
-      queueSummary.find(
-        (item) =>
-          item.status ===
-          'REJECTED',
-      )?._count._all ?? 0;
-
-    const imported =
-      queueSummary.find(
-        (item) =>
-          item.status ===
-          'IMPORTED',
-      )?._count._all ?? 0;
+    const queue =
+      await getQueueSummary();
 
     return NextResponse.json({
       ok: true,
+
+      batch: {
+        cursor:
+          result.cursor,
+
+        nextCursor:
+          result.nextCursor,
+
+        batchSize:
+          result.batchSize,
+
+        totalSources:
+          result.totalSources,
+
+        hasMore:
+          result.hasMore,
+
+        sourceIds:
+          result.sourceIds,
+
+        externalTargetsScanned:
+          result.externalTargetsScanned,
+      },
 
       summary: {
         sourcesScanned:
@@ -276,19 +397,14 @@ export async function POST() {
         total:
           persistence.total,
 
-        queue: {
-          pending,
-          approved,
-          rejected,
-          imported,
-        },
+        queue,
       },
 
       result,
     });
   } catch (error) {
     console.error(
-      'Erro na varredura das fontes:',
+      'Erro no lote de varredura das fontes:',
       error,
     );
 
@@ -299,7 +415,7 @@ export async function POST() {
         error:
           error instanceof Error
             ? error.message
-            : 'Não foi possível executar a varredura das fontes.',
+            : 'Não foi possível executar o lote de varredura das fontes.',
       },
       {
         status: 500,

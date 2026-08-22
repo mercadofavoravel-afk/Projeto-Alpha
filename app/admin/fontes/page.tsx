@@ -55,6 +55,13 @@ type ScanResponse = {
   error?: string;
 };
 
+type SetupResponse = {
+  ok: boolean;
+  message?: string;
+  table?: string;
+  error?: string;
+};
+
 function ResultTable({
   title,
   description,
@@ -86,56 +93,67 @@ function ResultTable({
             <thead>
               <tr>
                 <th>Fonte</th>
-                <th>Página encontrada</th>
+                <th>
+                  Página encontrada
+                </th>
                 <th>Score</th>
               </tr>
             </thead>
 
             <tbody>
-              {items.map((item) => (
-                <tr key={item.url}>
-                  <td>
-                    <strong>
-                      {item.sourceRootName}
-                    </strong>
-                  </td>
+              {items.map(
+                (item) => (
+                  <tr key={item.url}>
+                    <td>
+                      <strong>
+                        {
+                          item.sourceRootName
+                        }
+                      </strong>
+                    </td>
 
-                  <td>
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {item.title ||
-                        item.url}
-                    </a>
+                    <td>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {item.title ||
+                          item.url}
+                      </a>
 
-                    <small>
-                      {item.url}
-                    </small>
-                  </td>
+                      <small>
+                        {item.url}
+                      </small>
+                    </td>
 
-                  <td>
-                    <span
-                      className={
-                        item.score >= 70
-                          ? 'score score-high'
-                          : item.score >= 40
-                            ? 'score score-medium'
-                            : 'score'
-                      }
-                    >
-                      {item.score}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    <td>
+                      <span
+                        className={
+                          item.score >=
+                          70
+                            ? 'score score-high'
+                            : item.score >=
+                                40
+                              ? 'score score-medium'
+                              : 'score'
+                        }
+                      >
+                        {
+                          item.score
+                        }
+                      </span>
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>
       ) : (
         <div className="sources-empty">
-          Nenhum item encontrado nesta categoria.
+          Nenhum item encontrado nesta
+          categoria.
         </div>
       )}
     </section>
@@ -143,13 +161,63 @@ function ResultTable({
 }
 
 export default function SourcesPage() {
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [data, setData] =
+  const [
+    data,
+    setData,
+  ] =
     useState<ScanResponse | null>(
       null,
     );
+
+  const [
+    setupLoading,
+    setSetupLoading,
+  ] = useState(false);
+
+  const [
+    setupData,
+    setSetupData,
+  ] =
+    useState<SetupResponse | null>(
+      null,
+    );
+
+  async function runSetup() {
+    if (setupLoading) {
+      return;
+    }
+
+    setSetupLoading(true);
+    setSetupData(null);
+
+    try {
+      const response =
+        await fetch(
+          '/api/admin/setup-discovery',
+          {
+            method: 'POST',
+          },
+        );
+
+      const result =
+        (await response.json()) as SetupResponse;
+
+      setSetupData(result);
+    } catch {
+      setSetupData({
+        ok: false,
+        error:
+          'Não foi possível preparar a fila de candidatos.',
+      });
+    } finally {
+      setSetupLoading(false);
+    }
+  }
 
   async function runScan() {
     if (loading) {
@@ -160,12 +228,13 @@ export default function SourcesPage() {
     setData(null);
 
     try {
-      const response = await fetch(
-        '/api/admin/source-scan',
-        {
-          method: 'POST',
-        },
-      );
+      const response =
+        await fetch(
+          '/api/admin/source-scan',
+          {
+            method: 'POST',
+          },
+        );
 
       const result =
         (await response.json()) as ScanResponse;
@@ -191,11 +260,126 @@ export default function SourcesPage() {
       <h1>Fontes</h1>
 
       <p className="sources-intro">
-        O Alpha monitora fontes aprovadas para
-        descobrir empreendimentos, bairros,
-        documentos e conteúdos relevantes antes
-        de incorporá-los à base imobiliária.
+        O Alpha monitora fontes
+        aprovadas para descobrir
+        empreendimentos, bairros,
+        documentos e conteúdos
+        relevantes antes de
+        incorporá-los à base
+        imobiliária.
       </p>
+
+      <section className="discovery-setup">
+        <div>
+          <div className="eyebrow">
+            Infraestrutura de
+            descoberta
+          </div>
+
+          <h2>
+            Fila persistente de
+            candidatos
+          </h2>
+
+          <p>
+            Prepare a estrutura que
+            permitirá ao Alpha guardar
+            permanentemente cada
+            empreendimento, bairro,
+            documento ou artigo
+            descoberto nas fontes.
+          </p>
+
+          <div className="setup-flow">
+            <span>
+              Descoberto
+            </span>
+
+            <b>→</b>
+
+            <span>
+              Pendente
+            </span>
+
+            <b>→</b>
+
+            <span>
+              Aprovado
+            </span>
+
+            <b>→</b>
+
+            <span>
+              Importado
+            </span>
+          </div>
+        </div>
+
+        <div className="setup-action">
+          <button
+            type="button"
+            onClick={runSetup}
+            disabled={setupLoading}
+          >
+            {setupLoading
+              ? 'Preparando fila...'
+              : 'Preparar fila de candidatos'}
+          </button>
+
+          <small>
+            Operação administrativa.
+            Não apaga nem altera
+            empreendimentos existentes.
+          </small>
+        </div>
+      </section>
+
+      {setupLoading && (
+        <section className="setup-loading">
+          <div className="scan-pulse" />
+
+          <div>
+            <strong>
+              Preparando estrutura
+            </strong>
+
+            <p>
+              O Alpha está verificando
+              e criando somente os
+              componentes necessários
+              para a fila de discovery.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {setupData?.ok && (
+        <div className="setup-message success">
+          <strong>
+            Fila preparada com sucesso.
+          </strong>
+
+          <span>
+            {setupData.message ??
+              'A estrutura DiscoveryCandidate está disponível.'}
+          </span>
+        </div>
+      )}
+
+      {setupData &&
+        !setupData.ok && (
+          <div className="setup-message error">
+            <strong>
+              Não foi possível preparar
+              a fila.
+            </strong>
+
+            <span>
+              {setupData.error ??
+                'Ocorreu um erro inesperado.'}
+            </span>
+          </div>
+        )}
 
       <section className="scan-hero">
         <div>
@@ -204,15 +388,17 @@ export default function SourcesPage() {
           </div>
 
           <h2>
-            Descubra automaticamente o que há de
-            novo no mercado.
+            Descubra automaticamente o
+            que há de novo no mercado.
           </h2>
 
           <p>
-            A varredura percorre as fontes-mãe
-            cadastradas, analisa os links internos
-            e organiza páginas candidatas. Nada é
-            publicado automaticamente nesta etapa.
+            A varredura percorre as
+            fontes-mãe cadastradas,
+            analisa os links internos e
+            organiza páginas candidatas.
+            Nada é publicado
+            automaticamente nesta etapa.
           </p>
 
           <div className="scan-features">
@@ -220,15 +406,23 @@ export default function SourcesPage() {
               Imóveis de Alto Padrão Rio
             </span>
 
-            <span>Construtoras</span>
+            <span>
+              Construtoras
+            </span>
 
-            <span>Empreendimentos</span>
+            <span>
+              Empreendimentos
+            </span>
 
             <span>Bairros</span>
 
-            <span>Documentos</span>
+            <span>
+              Documentos
+            </span>
 
-            <span>Conteúdo editorial</span>
+            <span>
+              Conteúdo editorial
+            </span>
           </div>
         </div>
 
@@ -244,9 +438,10 @@ export default function SourcesPage() {
           </button>
 
           <small>
-            A primeira varredura pode levar alguns
-            segundos porque o Alpha visita várias
-            páginas das fontes aprovadas.
+            A varredura pode levar
+            alguns segundos porque o
+            Alpha visita várias páginas
+            das fontes aprovadas.
           </small>
         </div>
       </section>
@@ -257,12 +452,14 @@ export default function SourcesPage() {
 
           <div>
             <strong>
-              Analisando inteligência de mercado
+              Analisando inteligência de
+              mercado
             </strong>
 
             <p>
-              O Alpha está percorrendo as fontes e
-              classificando as páginas encontradas.
+              O Alpha está percorrendo
+              as fontes e classificando
+              as páginas encontradas.
             </p>
           </div>
         </section>
@@ -272,7 +469,8 @@ export default function SourcesPage() {
         !data.ok && (
           <div className="scan-message error">
             <strong>
-              A varredura não foi concluída.
+              A varredura não foi
+              concluída.
             </strong>
 
             <span>
@@ -288,7 +486,10 @@ export default function SourcesPage() {
           <>
             <section className="scan-summary">
               <article>
-                <span>Fontes</span>
+                <span>
+                  Fontes
+                </span>
+
                 <strong>
                   {
                     data.summary
@@ -301,6 +502,7 @@ export default function SourcesPage() {
                 <span>
                   Páginas descobertas
                 </span>
+
                 <strong>
                   {
                     data.summary
@@ -313,6 +515,7 @@ export default function SourcesPage() {
                 <span>
                   Empreendimentos
                 </span>
+
                 <strong>
                   {
                     data.summary
@@ -322,7 +525,10 @@ export default function SourcesPage() {
               </article>
 
               <article>
-                <span>Bairros</span>
+                <span>
+                  Bairros
+                </span>
+
                 <strong>
                   {
                     data.summary
@@ -332,7 +538,10 @@ export default function SourcesPage() {
               </article>
 
               <article>
-                <span>Documentos</span>
+                <span>
+                  Documentos
+                </span>
+
                 <strong>
                   {
                     data.summary
@@ -342,7 +551,10 @@ export default function SourcesPage() {
               </article>
 
               <article>
-                <span>Artigos</span>
+                <span>
+                  Artigos
+                </span>
+
                 <strong>
                   {
                     data.summary
@@ -355,7 +567,9 @@ export default function SourcesPage() {
             <ResultTable
               title="Empreendimentos candidatos"
               description="Páginas com maior probabilidade de representar lançamentos, residenciais ou produtos imobiliários."
-              items={data.result.projects}
+              items={
+                data.result.projects
+              }
             />
 
             <ResultTable
@@ -383,16 +597,16 @@ export default function SourcesPage() {
               }
             />
 
-            {data.result.errors.length >
-              0 && (
+            {data.result.errors
+              .length > 0 && (
               <section className="scan-errors">
                 <div className="eyebrow">
                   Atenção
                 </div>
 
                 <h2>
-                  Algumas fontes não puderam ser
-                  varridas.
+                  Algumas fontes não
+                  puderam ser varridas.
                 </h2>
 
                 {data.result.errors.map(
@@ -410,7 +624,9 @@ export default function SourcesPage() {
                       </strong>
 
                       <span>
-                        {error.message}
+                        {
+                          error.message
+                        }
                       </span>
                     </div>
                   ),
@@ -427,11 +643,141 @@ export default function SourcesPage() {
           line-height: 1.75;
         }
 
-        .scan-hero {
+        .discovery-setup {
           margin-top: 34px;
+          padding: 30px 34px;
+          display: grid;
+          grid-template-columns:
+            1.2fr .8fr;
+          gap: 50px;
+          align-items: center;
+          background: #f7f3ec;
+          border:
+            1px solid #ded5c8;
+        }
+
+        .discovery-setup h2 {
+          margin: 0 0 12px;
+          font-family:
+            Georgia,
+            'Times New Roman',
+            serif;
+          font-size: 32px;
+          font-weight: 400;
+        }
+
+        .discovery-setup p {
+          max-width: 700px;
+          margin: 0;
+          color: #657075;
+          line-height: 1.7;
+        }
+
+        .setup-flow {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 9px;
+          margin-top: 22px;
+        }
+
+        .setup-flow span {
+          padding: 8px 10px;
+          border:
+            1px solid #d7cbb9;
+          background: #fff;
+          color: #6c5b44;
+          font-size: 9px;
+          font-weight: 700;
+          text-transform:
+            uppercase;
+          letter-spacing: .1em;
+        }
+
+        .setup-flow b {
+          color: #b3976d;
+        }
+
+        .setup-action {
+          display: grid;
+          gap: 12px;
+        }
+
+        .setup-action button {
+          min-height: 58px;
+          padding: 0 22px;
+          border: 0;
+          cursor: pointer;
+          background: #1a2b32;
+          color: #fff;
+          text-transform:
+            uppercase;
+          letter-spacing: .11em;
+          font-size: 10px;
+          font-weight: 700;
+        }
+
+        .setup-action button:hover:not(
+          :disabled
+        ) {
+          background: #263f49;
+        }
+
+        .setup-action button:disabled {
+          opacity: .65;
+          cursor: wait;
+        }
+
+        .setup-action small {
+          color: #7c817f;
+          line-height: 1.5;
+        }
+
+        .setup-loading,
+        .scan-loading {
+          margin-top: 24px;
+          padding: 24px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          border:
+            1px solid #d8d0c5;
+          background: #fff;
+        }
+
+        .setup-loading p,
+        .scan-loading p {
+          margin: 5px 0 0;
+          color: #69747a;
+        }
+
+        .setup-message {
+          margin-top: 20px;
+          padding: 18px 22px;
+          display: grid;
+          gap: 5px;
+        }
+
+        .setup-message.success {
+          color: #1d603b;
+          background: #edf8f1;
+          border:
+            1px solid #bfdcc9;
+        }
+
+        .setup-message.error {
+          color: #84362e;
+          background: #fff1ee;
+          border:
+            1px solid #e4beb7;
+        }
+
+        .scan-hero {
+          margin-top: 28px;
           padding: 42px;
           display: grid;
-          grid-template-columns: 1.2fr .8fr;
+          grid-template-columns:
+            1.2fr .8fr;
           gap: 70px;
           align-items: center;
           background:
@@ -545,22 +891,6 @@ export default function SourcesPage() {
               .5
             );
           line-height: 1.6;
-        }
-
-        .scan-loading {
-          margin-top: 24px;
-          padding: 24px;
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          border:
-            1px solid #d8d0c5;
-          background: #fff;
-        }
-
-        .scan-loading p {
-          margin: 5px 0 0;
-          color: #69747a;
         }
 
         .scan-pulse {
@@ -685,8 +1015,7 @@ export default function SourcesPage() {
         }
 
         .sources-result-head h2 {
-          margin:
-            0 0 8px;
+          margin: 0 0 8px;
           font-family:
             Georgia,
             'Times New Roman',
@@ -702,7 +1031,8 @@ export default function SourcesPage() {
           line-height: 1.65;
         }
 
-        .sources-result-head > strong {
+        .sources-result-head
+          > strong {
           font-family:
             Georgia,
             'Times New Roman',
@@ -721,19 +1051,16 @@ export default function SourcesPage() {
           display: block;
           max-width: 620px;
           margin-top: 5px;
-          word-break:
-            break-all;
+          word-break: break-all;
           color: #818a8e;
         }
 
         .score {
-          display:
-            inline-flex;
+          display: inline-flex;
           min-width: 40px;
           min-height: 30px;
           align-items: center;
-          justify-content:
-            center;
+          justify-content: center;
           border:
             1px solid #d6d0c8;
           color: #6e7477;
@@ -769,8 +1096,7 @@ export default function SourcesPage() {
         }
 
         .scan-errors h2 {
-          margin:
-            0 0 20px;
+          margin: 0 0 20px;
         }
 
         .scan-error-item {
@@ -802,6 +1128,7 @@ export default function SourcesPage() {
         @media (
           max-width: 800px
         ) {
+          .discovery-setup,
           .scan-hero {
             grid-template-columns:
               1fr;

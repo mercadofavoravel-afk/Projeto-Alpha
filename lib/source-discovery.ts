@@ -54,6 +54,13 @@ const SOFT_EXCLUDED_TERMS = [
   'assessoria de imprensa',
   'trabalhe conosco',
   'carreiras',
+  'lgpd',
+  'qualidade',
+  'compliance',
+  'governanca',
+  'fornecedores',
+  'codigo de conduta',
+  'relatorio institucional',
 ];
 
 const ARTICLE_TERMS = [
@@ -71,26 +78,49 @@ const ARTICLE_TERMS = [
   'investimento',
   'investir',
   'lifestyle',
+  'dicas',
+  'guia',
 ];
 
-const PROJECT_TERMS = [
-  'empreendimento',
-  'empreendimentos',
+const STRONG_PROJECT_TERMS = [
   'lancamento',
-  'lancamentos',
   'residencial',
   'residence',
-  'project',
-  'projects',
+  'residences',
+  'condominio',
+  'empreendimento',
+  'projeto',
   'produto',
+  'apartamentos novos',
+  'casas novas',
+  'studios',
+  'studio',
+];
+
+const WEAK_PROJECT_TERMS = [
   'imovel',
   'imoveis',
   'apartamento',
   'apartamentos',
+  'casa',
   'casas',
 ];
 
-const PROJECT_LISTING_TERMS = [
+const PROJECT_PATH_MARKERS = [
+  '/produto/',
+  '/produtos/',
+  '/projeto/',
+  '/projetos/',
+  '/empreendimento/',
+  '/empreendimentos/',
+  '/lancamento/',
+  '/lancamentos/',
+  '/residencial/',
+  '/residence/',
+  '/residences/',
+];
+
+const PROJECT_LISTING_PATHS = [
   '/projetos',
   '/empreendimentos',
   '/lancamentos',
@@ -99,6 +129,7 @@ const PROJECT_LISTING_TERMS = [
   '/disponiveis',
   '/em-andamento',
   '/concluidos',
+  '/produtos',
 ];
 
 const COLLECTION_TERMS = [
@@ -137,6 +168,72 @@ const NEIGHBORHOOD_TERMS = [
   'cidade-jardim',
   'chacara klabin',
   'chacara-klabin',
+  'higienopolis',
+  'cambui',
+  'sacoma',
+];
+
+const DEVELOPER_TERMS = [
+  'incorporadora',
+  'incorporador',
+  'construtora',
+  'developer',
+  'institucional',
+  'quem somos',
+  'sobre nos',
+  'sobre a empresa',
+];
+
+const GENERIC_PROJECT_TITLES = [
+  'lancamentos e imoveis prontos',
+  'empreendimentos de alto padrao',
+  'encontre seu imovel',
+  'encontre seu apartamento',
+  'apartamentos a venda',
+  'imoveis a venda',
+  'home',
+  'inicio',
+];
+
+const COMMERCIAL_DOCUMENT_TERMS = [
+  'book',
+  'book-digital',
+  'apresentacao',
+  'material',
+  'folder',
+  'brochura',
+  'catalogo',
+  'planta',
+  'plantas',
+  'implantacao',
+  'memorial',
+  'decorado',
+  'tabela',
+  'disponibilidade',
+  'tipologia',
+  'tipologias',
+  'unidades',
+  'lancamento',
+  'empreendimento',
+  'residencial',
+  'residence',
+];
+
+const INSTITUTIONAL_DOCUMENT_TERMS = [
+  'qualidade',
+  'politica',
+  'politicas',
+  'codigo',
+  'conduta',
+  'compliance',
+  'governanca',
+  'lgpd',
+  'privacidade',
+  'sustentabilidade',
+  'relatorio',
+  'manual fornecedor',
+  'fornecedores',
+  'certificacao',
 ];
 
 function normalizeText(
@@ -161,11 +258,17 @@ function normalizeUrl(
 ) {
   try {
     const url = base
-      ? new URL(value, base)
+      ? new URL(
+          value,
+          base,
+        )
       : new URL(value);
 
     if (
-      !['http:', 'https:'].includes(
+      ![
+        'http:',
+        'https:',
+      ].includes(
         url.protocol,
       )
     ) {
@@ -178,7 +281,9 @@ function normalizeUrl(
       const key of
       TRACKING_PARAMS
     ) {
-      url.searchParams.delete(key);
+      url.searchParams.delete(
+        key,
+      );
     }
 
     if (
@@ -331,14 +436,38 @@ function stripHtml(
       /<[^>]+>/g,
       ' ',
     )
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#8211;/gi, '–')
-    .replace(/&#8212;/gi, '—')
-    .replace(/&#183;/gi, '·')
-    .replace(/\s+/g, ' ')
+    .replace(
+      /&nbsp;/gi,
+      ' ',
+    )
+    .replace(
+      /&amp;/gi,
+      '&',
+    )
+    .replace(
+      /&quot;/gi,
+      '"',
+    )
+    .replace(
+      /&#39;/gi,
+      "'",
+    )
+    .replace(
+      /&#8211;/gi,
+      '–',
+    )
+    .replace(
+      /&#8212;/gi,
+      '—',
+    )
+    .replace(
+      /&#183;/gi,
+      '·',
+    )
+    .replace(
+      /\s+/g,
+      ' ',
+    )
     .trim();
 }
 
@@ -355,7 +484,9 @@ function extractTitle(
   }
 
   const title =
-    stripHtml(match[1]);
+    stripHtml(
+      match[1],
+    );
 
   return title || null;
 }
@@ -405,6 +536,23 @@ function pathDepth(
     .length;
 }
 
+function getPathSegments(
+  url: string,
+) {
+  return new URL(url)
+    .pathname
+    .split('/')
+    .filter(Boolean)
+    .map(
+      (segment) =>
+        normalizeText(
+          decodeURIComponent(
+            segment,
+          ),
+        ),
+    );
+}
+
 function isLikelyListingPage(
   url: string,
 ) {
@@ -412,31 +560,25 @@ function isLikelyListingPage(
     new URL(url);
 
   const path =
-    normalizeText(
-      parsed.pathname,
-    );
+    parsed.pathname
+      .toLowerCase();
 
   const segments =
-    parsed.pathname
+    path
       .split('/')
       .filter(Boolean);
 
-  const exactListing =
-    PROJECT_LISTING_TERMS.some(
+  if (
+    PROJECT_LISTING_PATHS.some(
       (term) =>
-        path === term.replace(
-          /^\//,
-          '',
-        ) ||
-        parsed.pathname === term,
-    );
-
-  if (exactListing) {
+        path === term,
+    )
+  ) {
     return true;
   }
 
   if (
-    parsed.pathname.includes(
+    path.includes(
       '/page/',
     )
   ) {
@@ -445,10 +587,10 @@ function isLikelyListingPage(
 
   if (
     segments.length <= 2 &&
-    PROJECT_LISTING_TERMS.some(
+    PROJECT_LISTING_PATHS.some(
       (term) =>
-        parsed.pathname.includes(
-          term,
+        path.includes(
+          `${term}/`,
         ),
     )
   ) {
@@ -456,6 +598,149 @@ function isLikelyListingPage(
   }
 
   return false;
+}
+
+function hasStrongProjectPath(
+  url: string,
+) {
+  const pathname =
+    new URL(url)
+      .pathname
+      .toLowerCase();
+
+  return PROJECT_PATH_MARKERS.some(
+    (marker) =>
+      pathname.includes(
+        marker,
+      ),
+  );
+}
+
+function looksLikeSpecificSlug(
+  url: string,
+) {
+  const segments =
+    getPathSegments(url);
+
+  if (
+    segments.length === 0
+  ) {
+    return false;
+  }
+
+  const last =
+    segments[
+      segments.length - 1
+    ];
+
+  if (
+    !last ||
+    last.length < 4
+  ) {
+    return false;
+  }
+
+  const genericSegments =
+    new Set([
+      'projetos',
+      'empreendimentos',
+      'produtos',
+      'produto',
+      'lancamentos',
+      'lancamento',
+      'imoveis',
+      'disponiveis',
+      'bairro',
+      'bairros',
+      'blog',
+      'sobre',
+    ]);
+
+  return !genericSegments.has(
+    last,
+  );
+}
+
+function classifyDocument(
+  url: string,
+): Pick<
+  DiscoveredSource,
+  'kind' | 'score'
+> {
+  const parsed =
+    new URL(url);
+
+  const text =
+    normalizeText(
+      decodeURIComponent(
+        parsed.pathname,
+      ),
+    );
+
+  let score = 35;
+
+  const commercialSignals =
+    COMMERCIAL_DOCUMENT_TERMS.filter(
+      (term) =>
+        text.includes(
+          normalizeText(
+            term,
+          ),
+        ),
+    ).length;
+
+  const institutionalSignals =
+    INSTITUTIONAL_DOCUMENT_TERMS.filter(
+      (term) =>
+        text.includes(
+          normalizeText(
+            term,
+          ),
+        ),
+    ).length;
+
+  score +=
+    commercialSignals * 15;
+
+  score -=
+    institutionalSignals * 20;
+
+  if (
+    text.includes('book')
+  ) {
+    score += 15;
+  }
+
+  if (
+    text.includes('planta') ||
+    text.includes(
+      'implantacao',
+    )
+  ) {
+    score += 15;
+  }
+
+  if (
+    institutionalSignals > 0 &&
+    commercialSignals === 0
+  ) {
+    score = Math.min(
+      score,
+      25,
+    );
+  }
+
+  return {
+    kind: 'document',
+    score:
+      Math.max(
+        10,
+        Math.min(
+          score,
+          95,
+        ),
+      ),
+  };
 }
 
 function classifyUrl(
@@ -468,10 +753,9 @@ function classifyUrl(
   if (
     isDocumentUrl(url)
   ) {
-    return {
-      kind: 'document',
-      score: 95,
-    };
+    return classifyDocument(
+      url,
+    );
   }
 
   const parsed =
@@ -484,7 +768,9 @@ function classifyUrl(
 
   const pathText =
     normalizeText(
-      parsed.pathname,
+      decodeURIComponent(
+        parsed.pathname,
+      ),
     );
 
   const fullText =
@@ -494,7 +780,9 @@ function classifyUrl(
     SOFT_EXCLUDED_TERMS.some(
       (term) =>
         fullText.includes(
-          normalizeText(term),
+          normalizeText(
+            term,
+          ),
         ),
     )
   ) {
@@ -508,7 +796,9 @@ function classifyUrl(
     ARTICLE_TERMS.some(
       (term) =>
         fullText.includes(
-          term,
+          normalizeText(
+            term,
+          ),
         ),
     ) ||
     parsed.pathname.includes(
@@ -516,11 +806,11 @@ function classifyUrl(
     );
 
   if (isArticle) {
-    let articleScore = 55;
+    let articleScore = 50;
 
     if (
       parsed.pathname.includes(
-        '/blog/'
+        '/blog/',
       )
     ) {
       articleScore += 20;
@@ -535,10 +825,11 @@ function classifyUrl(
 
     return {
       kind: 'article',
-      score: Math.min(
-        articleScore,
-        95,
-      ),
+      score:
+        Math.min(
+          articleScore,
+          90,
+        ),
     };
   }
 
@@ -555,164 +846,237 @@ function classifyUrl(
         ),
     );
 
-  const hasProjectTerm =
-    PROJECT_TERMS.some(
+  const strongProjectSignals =
+    STRONG_PROJECT_TERMS.filter(
       (term) =>
         fullText.includes(
-          term,
+          normalizeText(
+            term,
+          ),
         ),
-    );
+    ).length;
 
-  const hasNeighborhoodTerm =
-    NEIGHBORHOOD_TERMS.some(
+  const weakProjectSignals =
+    WEAK_PROJECT_TERMS.filter(
       (term) =>
         fullText.includes(
-          term,
+          normalizeText(
+            term,
+          ),
         ),
-    );
+    ).length;
+
+  const neighborhoodSignals =
+    NEIGHBORHOOD_TERMS.filter(
+      (term) =>
+        fullText.includes(
+          normalizeText(
+            term,
+          ),
+        ),
+    ).length;
+
+  const developerSignals =
+    DEVELOPER_TERMS.filter(
+      (term) =>
+        fullText.includes(
+          normalizeText(
+            term,
+          ),
+        ),
+    ).length;
 
   const depth =
     pathDepth(url);
 
-  let kind:
-    DiscoveredSource['kind'] =
-      'other';
-
-  let score = 0;
-
-  if (
-    hasProjectTerm &&
-    !listingPage &&
-    !collectionPage
-  ) {
-    kind = 'project';
-    score += 45;
-  }
-
-  if (
-    hasNeighborhoodTerm
-  ) {
-    if (
-      kind === 'other'
-    ) {
-      kind =
-        'neighborhood';
-    }
-
-    score += 25;
-  }
-
-  if (
-    collectionPage
-  ) {
-    kind =
-      'neighborhood';
-
-    score = Math.max(
-      score,
-      45,
+  const specificSlug =
+    looksLikeSpecificSlug(
+      url,
     );
-  }
 
-  if (
-    listingPage
-  ) {
-    if (
-      hasNeighborhoodTerm
-    ) {
-      kind =
-        'neighborhood';
+  const strongPath =
+    hasStrongProjectPath(
+      url,
+    );
 
-      score = Math.max(
-        score,
-        40,
-      );
-    } else {
-      kind =
-        'developer';
-
-      score = Math.max(
-        score,
-        30,
-      );
-    }
-  }
-
-  if (
-    [
-      'incorporadora',
-      'construtora',
-      'developer',
-      'institucional',
-    ].some(
+  const genericTitle =
+    GENERIC_PROJECT_TITLES.some(
       (term) =>
-        fullText.includes(
+        titleText.includes(
           term,
         ),
-    )
-  ) {
+    );
+
+  if (collectionPage) {
+    return {
+      kind: 'neighborhood',
+      score:
+        neighborhoodSignals >
+        0
+          ? 55
+          : 40,
+    };
+  }
+
+  if (listingPage) {
     if (
-      kind === 'other'
+      neighborhoodSignals >
+      0
     ) {
-      kind =
-        'developer';
+      return {
+        kind:
+          'neighborhood',
+        score: 45,
+      };
     }
 
-    score += 20;
+    return {
+      kind:
+        developerSignals >
+        0
+          ? 'developer'
+          : 'other',
+      score:
+        developerSignals >
+        0
+          ? 35
+          : 20,
+    };
   }
 
-  if (
-    depth >= 2
-  ) {
-    score += 10;
-  }
+  let projectScore = 0;
 
   if (
-    depth >= 4 &&
-    kind === 'project'
+    strongProjectSignals >
+    0
   ) {
-    score += 10;
-  }
-
-  if (
-    title &&
-    title.length >= 15
-  ) {
-    score += 5;
-  }
-
-  if (
-    kind === 'project' &&
-    title
-  ) {
-    const genericTitle =
-      [
-        'lancamentos e imoveis prontos',
-        'empreendimentos de alto padrao',
-        'encontre seu',
-        'home',
-      ].some(
-        (term) =>
-          titleText.includes(
-            term,
-          ),
+    projectScore +=
+      35 +
+      Math.min(
+        strongProjectSignals *
+          10,
+        30,
       );
+  }
 
-    if (genericTitle) {
-      score -= 25;
+  if (
+    strongPath
+  ) {
+    projectScore += 15;
+  }
+
+  if (
+    specificSlug
+  ) {
+    projectScore += 10;
+  }
+
+  if (
+    depth >= 3
+  ) {
+    projectScore += 10;
+  }
+
+  if (
+    depth >= 5
+  ) {
+    projectScore += 5;
+  }
+
+  if (
+    weakProjectSignals >
+      0 &&
+    strongProjectSignals ===
+      0
+  ) {
+    projectScore += 10;
+  }
+
+  if (
+    genericTitle
+  ) {
+    projectScore -= 30;
+  }
+
+  if (
+    projectScore >= 50
+  ) {
+    return {
+      kind: 'project',
+      score:
+        Math.max(
+          0,
+          Math.min(
+            projectScore,
+            100,
+          ),
+        ),
+    };
+  }
+
+  if (
+    neighborhoodSignals >
+    0
+  ) {
+    let neighborhoodScore =
+      30;
+
+    if (
+      titleText.includes(
+        'bairro',
+      )
+    ) {
+      neighborhoodScore +=
+        15;
     }
+
+    if (
+      depth <= 3
+    ) {
+      neighborhoodScore +=
+        5;
+    }
+
+    return {
+      kind:
+        'neighborhood',
+      score:
+        Math.min(
+          neighborhoodScore,
+          75,
+        ),
+    };
+  }
+
+  if (
+    developerSignals >
+    0
+  ) {
+    return {
+      kind: 'developer',
+      score:
+        Math.min(
+          35 +
+            developerSignals *
+              10,
+          75,
+        ),
+    };
+  }
+
+  if (
+    weakProjectSignals >
+    0
+  ) {
+    return {
+      kind: 'other',
+      score: 20,
+    };
   }
 
   return {
-    kind,
-    score:
-      Math.max(
-        0,
-        Math.min(
-          score,
-          100,
-        ),
-      ),
+    kind: 'other',
+    score: 10,
   };
 }
 
@@ -720,19 +1084,24 @@ async function fetchHtml(
   url: string,
 ) {
   const response =
-    await fetch(url, {
-      cache: 'no-store',
+    await fetch(
+      url,
+      {
+        cache:
+          'no-store',
 
-      redirect: 'follow',
+        redirect:
+          'follow',
 
-      headers: {
-        Accept:
-          'text/html,application/xhtml+xml',
+        headers: {
+          Accept:
+            'text/html,application/xhtml+xml',
 
-        'User-Agent':
-          'Mozilla/5.0 (compatible; ProjetoAlphaBot/1.0; +https://imoveisdealtopadraorio.com.br)',
+          'User-Agent':
+            'Mozilla/5.0 (compatible; ProjetoAlphaBot/1.0; +https://imoveisdealtopadraorio.com.br)',
+        },
       },
-    });
+    );
 
   if (!response.ok) {
     return null;
@@ -746,7 +1115,9 @@ async function fetchHtml(
   if (
     !contentType
       .toLowerCase()
-      .includes('text/html')
+      .includes(
+        'text/html',
+      )
   ) {
     return null;
   }
@@ -757,9 +1128,13 @@ async function fetchHtml(
 export async function discoverSources(
   rootUrl: string,
   options: DiscoverOptions = {},
-): Promise<DiscoveredSource[]> {
+): Promise<
+  DiscoveredSource[]
+> {
   const normalizedRoot =
-    normalizeUrl(rootUrl);
+    normalizeUrl(
+      rootUrl,
+    );
 
   if (!normalizedRoot) {
     throw new Error(
@@ -819,7 +1194,8 @@ export async function discoverSources(
 
   while (
     queue.length > 0 &&
-    visited.size < maxPages
+    visited.size <
+      maxPages
   ) {
     const current =
       queue.shift();
@@ -853,17 +1229,32 @@ export async function discoverSources(
         current.url,
       )
     ) {
-      discovered.set(
-        current.url,
-        {
-          url:
-            current.url,
-          title: null,
-          kind:
-            'document',
-          score: 95,
-        },
-      );
+      const classification =
+        classifyDocument(
+          current.url,
+        );
+
+      if (
+        classification.score >=
+        20
+      ) {
+        discovered.set(
+          current.url,
+          {
+            url:
+              current.url,
+
+            title:
+              null,
+
+            kind:
+              classification.kind,
+
+            score:
+              classification.score,
+          },
+        );
+      }
 
       continue;
     }
@@ -895,9 +1286,12 @@ export async function discoverSources(
         {
           url:
             current.url,
+
           title,
+
           kind:
             classification.kind,
+
           score:
             classification.score,
         },
@@ -930,38 +1324,64 @@ export async function discoverSources(
       }
 
       if (
-        isStaticAsset(link) ||
-        isHardExcluded(link)
+        isStaticAsset(
+          link,
+        ) ||
+        isHardExcluded(
+          link,
+        )
       ) {
         continue;
       }
 
       if (
-        isDocumentUrl(link)
+        isDocumentUrl(
+          link,
+        )
       ) {
         if (
           !discovered.has(
             link,
           )
         ) {
-          discovered.set(
-            link,
-            {
-              url: link,
-              title: null,
-              kind:
-                'document',
-              score: 95,
-            },
-          );
+          const classification =
+            classifyDocument(
+              link,
+            );
+
+          if (
+            classification.score >=
+            20
+          ) {
+            discovered.set(
+              link,
+              {
+                url:
+                  link,
+
+                title:
+                  null,
+
+                kind:
+                  classification.kind,
+
+                score:
+                  classification.score,
+              },
+            );
+          }
         }
 
         continue;
       }
 
       if (
-        visited.has(link) ||
-        queued.has(link)
+        visited.has(
+          link,
+        ) ||
+        queued.has(
+          link,
+        )
       ) {
         continue;
       }
@@ -983,7 +1403,8 @@ export async function discoverSources(
   ]
     .filter(
       (item) =>
-        item.score >= 20,
+        item.score >=
+        20,
     )
     .sort(
       (a, b) =>

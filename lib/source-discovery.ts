@@ -45,22 +45,25 @@ const HARD_EXCLUDED_PATHS = [
   '/wp-admin',
 ];
 
-const SOFT_EXCLUDED_TERMS = [
-  'contato',
-  'fale conosco',
-  'politica de privacidade',
-  'privacy policy',
-  'termos de uso',
-  'assessoria de imprensa',
+const STRONG_NEGATIVE_TERMS = [
   'trabalhe conosco',
+  'trabalhe-conosco',
   'carreiras',
+  'vaga',
+  'vagas',
   'lgpd',
-  'qualidade',
+  'privacidade',
+  'politica de privacidade',
+  'politica-de-privacidade',
   'compliance',
   'governanca',
-  'fornecedores',
   'codigo de conduta',
-  'relatorio institucional',
+  'qualidade',
+  'fornecedores',
+  'assessoria de imprensa',
+  'imprensa',
+  'venda seu terreno',
+  'venda-seu-terreno',
 ];
 
 const ARTICLE_TERMS = [
@@ -69,41 +72,66 @@ const ARTICLE_TERMS = [
   'noticias',
   'artigo',
   'artigos',
-  'conteudo',
-  'mercado',
-  'tendencia',
-  'tendencias',
   'decoracao',
   'arquitetura',
-  'investimento',
-  'investir',
   'lifestyle',
+  'mercado imobiliario',
+  'tendencia',
+  'tendencias',
   'dicas',
   'guia',
 ];
 
-const STRONG_PROJECT_TERMS = [
-  'lancamento',
+const COMMERCIAL_DOCUMENT_TERMS = [
+  'book',
+  'book digital',
+  'book-digital',
+  'apresentacao',
+  'folder',
+  'brochura',
+  'catalogo',
+  'planta',
+  'plantas',
+  'implantacao',
+  'memorial',
+  'decorado',
+  'tabela',
+  'disponibilidade',
+  'tipologia',
+  'tipologias',
+  'unidades',
+];
+
+const INSTITUTIONAL_DOCUMENT_TERMS = [
+  'qualidade',
+  'politica',
+  'politicas',
+  'codigo',
+  'conduta',
+  'compliance',
+  'governanca',
+  'lgpd',
+  'privacidade',
+  'sustentabilidade',
+  'relatorio',
+  'certificacao',
+  'fornecedor',
+  'fornecedores',
+];
+
+const PROJECT_WORDS = [
   'residencial',
   'residence',
   'residences',
+  'residencial',
   'condominio',
+  'condominium',
+  'lancamento',
   'empreendimento',
-  'projeto',
-  'produto',
-  'apartamentos novos',
-  'casas novas',
   'studios',
   'studio',
-];
-
-const WEAK_PROJECT_TERMS = [
-  'imovel',
-  'imoveis',
-  'apartamento',
-  'apartamentos',
-  'casa',
-  'casas',
+  'home',
+  'homes',
 ];
 
 const PROJECT_PATH_MARKERS = [
@@ -120,26 +148,34 @@ const PROJECT_PATH_MARKERS = [
   '/residences/',
 ];
 
-const PROJECT_LISTING_PATHS = [
-  '/projetos',
-  '/empreendimentos',
-  '/lancamentos',
-  '/imoveis',
-  '/busca',
-  '/disponiveis',
-  '/em-andamento',
-  '/concluidos',
-  '/produtos',
-];
+const GENERIC_LISTING_SEGMENTS = new Set([
+  'projetos',
+  'empreendimentos',
+  'produtos',
+  'lancamentos',
+  'imoveis',
+  'disponiveis',
+  'busca',
+  'todos',
+  'todos-os-imoveis',
+]);
 
-const COLLECTION_TERMS = [
-  'colecao',
-  'collection',
-];
-
-const NEIGHBORHOOD_TERMS = [
-  'bairro',
+const GENERIC_LAST_SEGMENTS = new Set([
+  'home',
+  'inicio',
+  'sobre',
+  'blog',
+  'projetos',
+  'produto',
+  'produtos',
+  'empreendimentos',
+  'lancamentos',
+  'imoveis',
+  'disponiveis',
   'bairros',
+]);
+
+const NEIGHBORHOOD_NAMES = [
   'ipanema',
   'leblon',
   'copacabana',
@@ -159,7 +195,6 @@ const NEIGHBORHOOD_TERMS = [
   'joa',
   'recreio',
   'peninsula',
-  'abm',
   'botafogo',
   'gloria',
   'brooklin',
@@ -178,62 +213,23 @@ const DEVELOPER_TERMS = [
   'incorporador',
   'construtora',
   'developer',
-  'institucional',
   'quem somos',
   'sobre nos',
   'sobre a empresa',
+  'institucional',
 ];
 
-const GENERIC_PROJECT_TITLES = [
-  'lancamentos e imoveis prontos',
-  'empreendimentos de alto padrao',
-  'encontre seu imovel',
-  'encontre seu apartamento',
-  'apartamentos a venda',
-  'imoveis a venda',
-  'home',
-  'inicio',
-];
-
-const COMMERCIAL_DOCUMENT_TERMS = [
-  'book',
-  'book-digital',
-  'apresentacao',
-  'material',
-  'folder',
-  'brochura',
-  'catalogo',
-  'planta',
-  'plantas',
-  'implantacao',
-  'memorial',
-  'decorado',
-  'tabela',
-  'disponibilidade',
-  'tipologia',
-  'tipologias',
-  'unidades',
-  'lancamento',
-  'empreendimento',
-  'residencial',
-  'residence',
-];
-
-const INSTITUTIONAL_DOCUMENT_TERMS = [
-  'qualidade',
-  'politica',
-  'politicas',
-  'codigo',
-  'conduta',
-  'compliance',
-  'governanca',
-  'lgpd',
-  'privacidade',
-  'sustentabilidade',
-  'relatorio',
-  'manual fornecedor',
-  'fornecedores',
-  'certificacao',
+const GATEWAY_HOSTS = [
+  'linktr.ee',
+  'drive.google.com',
+  'docs.google.com',
+  'youtube.com',
+  'youtu.be',
+  'instagram.com',
+  'facebook.com',
+  'pinterest.com',
+  'matterport.com',
+  'my.matterport.com',
 ];
 
 function normalizeText(
@@ -286,14 +282,11 @@ function normalizeUrl(
       );
     }
 
-    if (
-      url.hostname.startsWith(
-        'www.',
-      )
-    ) {
-      url.hostname =
-        url.hostname.slice(4);
-    }
+    url.hostname =
+      url.hostname.replace(
+        /^www\./,
+        '',
+      );
 
     if (
       url.pathname.length > 1 &&
@@ -304,27 +297,6 @@ function normalizeUrl(
           0,
           -1,
         );
-    }
-
-    const sortedParams = [
-      ...url.searchParams.entries(),
-    ].sort(
-      ([a], [b]) =>
-        a.localeCompare(b),
-    );
-
-    url.search = '';
-
-    for (
-      const [
-        key,
-        paramValue,
-      ] of sortedParams
-    ) {
-      url.searchParams.append(
-        key,
-        paramValue,
-      );
     }
 
     return url.toString();
@@ -338,24 +310,43 @@ function sameHost(
   candidate: string,
 ) {
   try {
-    const url =
+    const candidateUrl =
       new URL(candidate);
 
-    const rootHost =
+    return (
       root.hostname.replace(
         /^www\./,
         '',
-      );
-
-    const candidateHost =
-      url.hostname.replace(
+      ) ===
+      candidateUrl.hostname.replace(
         /^www\./,
         '',
-      );
+      )
+    );
+  } catch {
+    return false;
+  }
+}
 
-    return (
-      rootHost ===
-      candidateHost
+function isGatewayHost(
+  url: string,
+) {
+  try {
+    const hostname =
+      new URL(url)
+        .hostname
+        .replace(
+          /^www\./,
+          '',
+        )
+        .toLowerCase();
+
+    return GATEWAY_HOSTS.some(
+      (host) =>
+        hostname === host ||
+        hostname.endsWith(
+          `.${host}`,
+        ),
     );
   } catch {
     return false;
@@ -366,14 +357,10 @@ function isHardExcluded(
   url: string,
 ) {
   try {
-    const parsed =
-      new URL(url);
-
     const path =
-      parsed.pathname
-        .toLocaleLowerCase(
-          'pt-BR',
-        );
+      new URL(url)
+        .pathname
+        .toLowerCase();
 
     return HARD_EXCLUDED_PATHS.some(
       (item) =>
@@ -453,18 +440,6 @@ function stripHtml(
       "'",
     )
     .replace(
-      /&#8211;/gi,
-      '–',
-    )
-    .replace(
-      /&#8212;/gi,
-      '—',
-    )
-    .replace(
-      /&#183;/gi,
-      '·',
-    )
-    .replace(
       /\s+/g,
       ' ',
     )
@@ -526,16 +501,6 @@ function extractLinks(
   ];
 }
 
-function pathDepth(
-  url: string,
-) {
-  return new URL(url)
-    .pathname
-    .split('/')
-    .filter(Boolean)
-    .length;
-}
-
 function getPathSegments(
   url: string,
 ) {
@@ -553,33 +518,85 @@ function getPathSegments(
     );
 }
 
-function isLikelyListingPage(
+function pathDepth(
   url: string,
 ) {
-  const parsed =
-    new URL(url);
+  return getPathSegments(
+    url,
+  ).length;
+}
 
-  const path =
-    parsed.pathname
-      .toLowerCase();
-
+function getLastSegment(
+  url: string,
+) {
   const segments =
-    path
-      .split('/')
-      .filter(Boolean);
+    getPathSegments(url);
+
+  return (
+    segments[
+      segments.length - 1
+    ] ?? ''
+  );
+}
+
+function containsAny(
+  text: string,
+  terms: string[],
+) {
+  return terms.some(
+    (term) =>
+      text.includes(
+        normalizeText(
+          term,
+        ),
+      ),
+  );
+}
+
+function countTerms(
+  text: string,
+  terms: string[],
+) {
+  return terms.filter(
+    (term) =>
+      text.includes(
+        normalizeText(
+          term,
+        ),
+      ),
+  ).length;
+}
+
+function isNeighborhoodSegment(
+  segment: string,
+) {
+  return NEIGHBORHOOD_NAMES.some(
+    (term) =>
+      segment ===
+      normalizeText(term),
+  );
+}
+
+function isGenericListingPage(
+  url: string,
+) {
+  const segments =
+    getPathSegments(url);
 
   if (
-    PROJECT_LISTING_PATHS.some(
-      (term) =>
-        path === term,
-    )
+    segments.length === 0
   ) {
     return true;
   }
 
+  const last =
+    segments[
+      segments.length - 1
+    ];
+
   if (
-    path.includes(
-      '/page/',
+    GENERIC_LISTING_SEGMENTS.has(
+      last,
     )
   ) {
     return true;
@@ -587,10 +604,10 @@ function isLikelyListingPage(
 
   if (
     segments.length <= 2 &&
-    PROJECT_LISTING_PATHS.some(
-      (term) =>
-        path.includes(
-          `${term}/`,
+    segments.some(
+      (segment) =>
+        GENERIC_LISTING_SEGMENTS.has(
+          segment,
         ),
     )
   ) {
@@ -600,38 +617,36 @@ function isLikelyListingPage(
   return false;
 }
 
-function hasStrongProjectPath(
+function hasProjectPathMarker(
   url: string,
 ) {
-  const pathname =
+  const path =
     new URL(url)
       .pathname
       .toLowerCase();
 
   return PROJECT_PATH_MARKERS.some(
     (marker) =>
-      pathname.includes(
+      path.includes(
         marker,
       ),
   );
 }
 
-function looksLikeSpecificSlug(
+function looksLikeSpecificProjectPath(
   url: string,
 ) {
   const segments =
     getPathSegments(url);
 
   if (
-    segments.length === 0
+    segments.length < 2
   ) {
     return false;
   }
 
   const last =
-    segments[
-      segments.length - 1
-    ];
+    getLastSegment(url);
 
   if (
     !last ||
@@ -640,24 +655,81 @@ function looksLikeSpecificSlug(
     return false;
   }
 
-  const genericSegments =
-    new Set([
-      'projetos',
-      'empreendimentos',
-      'produtos',
-      'produto',
-      'lancamentos',
-      'lancamento',
-      'imoveis',
-      'disponiveis',
-      'bairro',
-      'bairros',
-      'blog',
-      'sobre',
-    ]);
+  if (
+    GENERIC_LAST_SEGMENTS.has(
+      last,
+    )
+  ) {
+    return false;
+  }
 
-  return !genericSegments.has(
-    last,
+  /*
+   * Fundamental para casos Tegra:
+   *
+   * /sp/sao-paulo/sul/brooklin/amperebrooklin
+   *
+   * Brooklin é bairro, mas o último segmento
+   * é um produto específico.
+   */
+  if (
+    segments.length >= 4 &&
+    !isNeighborhoodSegment(
+      last,
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    hasProjectPathMarker(
+      url,
+    ) &&
+    !isNeighborhoodSegment(
+      last,
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function isNeighborhoodLandingPage(
+  url: string,
+  titleText: string,
+) {
+  const segments =
+    getPathSegments(url);
+
+  const last =
+    getLastSegment(url);
+
+  if (
+    !isNeighborhoodSegment(
+      last,
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    looksLikeSpecificProjectPath(
+      url,
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    titleText.includes(
+      'bairro',
+    )
+  ) {
+    return true;
+  }
+
+  return (
+    segments.length <= 5
   );
 }
 
@@ -667,71 +739,63 @@ function classifyDocument(
   DiscoveredSource,
   'kind' | 'score'
 > {
-  const parsed =
-    new URL(url);
-
   const text =
     normalizeText(
       decodeURIComponent(
-        parsed.pathname,
+        new URL(url)
+          .pathname,
       ),
     );
 
-  let score = 35;
+  const commercial =
+    countTerms(
+      text,
+      COMMERCIAL_DOCUMENT_TERMS,
+    );
 
-  const commercialSignals =
-    COMMERCIAL_DOCUMENT_TERMS.filter(
-      (term) =>
-        text.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
+  const institutional =
+    countTerms(
+      text,
+      INSTITUTIONAL_DOCUMENT_TERMS,
+    );
 
-  const institutionalSignals =
-    INSTITUTIONAL_DOCUMENT_TERMS.filter(
-      (term) =>
-        text.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
+  let score = 25;
 
   score +=
-    commercialSignals * 15;
+    commercial * 15;
 
   score -=
-    institutionalSignals * 20;
+    institutional * 20;
 
   if (
-    text.includes('book')
+    text.includes(
+      'book',
+    )
   ) {
-    score += 15;
+    score += 20;
   }
 
   if (
-    text.includes('planta') ||
+    text.includes(
+      'planta',
+    ) ||
     text.includes(
       'implantacao',
     )
   ) {
-    score += 15;
+    score += 20;
   }
 
   if (
-    institutionalSignals > 0 &&
-    commercialSignals === 0
+    institutional > 0 &&
+    commercial === 0
   ) {
-    score = Math.min(
-      score,
-      25,
-    );
+    score = 10;
   }
 
   return {
     kind: 'document',
+
     score:
       Math.max(
         10,
@@ -761,11 +825,6 @@ function classifyUrl(
   const parsed =
     new URL(url);
 
-  const titleText =
-    normalizeText(
-      title ?? '',
-    );
-
   const pathText =
     normalizeText(
       decodeURIComponent(
@@ -773,17 +832,43 @@ function classifyUrl(
       ),
     );
 
+  const titleText =
+    normalizeText(
+      title ?? '',
+    );
+
   const fullText =
     `${pathText} ${titleText}`;
 
+  /*
+   * Gateways são portas de entrada.
+   * Não são empreendimentos por si só.
+   */
   if (
-    SOFT_EXCLUDED_TERMS.some(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
+    isGatewayHost(url)
+  ) {
+    if (
+      containsAny(
+        fullText,
+        ARTICLE_TERMS,
+      )
+    ) {
+      return {
+        kind: 'article',
+        score: 25,
+      };
+    }
+
+    return {
+      kind: 'other',
+      score: 20,
+    };
+  }
+
+  if (
+    containsAny(
+      fullText,
+      STRONG_NEGATIVE_TERMS,
     )
   ) {
     return {
@@ -793,284 +878,208 @@ function classifyUrl(
   }
 
   const isArticle =
-    ARTICLE_TERMS.some(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ) ||
     parsed.pathname.includes(
       '/blog/',
+    ) ||
+    containsAny(
+      fullText,
+      ARTICLE_TERMS,
     );
 
   if (isArticle) {
-    let articleScore = 50;
+    let score = 55;
 
     if (
       parsed.pathname.includes(
         '/blog/',
       )
     ) {
-      articleScore += 20;
+      score += 15;
     }
 
     if (
       title &&
       title.length >= 25
     ) {
-      articleScore += 10;
+      score += 10;
     }
 
     return {
       kind: 'article',
       score:
         Math.min(
-          articleScore,
-          90,
+          score,
+          85,
         ),
     };
   }
-
-  const listingPage =
-    isLikelyListingPage(
-      url,
-    );
-
-  const collectionPage =
-    COLLECTION_TERMS.some(
-      (term) =>
-        fullText.includes(
-          term,
-        ),
-    );
-
-  const strongProjectSignals =
-    STRONG_PROJECT_TERMS.filter(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
-
-  const weakProjectSignals =
-    WEAK_PROJECT_TERMS.filter(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
-
-  const neighborhoodSignals =
-    NEIGHBORHOOD_TERMS.filter(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
-
-  const developerSignals =
-    DEVELOPER_TERMS.filter(
-      (term) =>
-        fullText.includes(
-          normalizeText(
-            term,
-          ),
-        ),
-    ).length;
 
   const depth =
     pathDepth(url);
 
-  const specificSlug =
-    looksLikeSpecificSlug(
+  const specificProject =
+    looksLikeSpecificProjectPath(
       url,
     );
 
-  const strongPath =
-    hasStrongProjectPath(
+  const neighborhoodLanding =
+    isNeighborhoodLandingPage(
       url,
+      titleText,
     );
 
-  const genericTitle =
-    GENERIC_PROJECT_TITLES.some(
-      (term) =>
-        titleText.includes(
-          term,
-        ),
-    );
+  /*
+   * PRECEDÊNCIA MAIS IMPORTANTE:
+   *
+   * Produto específico vem ANTES de bairro.
+   *
+   * Isso corrige:
+   * brooklin/amperebrooklin
+   * brooklin/ledgebrooklin
+   * higienopolis/aria-higienopolis
+   * cambui/andradecoutinho
+   */
+  if (specificProject) {
+    let score = 65;
 
-  if (collectionPage) {
-    return {
-      kind: 'neighborhood',
-      score:
-        neighborhoodSignals >
-        0
-          ? 55
-          : 40,
-    };
-  }
-
-  if (listingPage) {
     if (
-      neighborhoodSignals >
-      0
+      hasProjectPathMarker(
+        url,
+      )
     ) {
-      return {
-        kind:
-          'neighborhood',
-        score: 45,
-      };
+      score += 15;
     }
 
-    return {
-      kind:
-        developerSignals >
-        0
-          ? 'developer'
-          : 'other',
-      score:
-        developerSignals >
-        0
-          ? 35
-          : 20,
-    };
-  }
+    if (
+      containsAny(
+        fullText,
+        PROJECT_WORDS,
+      )
+    ) {
+      score += 10;
+    }
 
-  let projectScore = 0;
+    if (
+      depth >= 5
+    ) {
+      score += 10;
+    }
 
-  if (
-    strongProjectSignals >
-    0
-  ) {
-    projectScore +=
-      35 +
-      Math.min(
-        strongProjectSignals *
-          10,
-        30,
-      );
-  }
-
-  if (
-    strongPath
-  ) {
-    projectScore += 15;
-  }
-
-  if (
-    specificSlug
-  ) {
-    projectScore += 10;
-  }
-
-  if (
-    depth >= 3
-  ) {
-    projectScore += 10;
-  }
-
-  if (
-    depth >= 5
-  ) {
-    projectScore += 5;
-  }
-
-  if (
-    weakProjectSignals >
-      0 &&
-    strongProjectSignals ===
-      0
-  ) {
-    projectScore += 10;
-  }
-
-  if (
-    genericTitle
-  ) {
-    projectScore -= 30;
-  }
-
-  if (
-    projectScore >= 50
-  ) {
     return {
       kind: 'project',
       score:
-        Math.max(
-          0,
-          Math.min(
-            projectScore,
-            100,
-          ),
+        Math.min(
+          score,
+          100,
         ),
     };
   }
 
+  /*
+   * Só depois de excluir projeto específico
+   * consideramos que a URL é página territorial.
+   */
   if (
-    neighborhoodSignals >
-    0
+    neighborhoodLanding
   ) {
-    let neighborhoodScore =
-      30;
-
-    if (
-      titleText.includes(
-        'bairro',
-      )
-    ) {
-      neighborhoodScore +=
-        15;
-    }
-
-    if (
-      depth <= 3
-    ) {
-      neighborhoodScore +=
-        5;
-    }
-
     return {
       kind:
         'neighborhood',
       score:
-        Math.min(
-          neighborhoodScore,
-          75,
-        ),
+        titleText.includes(
+          'bairro',
+        )
+          ? 55
+          : 45,
     };
   }
 
   if (
-    developerSignals >
-    0
+    titleText.includes(
+      'colecao',
+    ) ||
+    pathText.includes(
+      'colecao',
+    )
   ) {
     return {
-      kind: 'developer',
-      score:
-        Math.min(
-          35 +
-            developerSignals *
-              10,
-          75,
-        ),
+      kind: 'neighborhood',
+      score: 40,
     };
   }
 
   if (
-    weakProjectSignals >
-    0
+    isGenericListingPage(
+      url,
+    )
   ) {
+    if (
+      containsAny(
+        fullText,
+        DEVELOPER_TERMS,
+      )
+    ) {
+      return {
+        kind: 'developer',
+        score: 35,
+      };
+    }
+
     return {
       kind: 'other',
       score: 20,
+    };
+  }
+
+  const projectSignals =
+    countTerms(
+      fullText,
+      PROJECT_WORDS,
+    );
+
+  /*
+   * Página rasa precisa de mais evidência.
+   * Evita transformar home, portal ou
+   * listagem genérica em empreendimento.
+   */
+  if (
+    projectSignals >= 2 &&
+    depth >= 2
+  ) {
+    return {
+      kind: 'project',
+      score:
+        Math.min(
+          45 +
+            projectSignals *
+              10,
+          80,
+        ),
+    };
+  }
+
+  if (
+    containsAny(
+      fullText,
+      DEVELOPER_TERMS,
+    )
+  ) {
+    return {
+      kind: 'developer',
+      score: 45,
+    };
+  }
+
+  if (
+    containsAny(
+      fullText,
+      NEIGHBORHOOD_NAMES,
+    ) &&
+    depth <= 3
+  ) {
+    return {
+      kind: 'neighborhood',
+      score: 35,
     };
   }
 
@@ -1386,10 +1395,13 @@ export async function discoverSources(
         continue;
       }
 
-      queued.add(link);
+      queued.add(
+        link,
+      );
 
       queue.push({
-        url: link,
+        url:
+          link,
 
         depth:
           current.depth +

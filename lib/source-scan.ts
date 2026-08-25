@@ -1,6 +1,11 @@
 import 'server-only';
 
 import {
+  isGoogleDriveGatewayUrl,
+  isSameNormalizedUrl,
+} from '@/lib/source-url';
+
+import {
   discoverSources,
   type DiscoveredSource,
 } from '@/lib/source-discovery';
@@ -518,10 +523,22 @@ async function discoverGatewayTargets(
   const filtered =
     links.filter(
       (link) => {
-        if (
+        const internal =
           sameHost(
             root.url,
             link.url,
+          );
+
+        if (
+          internal &&
+          (
+            !isGoogleDriveGatewayUrl(
+              root.url,
+            ) ||
+            isSameNormalizedUrl(
+              root.url,
+              link.url,
+            )
           )
         ) {
           return false;

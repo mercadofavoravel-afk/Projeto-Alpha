@@ -1,5 +1,9 @@
 import 'server-only';
 
+import {
+  isGoogleWorkspaceDocumentUrl,
+} from '@/lib/source-url';
+
 export type DiscoveredSource = {
   url: string;
   title: string | null;
@@ -428,6 +432,14 @@ function isStaticAsset(url: string) {
 }
 
 function isDocumentUrl(url: string) {
+  if (
+    isGoogleWorkspaceDocumentUrl(
+      url,
+    )
+  ) {
+    return true;
+  }
+
   try {
     return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i.test(
       new URL(url).pathname,

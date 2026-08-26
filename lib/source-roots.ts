@@ -73,11 +73,11 @@ export const sourceRoots: SourceRoot[] = [
     url: 'https://www.brixfii.com.br',
     kind: 'developer',
     access: 'website',
-    enabled: true,
+    enabled: false,
     priority: 95,
     city: 'Rio de Janeiro',
     notes:
-      'Fonte institucional Brix. Manter ativa mesmo quando uma varredura apresentar falha de conexão.',
+      'Fonte temporariamente desativada porque o servidor recusou a conexão automatizada da Vercel em 2026-08-26. Manter a URL para futura validação e reativação.',
     followExternalLinks: false,
   },
 

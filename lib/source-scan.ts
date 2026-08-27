@@ -464,6 +464,9 @@ async function fetchGatewayHtml(
       redirect:
         'follow',
 
+      signal:
+        AbortSignal.timeout(15_000),
+
       headers: {
         Accept:
           'text/html,application/xhtml+xml',

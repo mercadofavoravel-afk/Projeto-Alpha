@@ -1083,6 +1083,7 @@ async function fetchHtml(
     await fetch(url, {
       cache: 'no-store',
       redirect: 'follow',
+      signal: AbortSignal.timeout(15_000),
 
       headers: {
         Accept:

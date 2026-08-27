@@ -145,6 +145,18 @@ export async function GET(
           160,
         );
 
+    const minScore =
+      Math.max(
+        0,
+        Math.min(
+          Number.parseInt(
+            url.searchParams.get('minScore') ?? '0',
+            10,
+          ) || 0,
+          100,
+        ),
+      );
+
     const page =
       parsePositiveInteger(
         url.searchParams.get(
@@ -173,6 +185,14 @@ export async function GET(
       ...(kind !== 'ALL'
         ? {
             kind,
+          }
+        : {}),
+
+      ...(minScore > 0
+        ? {
+            score: {
+              gte: minScore,
+            },
           }
         : {}),
 
@@ -360,6 +380,7 @@ export async function GET(
         status,
         kind,
         search,
+        minScore,
       },
 
       pagination: {

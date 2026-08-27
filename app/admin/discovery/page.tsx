@@ -52,6 +52,7 @@ type ApiResponse = {
     status: CandidateStatus | 'ALL';
     kind: CandidateKind | 'ALL';
     search: string;
+    minScore: number;
   };
 
   pagination?: {
@@ -250,6 +251,11 @@ export default function DiscoveryPage() {
   ] = useState('');
 
   const [
+    minScore,
+    setMinScore,
+  ] = useState(40);
+
+  const [
     page,
     setPage,
   ] = useState(1);
@@ -269,6 +275,8 @@ export default function DiscoveryPage() {
                 String(page),
               pageSize:
                 '30',
+              minScore:
+                String(minScore),
             });
 
           if (search) {
@@ -318,6 +326,7 @@ export default function DiscoveryPage() {
         status,
         kind,
         search,
+        minScore,
         page,
       ],
     );
@@ -763,6 +772,21 @@ export default function DiscoveryPage() {
             <option value="ALL">
               Todos os status
             </option>
+          </select>
+
+          <select
+            value={minScore}
+            onChange={(event) => {
+              setPage(1);
+              setSelectedIds([]);
+              setMinScore(Number(event.target.value));
+            }}
+            aria-label="Pontuação mínima"
+          >
+            <option value={70}>Pontuação alta (70+)</option>
+            <option value={40}>Pontuação relevante (40+)</option>
+            <option value={20}>Pontuação ampliada (20+)</option>
+            <option value={0}>Todas as pontuações</option>
           </select>
 
           <select

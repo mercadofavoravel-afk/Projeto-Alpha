@@ -70,14 +70,14 @@ export const sourceRoots: SourceRoot[] = [
   {
     id: 'brix',
     name: 'Brix',
-    url: 'http://www.brixfii.com.br',
+    url: 'https://www.brixfii.com.br',
     kind: 'developer',
     access: 'website',
-    enabled: true,
+    enabled: false,
     priority: 95,
     city: 'Rio de Janeiro',
     notes:
-      'Fonte institucional Brix. Manter ativa mesmo quando uma varredura apresentar falha de conexão.',
+      'Fonte temporariamente desativada porque o servidor recusou a conexão automatizada da Vercel em 2026-08-26. Manter a URL para futura validação e reativação.',
     followExternalLinks: false,
   },
 
@@ -313,10 +313,10 @@ export const sourceRoots: SourceRoot[] = [
     url: 'https://drive.google.com/drive/folders/10Ct8-aeEgDP6JmIiWi7KSMBmAFnA60nK',
     kind: 'market',
     access: 'drive',
-    enabled: true,
+    enabled: false,
     priority: 85,
     notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+      'Fonte temporariamente desativada após retornar HTTP 404 em 2026-08-26. Manter o endereço para futura validação e reativação.',
     followExternalLinks: true,
   },
 
@@ -366,10 +366,10 @@ export const sourceRoots: SourceRoot[] = [
     url: 'https://drive.google.com/drive/folders/1cegnY7AtxN9enAyHIWJdjZSvcAZwLQHS?usp=sharing',
     kind: 'market',
     access: 'drive',
-    enabled: true,
+    enabled: false,
     priority: 85,
     notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+      'Fonte temporariamente desativada após retornar HTTP 404 em 2026-08-26. Manter o endereço para futura validação e reativação.',
     followExternalLinks: true,
   },
 
@@ -379,10 +379,10 @@ export const sourceRoots: SourceRoot[] = [
     url: 'https://drive.google.com/drive/folders/1reExO1trFYEouulaKMEozKne3W3SC2B2?usp=sharing',
     kind: 'market',
     access: 'drive',
-    enabled: true,
+    enabled: false,
     priority: 85,
     notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+      'Fonte temporariamente desativada após retornar HTTP 404 em 2026-08-26. Manter o endereço para futura validação e reativação.',
     followExternalLinks: true,
   },
 

@@ -53,6 +53,7 @@ type ApiResponse = {
     kind: CandidateKind | 'ALL';
     search: string;
     minScore: number;
+    market: 'RIO' | 'ALL';
   };
 
   pagination?: {
@@ -251,6 +252,11 @@ export default function DiscoveryPage() {
   ] = useState('');
 
   const [
+    market,
+    setMarket,
+  ] = useState<'RIO' | 'ALL'>('RIO');
+
+  const [
     minScore,
     setMinScore,
   ] = useState(40);
@@ -277,6 +283,7 @@ export default function DiscoveryPage() {
                 '30',
               minScore:
                 String(minScore),
+              market,
             });
 
           if (search) {
@@ -326,6 +333,7 @@ export default function DiscoveryPage() {
         status,
         kind,
         search,
+        market,
         minScore,
         page,
       ],
@@ -772,6 +780,19 @@ export default function DiscoveryPage() {
             <option value="ALL">
               Todos os status
             </option>
+          </select>
+
+          <select
+            value={market}
+            onChange={(event) => {
+              setPage(1);
+              setSelectedIds([]);
+              setMarket(event.target.value as 'RIO' | 'ALL');
+            }}
+            aria-label="Mercado"
+          >
+            <option value="RIO">Mercado do Rio de Janeiro</option>
+            <option value="ALL">Todas as regiões</option>
           </select>
 
           <select

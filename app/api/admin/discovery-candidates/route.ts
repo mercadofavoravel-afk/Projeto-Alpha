@@ -19,6 +19,7 @@ type CandidateKindFilter =
 
 type PatchBody = {
   id?: string;
+  ids?: string[];
   status?: DiscoveryCandidateStatus;
 };
 
@@ -433,10 +434,18 @@ export async function PATCH(
       (await request.json()) as
         PatchBody;
 
-    const id =
-      body.id?.trim();
+    const ids = Array.from(
+      new Set(
+        [
+          ...(Array.isArray(body.ids) ? body.ids : []),
+          ...(body.id ? [body.id] : []),
+        ]
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    ).slice(0, 100);
 
-    if (!id) {
+    if (ids.length === 0) {
       return NextResponse.json(
         {
           ok: false,
@@ -470,9 +479,11 @@ export async function PATCH(
     }
 
     const existing =
-      await db.discoveryCandidate.findUnique({
+      await db.discoveryCandidate.findMany({
         where: {
-          id,
+          id: {
+            in: ids,
+          },
         },
 
         select: {
@@ -481,7 +492,7 @@ export async function PATCH(
         },
       });
 
-    if (!existing) {
+    if (existing.length !== ids.length) {
       return NextResponse.json(
         {
           ok: false,
@@ -520,10 +531,12 @@ export async function PATCH(
     const now =
       new Date();
 
-    const candidate =
-      await db.discoveryCandidate.update({
+    const result =
+      await db.discoveryCandidate.updateMany({
         where: {
-          id,
+          id: {
+            in: ids,
+          },
         },
 
         data: {
@@ -540,7 +553,7 @@ export async function PATCH(
 
     return NextResponse.json({
       ok: true,
-      candidate,
+      updated: result.count,
     });
   } catch (error) {
     console.error(

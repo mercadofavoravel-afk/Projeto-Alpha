@@ -203,6 +203,11 @@ export default function DiscoveryPage() {
     );
 
   const [
+    selectedIds,
+    setSelectedIds,
+  ] = useState<string[]>([]);
+
+  const [
     data,
     setData,
   ] =
@@ -322,7 +327,7 @@ export default function DiscoveryPage() {
   }, [loadCandidates]);
 
   async function updateStatus(
-    id: string,
+    target: string | string[],
     nextStatus:
       | 'PENDING'
       | 'APPROVED'
@@ -332,7 +337,16 @@ export default function DiscoveryPage() {
       return;
     }
 
-    setActionId(id);
+    const candidateIds =
+      Array.isArray(target)
+        ? target
+        : [target];
+
+    if (candidateIds.length === 0) {
+      return;
+    }
+
+    setActionId(candidateIds.join(','));
     setError(null);
 
     try {
@@ -350,7 +364,7 @@ export default function DiscoveryPage() {
 
             body:
               JSON.stringify({
-                id,
+                ids: candidateIds,
                 status:
                   nextStatus,
               }),
@@ -373,6 +387,7 @@ export default function DiscoveryPage() {
         );
       }
 
+      setSelectedIds([]);
       await loadCandidates();
     } catch (
       updateError
@@ -386,6 +401,27 @@ export default function DiscoveryPage() {
     } finally {
       setActionId(null);
     }
+  }
+
+  function toggleCandidate(
+    id: string,
+  ) {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
+  }
+
+  function togglePageSelection() {
+    const pageIds = items.map((item) => item.id);
+    const allSelected = pageIds.every((id) => selectedIds.includes(id));
+
+    setSelectedIds(
+      allSelected
+        ? selectedIds.filter((id) => !pageIds.includes(id))
+        : Array.from(new Set([...selectedIds, ...pageIds])),
+    );
   }
 
   function submitSearch(
@@ -836,6 +872,38 @@ export default function DiscoveryPage() {
         )}
 
       {items.length > 0 && (
+        <section className="bulk-review">
+          <label>
+            <input
+              type="checkbox"
+              checked={items.every((item) => selectedIds.includes(item.id))}
+              onChange={togglePageSelection}
+            />
+            Selecionar os {items.length} itens desta página
+          </label>
+
+          <strong>{selectedIds.length} selecionados</strong>
+
+          <button
+            type="button"
+            disabled={selectedIds.length === 0 || Boolean(actionId)}
+            onClick={() => void updateStatus(selectedIds, 'APPROVED')}
+          >
+            Aprovar selecionados
+          </button>
+
+          <button
+            type="button"
+            className="secondary"
+            disabled={selectedIds.length === 0 || Boolean(actionId)}
+            onClick={() => void updateStatus(selectedIds, 'REJECTED')}
+          >
+            Rejeitar selecionados
+          </button>
+        </section>
+      )}
+
+      {items.length > 0 && (
         <section className="candidate-list">
           <div className="list-head">
             <div>
@@ -872,6 +940,15 @@ export default function DiscoveryPage() {
                   className="candidate-card"
                 >
                   <div className="candidate-main">
+                    <label className="candidate-select">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(candidate.id)}
+                        onChange={() => toggleCandidate(candidate.id)}
+                      />
+                      Selecionar candidato
+                    </label>
+
                     <div className="candidate-top">
                       <div className="badges">
                         <span className="kind-badge">
@@ -1284,6 +1361,38 @@ export default function DiscoveryPage() {
 
         .empty p {
           margin: 8px 0 0;
+        }
+
+        .bulk-review {
+          margin-top: 22px;
+          padding: 18px 20px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+          background: #f7f3ec;
+          border: 1px solid #ded5c8;
+        }
+
+        .bulk-review label {
+          display: flex;
+          gap: 9px;
+          align-items: center;
+          margin-right: auto;
+        }
+
+        .bulk-review button {
+          min-height: 40px;
+          padding: 0 16px;
+        }
+
+        .candidate-select {
+          display: inline-flex;
+          gap: 8px;
+          align-items: center;
+          margin-bottom: 14px;
+          color: #657075;
+          font-size: 12px;
         }
 
         .candidate-list {

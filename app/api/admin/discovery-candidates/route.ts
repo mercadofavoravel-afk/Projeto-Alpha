@@ -145,6 +145,36 @@ export async function GET(
           160,
         );
 
+    const market =
+      url.searchParams.get('market') === 'ALL'
+        ? 'ALL'
+        : 'RIO';
+
+    const rioTerms = [
+      'rio de janeiro',
+      '/rj/',
+      'barra da tijuca',
+      'barra-da-tijuca',
+      'recreio',
+      'ipanema',
+      'leblon',
+      'copacabana',
+      'botafogo',
+      'flamengo',
+      'laranjeiras',
+      'gloria',
+      'sao conrado',
+      'sao-conrado',
+      'gavea',
+      'lagoa',
+      'jardim botanico',
+      'jardim-botanico',
+      'jardim oceanico',
+      'jardim-oceanico',
+      'peninsula',
+      'arpoador',
+    ];
+
     const minScore =
       Math.max(
         0,
@@ -185,6 +215,29 @@ export async function GET(
       ...(kind !== 'ALL'
         ? {
             kind,
+          }
+        : {}),
+
+      ...(market === 'RIO'
+        ? {
+            AND: [
+              {
+                OR: rioTerms.flatMap((term) => [
+                  {
+                    title: {
+                      contains: term,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                  {
+                    url: {
+                      contains: term,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                ]),
+              },
+            ],
           }
         : {}),
 
@@ -381,6 +434,7 @@ export async function GET(
         kind,
         search,
         minScore,
+        market,
       },
 
       pagination: {

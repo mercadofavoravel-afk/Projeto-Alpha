@@ -904,6 +904,43 @@ function buildResult(
   };
 }
 
+async function scanRootWithTimeout(
+  root: SourceRoot,
+  options: ResolvedScanOptions,
+) {
+  let timeout:
+    ReturnType<typeof setTimeout> |
+    undefined;
+
+  try {
+    return await Promise.race([
+      scanRoot(
+        root,
+        options,
+      ),
+
+      new Promise<never>(
+        (_, reject) => {
+          timeout =
+            setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    'A fonte excedeu o limite de 20 segundos.',
+                  ),
+                ),
+              20_000,
+            );
+        },
+      ),
+    ]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 async function scanRoots(
   roots: SourceRoot[],
   options: ResolvedScanOptions,
@@ -921,24 +958,37 @@ async function scanRoots(
   let externalTargetsScanned =
     0;
 
-  for (
-    const root of roots
-  ) {
-    try {
-      const rootResult =
-        await scanRoot(
-          root,
-          options,
+  const settled =
+    await Promise.allSettled(
+      roots.map(
+        (root) =>
+          scanRootWithTimeout(
+            root,
+            options,
+          ),
+      ),
+    );
+
+  settled.forEach(
+    (result, index) => {
+      const root =
+        roots[index];
+
+      if (
+        result.status ===
+        'fulfilled'
+      ) {
+        externalTargetsScanned +=
+          result.value
+            .externalTargetsScanned;
+
+        allItems.push(
+          ...result.value.items,
         );
 
-      externalTargetsScanned +=
-        rootResult
-          .externalTargetsScanned;
+        return;
+      }
 
-      allItems.push(
-        ...rootResult.items,
-      );
-    } catch (error) {
       errors.push({
         sourceRootId:
           root.id,
@@ -950,12 +1000,12 @@ async function scanRoots(
           root.url,
 
         message:
-          error instanceof Error
-            ? error.message
+          result.reason instanceof Error
+            ? result.reason.message
             : 'Erro desconhecido durante a varredura.',
       });
-    }
-  }
+    },
+  );
 
   return buildResult(
     startedAt,

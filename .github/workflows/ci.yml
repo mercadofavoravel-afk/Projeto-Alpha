@@ -85,13 +85,7 @@ jobs:
             exit 0
           fi
 
-          npx prettier --write "${files[@]}"
-
-          if ! git diff --quiet -- "${files[@]}"; then
-            echo "Arquivos fora do padrão de formatação:"
-            git diff -- "${files[@]}"
-            exit 1
-          fi
+          npx prettier --check "${files[@]}"
 
       - name: TypeScript check
         run: npm run typecheck

@@ -1,4 +1,3 @@
-../../../tmp/projeto-alpha-source-scan.ts 200ms
 import "server-only";
 
 import { isGoogleDriveGatewayUrl, isSameNormalizedUrl } from "@/lib/source-url";

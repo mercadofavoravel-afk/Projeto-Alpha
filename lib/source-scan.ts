@@ -539,7 +539,7 @@ function buildResult(
 
 async function scanRootWithTimeout(root: SourceRoot, options: ResolvedScanOptions) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
-  const timeoutMs = EXTENDED_TIMEOUT_SOURCE_IDS.has(root.id) ? 35_000 : 20_000;
+  const timeoutMs = EXTENDED_TIMEOUT_SOURCE_IDS.has(root.id) ? 30_000 : 20_000;
   const timeoutSeconds = timeoutMs / 1_000;
 
   try {

@@ -52,6 +52,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -71,7 +73,19 @@ jobs:
         run: npx prisma db push --schema=prisma/schema.prisma --skip-generate
 
       - name: Format check
-        run: npm run format:check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$GITHUB_SHA" --               '*.js' '*.jsx' '*.ts' '*.tsx' '*.json' '*.css' '*.md' '*.yml' '*.yaml'
+          )
+
+          if (( ${#files[@]} == 0 )); then
+            echo "Nenhum arquivo formatável foi alterado."
+            exit 0
+          fi
+
+          npx prettier --check "${files[@]}"
 
       - name: TypeScript check
         run: npm run typecheck

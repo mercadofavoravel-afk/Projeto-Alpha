@@ -1,16 +1,16 @@
-import "server-only";
+import 'server-only';
 
-import { isGoogleDriveGatewayUrl, isSameNormalizedUrl } from "@/lib/source-url";
+import { isGoogleDriveGatewayUrl, isSameNormalizedUrl } from '@/lib/source-url';
 
-import { discoverSources, type DiscoveredSource } from "@/lib/source-discovery";
+import { discoverSources, type DiscoveredSource } from '@/lib/source-discovery';
 
-import { getEnabledSourceRoots, type SourceRoot } from "@/lib/source-roots";
+import { getEnabledSourceRoots, type SourceRoot } from '@/lib/source-roots';
 
 export type SourceScanItem = DiscoveredSource & {
   sourceRootId: string;
   sourceRootName: string;
   sourceRootUrl: string;
-  sourceRootKind: SourceRoot["kind"];
+  sourceRootKind: SourceRoot['kind'];
   priority: number;
   discoveredViaUrl?: string;
   discoveredFromExternal?: boolean;
@@ -74,48 +74,45 @@ type ResolvedScanOptions = {
 };
 
 const BLOCKED_EXTERNAL_HOSTS = [
-  "instagram.com",
-  "facebook.com",
-  "linkedin.com",
-  "tiktok.com",
-  "twitter.com",
-  "x.com",
-  "wa.me",
-  "whatsapp.com",
-  "api.whatsapp.com",
-  "telegram.me",
-  "t.me",
-  "spotify.com",
-  "music.apple.com",
+  'instagram.com',
+  'facebook.com',
+  'linkedin.com',
+  'tiktok.com',
+  'twitter.com',
+  'x.com',
+  'wa.me',
+  'whatsapp.com',
+  'api.whatsapp.com',
+  'telegram.me',
+  't.me',
+  'spotify.com',
+  'music.apple.com',
 ];
 
 const TECHNICAL_HOSTS = [
-  "google.com",
-  "accounts.google.com",
-  "support.google.com",
-  "policies.google.com",
-  "gstatic.com",
-  "googleusercontent.com",
-  "doubleclick.net",
+  'google.com',
+  'accounts.google.com',
+  'support.google.com',
+  'policies.google.com',
+  'gstatic.com',
+  'googleusercontent.com',
+  'doubleclick.net',
 ];
 
 const LIMITED_SOURCE_IDS = new Set([
-  "imoveis-alto-padrao-rio",
-  "mozak",
-  "piimo",
-  "comercial-calper",
+  'imoveis-alto-padrao-rio',
+  'mozak',
+  'piimo',
+  'comercial-calper',
 ]);
 
 function normalizeHost(hostname: string) {
-  return hostname.toLowerCase().replace(/^www\./, "");
+  return hostname.toLowerCase().replace(/^www\./, '');
 }
 
 function sameHost(first: string, second: string) {
   try {
-    return (
-      normalizeHost(new URL(first).hostname) ===
-      normalizeHost(new URL(second).hostname)
-    );
+    return normalizeHost(new URL(first).hostname) === normalizeHost(new URL(second).hostname);
   } catch {
     return false;
   }
@@ -125,29 +122,29 @@ function normalizeGatewayUrl(value: string, baseUrl?: string) {
   try {
     const url = baseUrl ? new URL(value, baseUrl) : new URL(value);
 
-    if (!["http:", "https:"].includes(url.protocol)) {
+    if (!['http:', 'https:'].includes(url.protocol)) {
       return null;
     }
 
-    url.hash = "";
+    url.hash = '';
 
     for (const key of [
-      "utm_source",
-      "utm_medium",
-      "utm_campaign",
-      "utm_term",
-      "utm_content",
-      "fbclid",
-      "gclid",
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'utm_term',
+      'utm_content',
+      'fbclid',
+      'gclid',
     ]) {
       url.searchParams.delete(key);
     }
 
-    if (url.hostname.startsWith("www.")) {
+    if (url.hostname.startsWith('www.')) {
       url.hostname = url.hostname.slice(4);
     }
 
-    if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
+    if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
       url.pathname = url.pathname.slice(0, -1);
     }
 
@@ -159,22 +156,22 @@ function normalizeGatewayUrl(value: string, baseUrl?: string) {
 
 function decodeHtml(value: string) {
   return value
-    .replace(/&amp;/gi, "&")
+    .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ')
     .trim();
 }
 
 function stripHtml(value: string) {
   return decodeHtml(
     value
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " "),
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' '),
   );
 }
 
@@ -184,29 +181,17 @@ function isBlockedExternalUrl(value: string) {
 
     const hostname = normalizeHost(url.hostname);
 
-    if (
-      BLOCKED_EXTERNAL_HOSTS.some(
-        (host) => hostname === host || hostname.endsWith(`.${host}`),
-      )
-    ) {
+    if (BLOCKED_EXTERNAL_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) {
       return true;
     }
 
-    if (
-      TECHNICAL_HOSTS.some(
-        (host) => hostname === host || hostname.endsWith(`.${host}`),
-      )
-    ) {
+    if (TECHNICAL_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) {
       return true;
     }
 
     const pathname = url.pathname.toLowerCase();
 
-    if (
-      /\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff|woff2|ttf|zip|rar|7z)$/i.test(
-        pathname,
-      )
-    ) {
+    if (/\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff|woff2|ttf|zip|rar|7z)$/i.test(pathname)) {
       return true;
     }
 
@@ -260,9 +245,9 @@ function extractAbsoluteUrls(html: string) {
 
   for (const rawValue of matches) {
     const decoded = rawValue
-      .replace(/\\u002F/gi, "/")
-      .replace(/\\\//g, "/")
-      .replace(/\\u0026/gi, "&");
+      .replace(/\\u002F/gi, '/')
+      .replace(/\\\//g, '/')
+      .replace(/\\u0026/gi, '&');
 
     const normalized = normalizeGatewayUrl(decoded);
 
@@ -301,17 +286,17 @@ function uniqueGatewayLinks(links: GatewayLink[]) {
 
 async function fetchGatewayHtml(url: string) {
   const response = await fetch(url, {
-    cache: "no-store",
+    cache: 'no-store',
 
-    redirect: "follow",
+    redirect: 'follow',
 
     signal: AbortSignal.timeout(15_000),
 
     headers: {
-      Accept: "text/html,application/xhtml+xml",
+      Accept: 'text/html,application/xhtml+xml',
 
-      "User-Agent":
-        "Mozilla/5.0 (compatible; ProjetoAlphaIntelligence/1.0; +https://imoveisdealtopadraorio.com.br)",
+      'User-Agent':
+        'Mozilla/5.0 (compatible; ProjetoAlphaIntelligence/1.0; +https://imoveisdealtopadraorio.com.br)',
     },
   });
 
@@ -319,10 +304,10 @@ async function fetchGatewayHtml(url: string) {
     throw new Error(`Gateway respondeu com HTTP ${response.status}.`);
   }
 
-  const contentType = response.headers.get("content-type") ?? "";
+  const contentType = response.headers.get('content-type') ?? '';
 
-  if (!contentType.toLowerCase().includes("text/html")) {
-    throw new Error("Gateway não retornou HTML navegável.");
+  if (!contentType.toLowerCase().includes('text/html')) {
+    throw new Error('Gateway não retornou HTML navegável.');
   }
 
   return response.text();
@@ -342,8 +327,7 @@ async function discoverGatewayTargets(root: SourceRoot, limit: number) {
 
     if (
       internal &&
-      (!isGoogleDriveGatewayUrl(root.url) ||
-        isSameNormalizedUrl(root.url, link.url))
+      (!isGoogleDriveGatewayUrl(root.url) || isSameNormalizedUrl(root.url, link.url))
     ) {
       return false;
     }
@@ -389,7 +373,7 @@ function uniqueItems(items: SourceScanItem[]) {
   const seen = new Set<string>();
 
   return items.filter((item) => {
-    const key = item.url.trim().toLocaleLowerCase("pt-BR");
+    const key = item.url.trim().toLocaleLowerCase('pt-BR');
 
     if (seen.has(key)) {
       return false;
@@ -415,10 +399,7 @@ function sortItems(items: SourceScanItem[]) {
 
 function resolveScanOptions(options: ScanOptions): ResolvedScanOptions {
   return {
-    maxPagesPerSource: Math.max(
-      1,
-      Math.min(options.maxPagesPerSource ?? 40, 100),
-    ),
+    maxPagesPerSource: Math.max(1, Math.min(options.maxPagesPerSource ?? 40, 100)),
 
     maxDepth: Math.max(0, Math.min(options.maxDepth ?? 2, 4)),
 
@@ -427,10 +408,7 @@ function resolveScanOptions(options: ScanOptions): ResolvedScanOptions {
       Math.min(options.maxExternalTargetsPerSource ?? 8, 20),
     ),
 
-    maxPagesPerExternalTarget: Math.max(
-      1,
-      Math.min(options.maxPagesPerExternalTarget ?? 12, 30),
-    ),
+    maxPagesPerExternalTarget: Math.max(1, Math.min(options.maxPagesPerExternalTarget ?? 12, 30)),
 
     maxExternalDepth: Math.max(0, Math.min(options.maxExternalDepth ?? 1, 2)),
   };
@@ -448,14 +426,8 @@ async function scanRoot(root: SourceRoot, options: ResolvedScanOptions) {
         ...options,
         maxPagesPerSource: Math.min(options.maxPagesPerSource, 10),
         maxDepth: Math.min(options.maxDepth, 1),
-        maxExternalTargetsPerSource: Math.min(
-          options.maxExternalTargetsPerSource,
-          3,
-        ),
-        maxPagesPerExternalTarget: Math.min(
-          options.maxPagesPerExternalTarget,
-          4,
-        ),
+        maxExternalTargetsPerSource: Math.min(options.maxExternalTargetsPerSource, 3),
+        maxPagesPerExternalTarget: Math.min(options.maxPagesPerExternalTarget, 4),
         maxExternalDepth: 0,
       }
     : options;
@@ -495,7 +467,7 @@ async function scanRoot(root: SourceRoot, options: ResolvedScanOptions) {
   );
 
   for (const result of externalResults) {
-    if (result.status !== "fulfilled") {
+    if (result.status !== 'fulfilled') {
       continue;
     }
 
@@ -528,21 +500,17 @@ function buildResult(
 ): SourceScanResult {
   const items = uniqueItems(allItems);
 
-  const projects = sortItems(items.filter((item) => item.kind === "project"));
+  const projects = sortItems(items.filter((item) => item.kind === 'project'));
 
-  const neighborhoods = sortItems(
-    items.filter((item) => item.kind === "neighborhood"),
-  );
+  const neighborhoods = sortItems(items.filter((item) => item.kind === 'neighborhood'));
 
-  const documents = sortItems(items.filter((item) => item.kind === "document"));
+  const documents = sortItems(items.filter((item) => item.kind === 'document'));
 
-  const articles = sortItems(items.filter((item) => item.kind === "article"));
+  const articles = sortItems(items.filter((item) => item.kind === 'article'));
 
-  const developers = sortItems(
-    items.filter((item) => item.kind === "developer"),
-  );
+  const developers = sortItems(items.filter((item) => item.kind === 'developer'));
 
-  const other = sortItems(items.filter((item) => item.kind === "other"));
+  const other = sortItems(items.filter((item) => item.kind === 'other'));
 
   return {
     startedAt,
@@ -565,10 +533,7 @@ function buildResult(
   };
 }
 
-async function scanRootWithTimeout(
-  root: SourceRoot,
-  options: ResolvedScanOptions,
-) {
+async function scanRootWithTimeout(root: SourceRoot, options: ResolvedScanOptions) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
 
   try {
@@ -577,7 +542,7 @@ async function scanRootWithTimeout(
 
       new Promise<never>((_, reject) => {
         timeout = setTimeout(
-          () => reject(new Error("A fonte excedeu o limite de 20 segundos.")),
+          () => reject(new Error('A fonte excedeu o limite de 20 segundos.')),
           20_000,
         );
       }),
@@ -598,14 +563,12 @@ async function scanRoots(roots: SourceRoot[], options: ResolvedScanOptions) {
 
   let externalTargetsScanned = 0;
 
-  const settled = await Promise.allSettled(
-    roots.map((root) => scanRootWithTimeout(root, options)),
-  );
+  const settled = await Promise.allSettled(roots.map((root) => scanRootWithTimeout(root, options)));
 
   settled.forEach((result, index) => {
     const root = roots[index];
 
-    if (result.status === "fulfilled") {
+    if (result.status === 'fulfilled') {
       externalTargetsScanned += result.value.externalTargetsScanned;
 
       allItems.push(...result.value.items);
@@ -623,35 +586,21 @@ async function scanRoots(roots: SourceRoot[], options: ResolvedScanOptions) {
       message:
         result.reason instanceof Error
           ? result.reason.message
-          : "Erro desconhecido durante a varredura.",
+          : 'Erro desconhecido durante a varredura.',
     });
   });
 
-  return buildResult(
-    startedAt,
-    roots,
-    allItems,
-    errors,
-    externalTargetsScanned,
-  );
+  return buildResult(startedAt, roots, allItems, errors, externalTargetsScanned);
 }
 
-export async function scanSourceBatch(
-  options: BatchOptions = {},
-): Promise<SourceScanBatchResult> {
+export async function scanSourceBatch(options: BatchOptions = {}): Promise<SourceScanBatchResult> {
   const allRoots = getEnabledSourceRoots();
 
   const totalSources = allRoots.length;
 
-  const cursor = Math.max(
-    0,
-    Math.min(Math.floor(options.cursor ?? 0), totalSources),
-  );
+  const cursor = Math.max(0, Math.min(Math.floor(options.cursor ?? 0), totalSources));
 
-  const batchSize = Math.max(
-    1,
-    Math.min(Math.floor(options.batchSize ?? 3), 5),
-  );
+  const batchSize = Math.max(1, Math.min(Math.floor(options.batchSize ?? 3), 5));
 
   const batchRoots = allRoots.slice(cursor, cursor + batchSize);
 
@@ -680,9 +629,7 @@ export async function scanSourceBatch(
   };
 }
 
-export async function scanAllSources(
-  options: ScanOptions = {},
-): Promise<SourceScanResult> {
+export async function scanAllSources(options: ScanOptions = {}): Promise<SourceScanResult> {
   const roots = getEnabledSourceRoots();
 
   const resolvedOptions = resolveScanOptions(options);

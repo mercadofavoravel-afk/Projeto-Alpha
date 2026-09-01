@@ -1231,10 +1231,15 @@ export async function discoverSources(
       continue;
     }
 
-    const html =
-      await fetchHtml(
+    let html: string | null;
+
+    try {
+      html = await fetchHtml(
         current.url,
       );
+    } catch {
+      continue;
+    }
 
     if (!html) {
       continue;

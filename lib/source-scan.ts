@@ -112,6 +112,14 @@ const TECHNICAL_HOSTS = [
   'doubleclick.net',
 ];
 
+const LIMITED_SOURCE_IDS =
+  new Set([
+    'imoveis-alto-padrao-rio',
+    'mozak',
+    'piimo',
+    'comercial-calper',
+  ]);
+
 function normalizeHost(
   hostname: string,
 ) {
@@ -719,15 +727,49 @@ async function scanRoot(
   let externalTargetsScanned =
     0;
 
+  const limited =
+    LIMITED_SOURCE_IDS.has(
+      root.id,
+    );
+
+  const sourceOptions:
+    ResolvedScanOptions =
+      limited
+        ? {
+            ...options,
+            maxPagesPerSource:
+              Math.min(
+                options.maxPagesPerSource,
+                10,
+              ),
+            maxDepth:
+              Math.min(
+                options.maxDepth,
+                1,
+              ),
+            maxExternalTargetsPerSource:
+              Math.min(
+                options.maxExternalTargetsPerSource,
+                3,
+              ),
+            maxPagesPerExternalTarget:
+              Math.min(
+                options.maxPagesPerExternalTarget,
+                4,
+              ),
+            maxExternalDepth: 0,
+          }
+        : options;
+
   const direct =
     await discoverSources(
       root.url,
       {
         maxPages:
-          options.maxPagesPerSource,
+          sourceOptions.maxPagesPerSource,
 
         maxDepth:
-          options.maxDepth,
+          sourceOptions.maxDepth,
       },
     );
 
@@ -756,52 +798,60 @@ async function scanRoot(
   const gatewayTargets =
     await discoverGatewayTargets(
       root,
-      options.maxExternalTargetsPerSource,
+      sourceOptions.maxExternalTargetsPerSource,
+    );
+
+  const externalResults =
+    await Promise.allSettled(
+      gatewayTargets.map(
+        async (target) => ({
+          target,
+          discovered:
+            await discoverSources(
+              target.url,
+              {
+                maxPages:
+                  sourceOptions.maxPagesPerExternalTarget,
+
+                maxDepth:
+                  sourceOptions.maxExternalDepth,
+              },
+            ),
+        }),
+      ),
     );
 
   for (
-    const target of
-    gatewayTargets
+    const result of
+    externalResults
   ) {
-    try {
-      const discovered =
-        await discoverSources(
-          target.url,
+    if (
+      result.status !==
+      'fulfilled'
+    ) {
+      continue;
+    }
+
+    externalTargetsScanned +=
+      1;
+
+    for (
+      const item of
+      result.value.discovered
+    ) {
+      collected.push(
+        toScanItem(
+          item,
+          root,
           {
-            maxPages:
-              options.maxPagesPerExternalTarget,
+            discoveredViaUrl:
+              result.value.target.url,
 
-            maxDepth:
-              options.maxExternalDepth,
+            discoveredFromExternal:
+              true,
           },
-        );
-
-      externalTargetsScanned +=
-        1;
-
-      for (
-        const item of
-        discovered
-      ) {
-        collected.push(
-          toScanItem(
-            item,
-            root,
-            {
-              discoveredViaUrl:
-                target.url,
-
-              discoveredFromExternal:
-                true,
-            },
-          ),
-        );
-      }
-    } catch {
-      /*
-       * Um destino externo individual
-       * nunca deve interromper a fonte.
-       */
+        ),
+      );
     }
   }
 

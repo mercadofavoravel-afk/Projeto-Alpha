@@ -1,19 +1,11 @@
 import 'server-only';
 
-import {
-  isGoogleWorkspaceDocumentUrl,
-} from '@/lib/source-url';
+import { isGoogleWorkspaceDocumentUrl } from '@/lib/source-url';
 
 export type DiscoveredSource = {
   url: string;
   title: string | null;
-  kind:
-    | 'project'
-    | 'neighborhood'
-    | 'developer'
-    | 'article'
-    | 'document'
-    | 'other';
+  kind: 'project' | 'neighborhood' | 'developer' | 'article' | 'document' | 'other';
   score: number;
 };
 
@@ -291,20 +283,11 @@ function normalizeText(value: string) {
     .trim();
 }
 
-function normalizeUrl(
-  value: string,
-  base?: string,
-) {
+function normalizeUrl(value: string, base?: string) {
   try {
-    const url = base
-      ? new URL(value, base)
-      : new URL(value);
+    const url = base ? new URL(value, base) : new URL(value);
 
-    if (
-      !['http:', 'https:'].includes(
-        url.protocol,
-      )
-    ) {
+    if (!['http:', 'https:'].includes(url.protocol)) {
       return null;
     }
 
@@ -314,18 +297,10 @@ function normalizeUrl(
       url.searchParams.delete(key);
     }
 
-    url.hostname =
-      url.hostname.replace(
-        /^www\./,
-        '',
-      );
+    url.hostname = url.hostname.replace(/^www\./, '');
 
-    if (
-      url.pathname.length > 1 &&
-      url.pathname.endsWith('/')
-    ) {
-      url.pathname =
-        url.pathname.slice(0, -1);
+    if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+      url.pathname = url.pathname.slice(0, -1);
     }
 
     return url.toString();
@@ -336,81 +311,41 @@ function normalizeUrl(
 
 function getHostname(url: string) {
   try {
-    return new URL(url)
-      .hostname
-      .replace(/^www\./, '')
-      .toLowerCase();
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
   } catch {
     return '';
   }
 }
 
-function hostMatches(
-  hostname: string,
-  hosts: string[],
-) {
-  return hosts.some(
-    (host) =>
-      hostname === host ||
-      hostname.endsWith(`.${host}`),
-  );
+function hostMatches(hostname: string, hosts: string[]) {
+  return hosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
 }
 
-function sameHost(
-  root: URL,
-  candidate: string,
-) {
-  const rootHost =
-    root.hostname
-      .replace(/^www\./, '')
-      .toLowerCase();
+function sameHost(root: URL, candidate: string) {
+  const rootHost = root.hostname.replace(/^www\./, '').toLowerCase();
 
-  const candidateHost =
-    getHostname(candidate);
+  const candidateHost = getHostname(candidate);
 
-  return (
-    !!candidateHost &&
-    rootHost === candidateHost
-  );
+  return !!candidateHost && rootHost === candidateHost;
 }
 
 function isGatewayHost(url: string) {
-  return hostMatches(
-    getHostname(url),
-    GATEWAY_HOSTS,
-  );
+  return hostMatches(getHostname(url), GATEWAY_HOSTS);
 }
 
 function isTechnicalHost(url: string) {
-  return hostMatches(
-    getHostname(url),
-    TECHNICAL_HOSTS,
-  );
+  return hostMatches(getHostname(url), TECHNICAL_HOSTS);
 }
 
-function isTrustedExternalHost(
-  url: string,
-) {
-  return hostMatches(
-    getHostname(url),
-    TRUSTED_EXTERNAL_HOSTS,
-  );
+function isTrustedExternalHost(url: string) {
+  return hostMatches(getHostname(url), TRUSTED_EXTERNAL_HOSTS);
 }
 
 function isHardExcluded(url: string) {
   try {
-    const path =
-      new URL(url)
-        .pathname
-        .toLowerCase();
+    const path = new URL(url).pathname.toLowerCase();
 
-    return HARD_EXCLUDED_PATHS.some(
-      (item) =>
-        path === item ||
-        path.startsWith(
-          `${item}/`,
-        ),
-    );
+    return HARD_EXCLUDED_PATHS.some((item) => path === item || path.startsWith(`${item}/`));
   } catch {
     return true;
   }
@@ -418,10 +353,7 @@ function isHardExcluded(url: string) {
 
 function isStaticAsset(url: string) {
   try {
-    const pathname =
-      new URL(url)
-        .pathname
-        .toLowerCase();
+    const pathname = new URL(url).pathname.toLowerCase();
 
     return /\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff|woff2|ttf|mp4|webm|mov|zip|rar|7z|xml)$/i.test(
       pathname,
@@ -432,18 +364,12 @@ function isStaticAsset(url: string) {
 }
 
 function isDocumentUrl(url: string) {
-  if (
-    isGoogleWorkspaceDocumentUrl(
-      url,
-    )
-  ) {
+  if (isGoogleWorkspaceDocumentUrl(url)) {
     return true;
   }
 
   try {
-    return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i.test(
-      new URL(url).pathname,
-    );
+    return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i.test(new URL(url).pathname);
   } catch {
     return false;
   }
@@ -451,18 +377,9 @@ function isDocumentUrl(url: string) {
 
 function stripHtml(value: string) {
   return value
-    .replace(
-      /<script[\s\S]*?<\/script>/gi,
-      ' ',
-    )
-    .replace(
-      /<style[\s\S]*?<\/style>/gi,
-      ' ',
-    )
-    .replace(
-      /<noscript[\s\S]*?<\/noscript>/gi,
-      ' ',
-    )
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
@@ -473,41 +390,26 @@ function stripHtml(value: string) {
 }
 
 function extractTitle(html: string) {
-  const match =
-    html.match(
-      /<title[^>]*>([\s\S]*?)<\/title>/i,
-    );
+  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
 
   if (!match?.[1]) {
     return null;
   }
 
-  const title =
-    stripHtml(match[1]);
+  const title = stripHtml(match[1]);
 
   return title || null;
 }
 
-function extractLinks(
-  html: string,
-  baseUrl: string,
-) {
+function extractLinks(html: string, baseUrl: string) {
   const links: string[] = [];
 
-  const regex =
-    /<a\s[^>]*href=["']([^"']+)["'][^>]*>/gi;
+  const regex = /<a\s[^>]*href=["']([^"']+)["'][^>]*>/gi;
 
-  let match:
-    RegExpExecArray | null;
+  let match: RegExpExecArray | null;
 
-  while (
-    (match = regex.exec(html))
-  ) {
-    const normalized =
-      normalizeUrl(
-        match[1],
-        baseUrl,
-      );
+  while ((match = regex.exec(html))) {
+    const normalized = normalizeUrl(match[1], baseUrl);
 
     if (normalized) {
       links.push(normalized);
@@ -517,18 +419,13 @@ function extractLinks(
   return [...new Set(links)];
 }
 
-function getPathSegments(
-  url: string,
-) {
-  return new URL(url)
-    .pathname
+function getPathSegments(url: string) {
+  return new URL(url).pathname
     .split('/')
     .filter(Boolean)
     .map((segment) => {
       try {
-        return normalizeText(
-          decodeURIComponent(segment),
-        );
+        return normalizeText(decodeURIComponent(segment));
       } catch {
         return normalizeText(segment);
       }
@@ -540,158 +437,87 @@ function pathDepth(url: string) {
 }
 
 function getLastSegment(url: string) {
-  const segments =
-    getPathSegments(url);
+  const segments = getPathSegments(url);
 
-  return (
-    segments[
-      segments.length - 1
-    ] ?? ''
-  );
+  return segments[segments.length - 1] ?? '';
 }
 
-function containsAny(
-  text: string,
-  terms: string[],
-) {
-  return terms.some((term) =>
-    text.includes(
-      normalizeText(term),
-    ),
-  );
+function containsAny(text: string, terms: string[]) {
+  return terms.some((term) => text.includes(normalizeText(term)));
 }
 
-function countTerms(
-  text: string,
-  terms: string[],
-) {
-  return terms.filter((term) =>
-    text.includes(
-      normalizeText(term),
-    ),
-  ).length;
+function countTerms(text: string, terms: string[]) {
+  return terms.filter((term) => text.includes(normalizeText(term))).length;
 }
 
-function isNeighborhoodSegment(
-  segment: string,
-) {
-  return NEIGHBORHOOD_NAMES.some(
-    (term) =>
-      segment ===
-      normalizeText(term),
-  );
+function isNeighborhoodSegment(segment: string) {
+  return NEIGHBORHOOD_NAMES.some((term) => segment === normalizeText(term));
 }
 
-function isGenericListingPage(
-  url: string,
-) {
-  const segments =
-    getPathSegments(url);
+function isGenericListingPage(url: string) {
+  const segments = getPathSegments(url);
 
   if (segments.length === 0) {
     return true;
   }
 
-  const last =
-    segments[
-      segments.length - 1
-    ];
+  const last = segments[segments.length - 1];
 
-  if (
-    GENERIC_LISTING_SEGMENTS.has(last)
-  ) {
+  if (GENERIC_LISTING_SEGMENTS.has(last)) {
     return true;
   }
 
-  if (
-    segments.length <= 2 &&
-    segments.some((segment) =>
-      GENERIC_LISTING_SEGMENTS.has(
-        segment,
-      ),
-    )
-  ) {
+  if (segments.length <= 2 && segments.some((segment) => GENERIC_LISTING_SEGMENTS.has(segment))) {
     return true;
   }
 
   return false;
 }
 
-function hasProjectPathMarker(
-  url: string,
-) {
-  const path =
-    new URL(url)
-      .pathname
-      .toLowerCase();
+function hasProjectPathMarker(url: string) {
+  const path = new URL(url).pathname.toLowerCase();
 
-  return PROJECT_PATH_MARKERS.some(
-    (marker) =>
-      path.includes(marker),
-  );
+  return PROJECT_PATH_MARKERS.some((marker) => path.includes(marker));
 }
 
-function looksLikeSpecificProjectPath(
-  url: string,
-) {
-  const segments =
-    getPathSegments(url);
+function looksLikeSpecificProjectPath(url: string) {
+  const segments = getPathSegments(url);
 
   if (segments.length < 2) {
     return false;
   }
 
-  const last =
-    getLastSegment(url);
+  const last = getLastSegment(url);
 
-  if (
-    !last ||
-    last.length < 4 ||
-    GENERIC_LAST_SEGMENTS.has(last)
-  ) {
+  if (!last || last.length < 4 || GENERIC_LAST_SEGMENTS.has(last)) {
     return false;
   }
 
-  if (
-    segments.length >= 4 &&
-    !isNeighborhoodSegment(last)
-  ) {
+  if (segments.length >= 4 && !isNeighborhoodSegment(last)) {
     return true;
   }
 
-  if (
-    hasProjectPathMarker(url) &&
-    !isNeighborhoodSegment(last)
-  ) {
+  if (hasProjectPathMarker(url) && !isNeighborhoodSegment(last)) {
     return true;
   }
 
   return false;
 }
 
-function looksLikeAlphaProjectPage(
-  url: string,
-  titleText: string,
-) {
-  const hostname =
-    getHostname(url);
+function looksLikeAlphaProjectPage(url: string, titleText: string) {
+  const hostname = getHostname(url);
 
-  if (
-    hostname !==
-    'imoveisdealtopadraorio.com.br'
-  ) {
+  if (hostname !== 'imoveisdealtopadraorio.com.br') {
     return false;
   }
 
-  const segments =
-    getPathSegments(url);
+  const segments = getPathSegments(url);
 
   if (segments.length !== 1) {
     return false;
   }
 
-  const last =
-    getLastSegment(url);
+  const last = getLastSegment(url);
 
   if (
     !last ||
@@ -713,80 +539,43 @@ function looksLikeAlphaProjectPage(
    * O título público contém o contexto
    * imobiliário necessário para confirmar.
    */
-  return (
-    titleText.includes(
-      'imoveis lancamento',
-    ) ||
-    containsAny(
-      titleText,
-      PROJECT_WORDS,
-    )
-  );
+  return titleText.includes('imoveis lancamento') || containsAny(titleText, PROJECT_WORDS);
 }
 
-function isNeighborhoodLandingPage(
-  url: string,
-  titleText: string,
-) {
-  const segments =
-    getPathSegments(url);
+function isNeighborhoodLandingPage(url: string, titleText: string) {
+  const segments = getPathSegments(url);
 
-  const last =
-    getLastSegment(url);
+  const last = getLastSegment(url);
 
-  if (
-    !isNeighborhoodSegment(last)
-  ) {
+  if (!isNeighborhoodSegment(last)) {
     return false;
   }
 
-  if (
-    looksLikeSpecificProjectPath(url)
-  ) {
+  if (looksLikeSpecificProjectPath(url)) {
     return false;
   }
 
-  if (
-    titleText.includes('bairro')
-  ) {
+  if (titleText.includes('bairro')) {
     return true;
   }
 
   return segments.length <= 5;
 }
 
-function classifyDocument(
-  url: string,
-): Pick<
-  DiscoveredSource,
-  'kind' | 'score'
-> {
+function classifyDocument(url: string): Pick<DiscoveredSource, 'kind' | 'score'> {
   let pathname = '';
 
   try {
-    pathname =
-      decodeURIComponent(
-        new URL(url).pathname,
-      );
+    pathname = decodeURIComponent(new URL(url).pathname);
   } catch {
-    pathname =
-      new URL(url).pathname;
+    pathname = new URL(url).pathname;
   }
 
-  const text =
-    normalizeText(pathname);
+  const text = normalizeText(pathname);
 
-  const commercial =
-    countTerms(
-      text,
-      COMMERCIAL_DOCUMENT_TERMS,
-    );
+  const commercial = countTerms(text, COMMERCIAL_DOCUMENT_TERMS);
 
-  const institutional =
-    countTerms(
-      text,
-      INSTITUTIONAL_DOCUMENT_TERMS,
-    );
+  const institutional = countTerms(text, INSTITUTIONAL_DOCUMENT_TERMS);
 
   let score = 25;
 
@@ -797,36 +586,21 @@ function classifyDocument(
     score += 20;
   }
 
-  if (
-    text.includes('planta') ||
-    text.includes('implantacao')
-  ) {
+  if (text.includes('planta') || text.includes('implantacao')) {
     score += 20;
   }
 
-  if (
-    institutional > 0 &&
-    commercial === 0
-  ) {
+  if (institutional > 0 && commercial === 0) {
     score = 10;
   }
 
   return {
     kind: 'document',
-    score: Math.max(
-      10,
-      Math.min(score, 95),
-    ),
+    score: Math.max(10, Math.min(score, 95)),
   };
 }
 
-function classifyUrl(
-  url: string,
-  title: string | null,
-): Pick<
-  DiscoveredSource,
-  'kind' | 'score'
-> {
+function classifyUrl(url: string, title: string | null): Pick<DiscoveredSource, 'kind' | 'score'> {
   if (isTechnicalHost(url)) {
     return {
       kind: 'other',
@@ -838,29 +612,21 @@ function classifyUrl(
     return classifyDocument(url);
   }
 
-  const parsed =
-    new URL(url);
+  const parsed = new URL(url);
 
-  let decodedPath =
-    parsed.pathname;
+  let decodedPath = parsed.pathname;
 
   try {
-    decodedPath =
-      decodeURIComponent(
-        parsed.pathname,
-      );
+    decodedPath = decodeURIComponent(parsed.pathname);
   } catch {
     // mantém pathname original
   }
 
-  const pathText =
-    normalizeText(decodedPath);
+  const pathText = normalizeText(decodedPath);
 
-  const titleText =
-    normalizeText(title ?? '');
+  const titleText = normalizeText(title ?? '');
 
-  const fullText =
-    `${pathText} ${titleText}`;
+  const fullText = `${pathText} ${titleText}`;
 
   /*
    * Gateways são fontes intermediárias.
@@ -873,49 +639,29 @@ function classifyUrl(
     };
   }
 
-  if (
-    containsAny(
-      fullText,
-      STRONG_NEGATIVE_TERMS,
-    )
-  ) {
+  if (containsAny(fullText, STRONG_NEGATIVE_TERMS)) {
     return {
       kind: 'other',
       score: 5,
     };
   }
 
-  const isArticle =
-    parsed.pathname.includes(
-      '/blog/',
-    ) ||
-    containsAny(
-      fullText,
-      ARTICLE_TERMS,
-    );
+  const isArticle = parsed.pathname.includes('/blog/') || containsAny(fullText, ARTICLE_TERMS);
 
   if (isArticle) {
     let score = 55;
 
-    if (
-      parsed.pathname.includes(
-        '/blog/',
-      )
-    ) {
+    if (parsed.pathname.includes('/blog/')) {
       score += 15;
     }
 
-    if (
-      title &&
-      title.length >= 25
-    ) {
+    if (title && title.length >= 25) {
       score += 10;
     }
 
     return {
       kind: 'article',
-      score:
-        Math.min(score, 85),
+      score: Math.min(score, 85),
     };
   }
 
@@ -927,12 +673,7 @@ function classifyUrl(
    * /projetos/em-andamento
    */
   if (isGenericListingPage(url)) {
-    if (
-      containsAny(
-        fullText,
-        DEVELOPER_TERMS,
-      )
-    ) {
+    if (containsAny(fullText, DEVELOPER_TERMS)) {
       return {
         kind: 'developer',
         score: 35,
@@ -945,11 +686,7 @@ function classifyUrl(
     };
   }
 
-  const alphaProject =
-    looksLikeAlphaProjectPage(
-      url,
-      titleText,
-    );
+  const alphaProject = looksLikeAlphaProjectPage(url, titleText);
 
   if (alphaProject) {
     return {
@@ -958,19 +695,11 @@ function classifyUrl(
     };
   }
 
-  const depth =
-    pathDepth(url);
+  const depth = pathDepth(url);
 
-  const specificProject =
-    looksLikeSpecificProjectPath(
-      url,
-    );
+  const specificProject = looksLikeSpecificProjectPath(url);
 
-  const neighborhoodLanding =
-    isNeighborhoodLandingPage(
-      url,
-      titleText,
-    );
+  const neighborhoodLanding = isNeighborhoodLandingPage(url, titleText);
 
   /*
    * Produto específico vem antes
@@ -979,18 +708,11 @@ function classifyUrl(
   if (specificProject) {
     let score = 65;
 
-    if (
-      hasProjectPathMarker(url)
-    ) {
+    if (hasProjectPathMarker(url)) {
       score += 15;
     }
 
-    if (
-      containsAny(
-        fullText,
-        PROJECT_WORDS,
-      )
-    ) {
+    if (containsAny(fullText, PROJECT_WORDS)) {
       score += 10;
     }
 
@@ -1000,70 +722,41 @@ function classifyUrl(
 
     return {
       kind: 'project',
-      score:
-        Math.min(score, 100),
+      score: Math.min(score, 100),
     };
   }
 
   if (neighborhoodLanding) {
     return {
       kind: 'neighborhood',
-      score:
-        titleText.includes('bairro')
-          ? 55
-          : 45,
+      score: titleText.includes('bairro') ? 55 : 45,
     };
   }
 
-  if (
-    titleText.includes('colecao') ||
-    pathText.includes('colecao')
-  ) {
+  if (titleText.includes('colecao') || pathText.includes('colecao')) {
     return {
       kind: 'neighborhood',
       score: 40,
     };
   }
 
-  const projectSignals =
-    countTerms(
-      fullText,
-      PROJECT_WORDS,
-    );
+  const projectSignals = countTerms(fullText, PROJECT_WORDS);
 
-  if (
-    projectSignals >= 2 &&
-    depth >= 2
-  ) {
+  if (projectSignals >= 2 && depth >= 2) {
     return {
       kind: 'project',
-      score: Math.min(
-        45 +
-          projectSignals * 10,
-        80,
-      ),
+      score: Math.min(45 + projectSignals * 10, 80),
     };
   }
 
-  if (
-    containsAny(
-      fullText,
-      DEVELOPER_TERMS,
-    )
-  ) {
+  if (containsAny(fullText, DEVELOPER_TERMS)) {
     return {
       kind: 'developer',
       score: 45,
     };
   }
 
-  if (
-    containsAny(
-      fullText,
-      NEIGHBORHOOD_NAMES,
-    ) &&
-    depth <= 3
-  ) {
+  if (containsAny(fullText, NEIGHBORHOOD_NAMES) && depth <= 3) {
     return {
       kind: 'neighborhood',
       score: 35,
@@ -1076,38 +769,27 @@ function classifyUrl(
   };
 }
 
-async function fetchHtml(
-  url: string,
-) {
-  const response =
-    await fetch(url, {
-      cache: 'no-store',
-      redirect: 'follow',
-      signal: AbortSignal.timeout(15_000),
+async function fetchHtml(url: string) {
+  const response = await fetch(url, {
+    cache: 'no-store',
+    redirect: 'follow',
+    signal: AbortSignal.timeout(15_000),
 
-      headers: {
-        Accept:
-          'text/html,application/xhtml+xml',
+    headers: {
+      Accept: 'text/html,application/xhtml+xml',
 
-        'User-Agent':
-          'Mozilla/5.0 (compatible; ProjetoAlphaBot/1.0; +https://imoveisdealtopadraorio.com.br)',
-      },
-    });
+      'User-Agent':
+        'Mozilla/5.0 (compatible; ProjetoAlphaBot/1.0; +https://imoveisdealtopadraorio.com.br)',
+    },
+  });
 
   if (!response.ok) {
     return null;
   }
 
-  const contentType =
-    response.headers.get(
-      'content-type',
-    ) ?? '';
+  const contentType = response.headers.get('content-type') ?? '';
 
-  if (
-    !contentType
-      .toLowerCase()
-      .includes('text/html')
-  ) {
+  if (!contentType.toLowerCase().includes('text/html')) {
     return null;
   }
 
@@ -1118,35 +800,17 @@ export async function discoverSources(
   rootUrl: string,
   options: DiscoverOptions = {},
 ): Promise<DiscoveredSource[]> {
-  const normalizedRoot =
-    normalizeUrl(rootUrl);
+  const normalizedRoot = normalizeUrl(rootUrl);
 
   if (!normalizedRoot) {
-    throw new Error(
-      'URL raiz inválida.',
-    );
+    throw new Error('URL raiz inválida.');
   }
 
-  const root =
-    new URL(normalizedRoot);
+  const root = new URL(normalizedRoot);
 
-  const maxPages =
-    Math.max(
-      1,
-      Math.min(
-        options.maxPages ?? 40,
-        100,
-      ),
-    );
+  const maxPages = Math.max(1, Math.min(options.maxPages ?? 40, 100));
 
-  const maxDepth =
-    Math.max(
-      0,
-      Math.min(
-        options.maxDepth ?? 2,
-        4,
-      ),
-    );
+  const maxDepth = Math.max(0, Math.min(options.maxDepth ?? 2, 4));
 
   const queue: Array<{
     url: string;
@@ -1158,74 +822,39 @@ export async function discoverSources(
     },
   ];
 
-  const visited =
-    new Set<string>();
+  const visited = new Set<string>();
 
-  const queued =
-    new Set<string>([
-      normalizedRoot,
-    ]);
+  const queued = new Set<string>([normalizedRoot]);
 
-  const discovered =
-    new Map<
-      string,
-      DiscoveredSource
-    >();
+  const discovered = new Map<string, DiscoveredSource>();
 
-  while (
-    queue.length > 0 &&
-    visited.size < maxPages
-  ) {
-    const current =
-      queue.shift();
+  while (queue.length > 0 && visited.size < maxPages) {
+    const current = queue.shift();
 
     if (!current) {
       break;
     }
 
-    if (
-      visited.has(current.url)
-    ) {
+    if (visited.has(current.url)) {
       continue;
     }
 
-    if (
-      isHardExcluded(
-        current.url,
-      ) ||
-      isTechnicalHost(
-        current.url,
-      )
-    ) {
+    if (isHardExcluded(current.url) || isTechnicalHost(current.url)) {
       continue;
     }
 
     visited.add(current.url);
 
-    if (
-      isDocumentUrl(
-        current.url,
-      )
-    ) {
-      const classification =
-        classifyDocument(
-          current.url,
-        );
+    if (isDocumentUrl(current.url)) {
+      const classification = classifyDocument(current.url);
 
-      if (
-        classification.score >= 20
-      ) {
-        discovered.set(
-          current.url,
-          {
-            url: current.url,
-            title: null,
-            kind:
-              classification.kind,
-            score:
-              classification.score,
-          },
-        );
+      if (classification.score >= 20) {
+        discovered.set(current.url, {
+          url: current.url,
+          title: null,
+          kind: classification.kind,
+          score: classification.score,
+        });
       }
 
       continue;
@@ -1234,9 +863,7 @@ export async function discoverSources(
     let html: string | null;
 
     try {
-      html = await fetchHtml(
-        current.url,
-      );
+      html = await fetchHtml(current.url);
     } catch {
       continue;
     }
@@ -1245,54 +872,31 @@ export async function discoverSources(
       continue;
     }
 
-    const title =
-      extractTitle(html);
+    const title = extractTitle(html);
 
-    const classification =
-      classifyUrl(
-        current.url,
+    const classification = classifyUrl(current.url, title);
+
+    if (classification.score >= 20) {
+      discovered.set(current.url, {
+        url: current.url,
         title,
-      );
-
-    if (
-      classification.score >= 20
-    ) {
-      discovered.set(
-        current.url,
-        {
-          url: current.url,
-          title,
-          kind:
-            classification.kind,
-          score:
-            classification.score,
-        },
-      );
+        kind: classification.kind,
+        score: classification.score,
+      });
     }
 
-    if (
-      current.depth >= maxDepth
-    ) {
+    if (current.depth >= maxDepth) {
       continue;
     }
 
-    const links =
-      extractLinks(
-        html,
-        current.url,
-      );
+    const links = extractLinks(html, current.url);
 
     for (const link of links) {
-      if (
-        isTechnicalHost(link) ||
-        isStaticAsset(link) ||
-        isHardExcluded(link)
-      ) {
+      if (isTechnicalHost(link) || isStaticAsset(link) || isHardExcluded(link)) {
         continue;
       }
 
-      const internal =
-        sameHost(root, link);
+      const internal = sameHost(root, link);
 
       /*
        * Navegação normal permanece
@@ -1305,55 +909,31 @@ export async function discoverSources(
        * técnica e outros vazamentos.
        */
       if (!internal) {
-        const rootIsGateway =
-          isGatewayHost(
-            normalizedRoot,
-          );
+        const rootIsGateway = isGatewayHost(normalizedRoot);
 
-        if (
-          !rootIsGateway ||
-          !isTrustedExternalHost(
-            link,
-          )
-        ) {
+        if (!rootIsGateway || !isTrustedExternalHost(link)) {
           continue;
         }
       }
 
-      if (
-        isDocumentUrl(link)
-      ) {
-        if (
-          !discovered.has(link)
-        ) {
-          const classification =
-            classifyDocument(link);
+      if (isDocumentUrl(link)) {
+        if (!discovered.has(link)) {
+          const classification = classifyDocument(link);
 
-          if (
-            classification.score >=
-            20
-          ) {
-            discovered.set(
-              link,
-              {
-                url: link,
-                title: null,
-                kind:
-                  classification.kind,
-                score:
-                  classification.score,
-              },
-            );
+          if (classification.score >= 20) {
+            discovered.set(link, {
+              url: link,
+              title: null,
+              kind: classification.kind,
+              score: classification.score,
+            });
           }
         }
 
         continue;
       }
 
-      if (
-        visited.has(link) ||
-        queued.has(link)
-      ) {
+      if (visited.has(link) || queued.has(link)) {
         continue;
       }
 
@@ -1361,21 +941,12 @@ export async function discoverSources(
 
       queue.push({
         url: link,
-        depth:
-          current.depth + 1,
+        depth: current.depth + 1,
       });
     }
   }
 
-  return [
-    ...discovered.values(),
-  ]
-    .filter(
-      (item) =>
-        item.score >= 20,
-    )
-    .sort(
-      (a, b) =>
-        b.score - a.score,
-    );
+  return [...discovered.values()]
+    .filter((item) => item.score >= 20)
+    .sort((a, b) => b.score - a.score);
 }

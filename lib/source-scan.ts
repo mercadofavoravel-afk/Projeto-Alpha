@@ -104,7 +104,12 @@ const LIMITED_SOURCE_IDS = new Set([
   'mozak',
   'piimo',
   'comercial-calper',
+  'tegra-conecta',
+  'ilha-pura',
 ]);
+
+// Estas fontes precisam de uma janela maior, mas continuam limitadas em profundidade e volume.
+const EXTENDED_TIMEOUT_SOURCE_IDS = new Set(['mozak', 'tegra-conecta', 'ilha-pura']);
 
 function normalizeHost(hostname: string) {
   return hostname.toLowerCase().replace(/^www\./, '');
@@ -535,6 +540,8 @@ function buildResult(
 
 async function scanRootWithTimeout(root: SourceRoot, options: ResolvedScanOptions) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutMs = EXTENDED_TIMEOUT_SOURCE_IDS.has(root.id) ? 30_000 : 20_000;
+  const timeoutSeconds = timeoutMs / 1_000;
 
   try {
     return await Promise.race([
@@ -542,8 +549,8 @@ async function scanRootWithTimeout(root: SourceRoot, options: ResolvedScanOption
 
       new Promise<never>((_, reject) => {
         timeout = setTimeout(
-          () => reject(new Error('A fonte excedeu o limite de 20 segundos.')),
-          20_000,
+          () => reject(new Error(`A fonte excedeu o limite de ${timeoutSeconds} segundos.`)),
+          timeoutMs,
         );
       }),
     ]);

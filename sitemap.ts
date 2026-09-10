@@ -1,9 +1,13 @@
 import type { MetadataRoute } from 'next';
 import { projects } from '@/lib/projects';
+import { SITE_CONFIG, siteUrl } from '@/lib/site-config';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const b = 'https://www.imoveisdealtopadraorio.com.br';
   return [
-    { url: b, lastModified: new Date() },
-    ...projects.map((p) => ({ url: `${b}/empreendimentos/${p.slug}`, lastModified: new Date() })),
+    { url: SITE_CONFIG.url, lastModified: new Date() },
+    ...projects.map((p) => ({
+      url: siteUrl(`/empreendimentos/${p.slug}`),
+      lastModified: new Date(),
+    })),
   ];
 }

@@ -109,7 +109,13 @@ const LIMITED_SOURCE_IDS = new Set([
 ]);
 
 // Estas fontes precisam de uma janela maior, mas continuam limitadas em profundidade e volume.
-const EXTENDED_TIMEOUT_SOURCE_IDS = new Set(['mozak', 'tegra-conecta', 'ilha-pura']);
+const EXTENDED_TIMEOUT_SOURCE_IDS = new Set([
+  'mozak',
+  'tegra-conecta',
+  'ilha-pura',
+  'imoveis-alto-padrao-rio',
+  'comercial-patrimar-rio',
+]);
 
 function normalizeHost(hostname: string) {
   return hostname.toLowerCase().replace(/^www\./, '');

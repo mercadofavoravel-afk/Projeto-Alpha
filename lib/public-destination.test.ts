@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { isPublicSiteUrl, publicArticleUrl, publicProjectUrl } from './public-destination';
+import {
+  isPublicSiteUrl,
+  publicArticleUrl,
+  publicProjectUrl,
+} from './public-destination';
 
 describe('public destinations', () => {
   it('creates internal project and article URLs', () => {

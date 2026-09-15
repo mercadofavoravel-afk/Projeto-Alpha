@@ -33,7 +33,12 @@ export default async function ArticlesAdminPage() {
       <form action={createArticleAction} className="panel form-grid">
         <label>
           Título do novo artigo
-          <input name="title" required minLength={5} placeholder="Ex.: Por que investir em Ipanema?" />
+          <input
+            name="title"
+            required
+            minLength={5}
+            placeholder="Ex.: Por que investir em Ipanema?"
+          />
         </label>
 
         <button className="primary" type="submit">

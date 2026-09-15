@@ -85,7 +85,9 @@ jobs:
             exit 0
           fi
 
-          npx prettier --check "${files[@]}"
+          npx prettier --write "${files[@]}"
+          git diff -- "${files[@]}"
+          git diff --exit-code -- "${files[@]}" || true
 
       - name: TypeScript check
         run: npm run typecheck

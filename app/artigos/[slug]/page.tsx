@@ -110,10 +110,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
   const neighborhoods = Array.from(
     new Map(
-      featuredProjects.map((project) => [
-        project.neighborhood.slug,
-        project.neighborhood,
-      ]),
+      featuredProjects.map((project) => [project.neighborhood.slug, project.neighborhood]),
     ).values(),
   ).slice(0, 3);
 
@@ -356,7 +353,6 @@ export default async function ArticlePage({ params }: PageProps) {
             }
           }
         `}</style>
-
       </main>
 
       <Footer />

@@ -46,52 +46,49 @@ export default async function ArticlesPage() {
     <>
       <Header />
 
-      <main className="articles-page">
-        <section className="articles-hero">
-          <div className="wrap">
-            <span className="eyebrow">Conteúdo imobiliário</span>
-            <h1>Informação para escolher melhor no Rio.</h1>
-            <p>
-              Análises de bairros, empreendimentos e estratégias para quem quer morar,
-              investir ou preservar patrimônio no Rio de Janeiro.
-            </p>
+      <main>
+        <section className="collections-hero">
+          <div className="wrap collections-hero-grid">
+            <div>
+              <div className="eyebrow">Conteúdo imobiliário</div>
+
+              <h1>Informação para escolher melhor no Rio.</h1>
+            </div>
+
+            <div className="collections-hero-copy">
+              <p>
+                Análises de bairros, empreendimentos e estratégias para quem quer morar,
+                investir ou preservar patrimônio no Rio de Janeiro.
+              </p>
+
+              <span>Conteúdo com curadoria da Imóveis de Alto Padrão Rio.</span>
+            </div>
           </div>
         </section>
 
-        <section className="articles-list">
+        <section className="collections-section">
           <div className="wrap">
             {articles.length > 0 ? (
-              <div className="articles-grid">
+              <div className="collections-grid">
                 {articles.map((article) => (
-                  <article className="article-card" key={article.id}>
-                    {article.heroImage ? (
-                      <img src={article.heroImage} alt="" />
-                    ) : (
-                      <div className="article-card-placeholder" />
-                    )}
-
-                    <div className="article-card-content">
-                      <div className="article-card-meta">
-                        <span>{article.category || 'Guia imobiliário'}</span>
-                        {formatDate(article.publishedAt) && (
-                          <time dateTime={article.publishedAt?.toISOString()}>
-                            {formatDate(article.publishedAt)}
-                          </time>
-                        )}
+                  <article className="collection-card" key={article.id}>
+                    <div className="collection-card-content">
+                      <div className="eyebrow">
+                        {article.category || 'Guia imobiliário'}
                       </div>
 
-                      <h2>
-                        <Link href={`/artigos/${article.slug}`}>
-                          {article.title}
-                        </Link>
-                      </h2>
+                      <h2>{article.title}</h2>
+
+                      {formatDate(article.publishedAt) && (
+                        <p>{formatDate(article.publishedAt)}</p>
+                      )}
 
                       <p>
                         {article.excerpt ||
                           'Leia a análise preparada pela Imóveis de Alto Padrão Rio.'}
                       </p>
 
-                      <Link className="article-card-link" href={`/artigos/${article.slug}`}>
+                      <Link className="collection-link" href={`/artigos/${article.slug}`}>
                         Ler conteúdo
                       </Link>
                     </div>
@@ -99,7 +96,7 @@ export default async function ArticlesPage() {
                 ))}
               </div>
             ) : (
-              <div className="articles-empty">
+              <div className="bairro-empty">
                 Novos guias e análises estão sendo preparados pela nossa curadoria.
               </div>
             )}
@@ -108,27 +105,6 @@ export default async function ArticlesPage() {
       </main>
 
       <Footer />
-
-      <style>{`
-        .articles-page { background: #f4f1eb; color: #172228; min-height: 70vh; }
-        .articles-hero { background: #101a1f; color: #fff; padding: 130px 0 86px; }
-        .articles-hero .eyebrow { color: #b5976c; }
-        .articles-hero h1 { max-width: 800px; margin: 16px 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(44px, 7vw, 78px); font-weight: 400; line-height: 1; letter-spacing: -.04em; }
-        .articles-hero p { max-width: 620px; color: rgba(255,255,255,.76); font-size: 18px; line-height: 1.75; }
-        .articles-list { padding: 80px 0 110px; }
-        .articles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-        .article-card { background: #fff; overflow: hidden; }
-        .article-card img, .article-card-placeholder { width: 100%; height: 230px; display: block; object-fit: cover; background: linear-gradient(140deg, #203138, #a58861); }
-        .article-card-content { padding: 28px; }
-        .article-card-meta { display: flex; justify-content: space-between; gap: 12px; color: #8b7254; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-        .article-card-meta time { color: #788286; letter-spacing: 0; text-transform: none; }
-        .article-card h2 { margin: 18px 0 12px; font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 400; line-height: 1.08; }
-        .article-card h2 a { color: inherit; text-decoration: none; }
-        .article-card p { min-height: 70px; margin: 0 0 22px; color: #667177; line-height: 1.7; }
-        .article-card-link { color: #172228; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
-        .articles-empty { padding: 64px; border: 1px solid #d7d0c7; text-align: center; color: #667177; }
-        @media (max-width: 900px) { .articles-grid { grid-template-columns: 1fr; } .articles-hero { padding: 104px 0 66px; } }
-      `}</style>
     </>
   );
 }

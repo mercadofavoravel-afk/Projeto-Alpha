@@ -72,20 +72,6 @@ jobs:
       - name: Prepare test database
         run: npx prisma db push --schema=prisma/schema.prisma --skip-generate
 
-      - name: Emit formatted editorial files
-        run: |
-          npx prettier --write \
-            app/admin/artigos/[id]/page.tsx \
-            app/admin/artigos/actions.ts \
-            app/admin/artigos/page.tsx \
-            app/admin/layout.tsx
-
-          git diff -- \
-            app/admin/artigos/[id]/page.tsx \
-            app/admin/artigos/actions.ts \
-            app/admin/artigos/page.tsx \
-            app/admin/layout.tsx
-
       - name: Format check
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}

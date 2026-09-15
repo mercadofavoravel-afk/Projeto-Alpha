@@ -431,6 +431,7 @@ export default async function BairroPage({
                   </video>
                 ) : (
                   <a
+                    aria-label="Receber seleção personalizada da Imóveis de Alto Padrão Rio"
                     className="bairro-video-link"
                     href="#atendimento"
                   >

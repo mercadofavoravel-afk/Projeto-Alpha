@@ -98,6 +98,7 @@ export default async function SeoMissionControlPage() {
         seoTitle: true,
         seoDescription: true,
         publishStatus: true,
+        category: true,
       },
       orderBy: {
         updatedAt: 'desc',
@@ -167,6 +168,27 @@ export default async function SeoMissionControlPage() {
   const neighborhoodsWithoutProjects = neighborhoods.filter(
     (neighborhood) => neighborhood._count.projects === 0,
   );
+  const publishedArticleCategories = new Map<string, number>();
+
+  for (const article of articles) {
+    if (article.publishStatus !== 'PUBLISHED' || !article.category?.trim()) {
+      continue;
+    }
+
+    const category = article.category.trim().toLocaleLowerCase('pt-BR');
+
+    publishedArticleCategories.set(category, (publishedArticleCategories.get(category) ?? 0) + 1);
+  }
+
+  const articlesWithGenericLinking = articles.filter((article) => {
+    if (article.publishStatus !== 'PUBLISHED') {
+      return false;
+    }
+
+    const category = article.category?.trim().toLocaleLowerCase('pt-BR');
+
+    return !category || (publishedArticleCategories.get(category) ?? 0) < 2;
+  });
   const average = all.length
     ? Math.round(all.reduce((total, item) => total + item.percentage, 0) / all.length)
     : 0;
@@ -331,6 +353,57 @@ export default async function SeoMissionControlPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="panel">
+        <h2>Linkagem interna dos artigos</h2>
+
+        <p>
+          Todo artigo publicado já mantém o visitante em páginas internas da Imóveis de Alto Padrão
+          Rio. Esta lista mostra os conteúdos que ainda usam caminhos gerais porque não têm categoria
+          editorial ou outro artigo da mesma pauta.
+        </p>
+
+        {articlesWithGenericLinking.length === 0 ? (
+          <p>Todos os artigos publicados já têm contexto editorial para recomendações relacionadas.</p>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Situação</th>
+                  <th>Próxima melhoria</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {articlesWithGenericLinking.map((article) => {
+                  const hasCategory = Boolean(article.category?.trim());
+
+                  return (
+                    <tr key={`linkagem-${article.id}`}>
+                      <td>
+                        <b>{article.title}</b>
+                        <small>{`/artigos/${article.slug}`}</small>
+                      </td>
+                      <td>{hasCategory ? article.category : 'Sem categoria editorial'}</td>
+                      <td>
+                        {hasCategory
+                          ? 'Criar ou categorizar outro conteúdo da mesma pauta.'
+                          : 'Definir uma categoria editorial para conectar conteúdos relacionados.'}
+                      </td>
+                      <td>
+                        <Link href={`/admin/artigos/${article.id}`}>Aprimorar artigo →</Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="panel">

@@ -360,12 +360,14 @@ export default async function SeoMissionControlPage() {
 
         <p>
           Todo artigo publicado já mantém o visitante em páginas internas da Imóveis de Alto Padrão
-          Rio. Esta lista mostra os conteúdos que ainda usam caminhos gerais porque não têm categoria
-          editorial ou outro artigo da mesma pauta.
+          Rio. Esta lista mostra os conteúdos que ainda usam caminhos gerais porque não têm
+          categoria editorial ou outro artigo da mesma pauta.
         </p>
 
         {articlesWithGenericLinking.length === 0 ? (
-          <p>Todos os artigos publicados já têm contexto editorial para recomendações relacionadas.</p>
+          <p>
+            Todos os artigos publicados já têm contexto editorial para recomendações relacionadas.
+          </p>
         ) : (
           <div className="table-wrap">
             <table>

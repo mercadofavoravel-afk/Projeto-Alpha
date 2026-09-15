@@ -72,18 +72,6 @@ jobs:
       - name: Prepare test database
         run: npx prisma db push --schema=prisma/schema.prisma --skip-generate
 
-      - name: Show formatted source for diagnostics
-        run: |
-          echo "::group::articles-index"
-          npx prettier app/artigos/page.tsx
-          echo "::endgroup::"
-          echo "::group::article-detail"
-          npx prettier 'app/artigos/[slug]/page.tsx'
-          echo "::endgroup::"
-          echo "::group::header"
-          npx prettier components/Header.tsx
-          echo "::endgroup::"
-
       - name: Format check
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}

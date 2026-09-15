@@ -7,12 +7,7 @@ import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { createSlug } from '@/lib/slug';
 
-const publishStatuses = [
-  'DRAFT',
-  'REVIEW',
-  'PUBLISHED',
-  'ARCHIVED',
-] as const;
+const publishStatuses = ['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED'] as const;
 
 type PublishStatusValue = (typeof publishStatuses)[number];
 
@@ -120,10 +115,7 @@ export async function saveArticleAction(formData: FormData) {
     redirect('/admin/artigos?erro=nao-encontrado');
   }
 
-  const slug = await uniqueSlug(
-    String(formData.get('slug') ?? title).trim() || title,
-    id,
-  );
+  const slug = await uniqueSlug(String(formData.get('slug') ?? title).trim() || title, id);
 
   const article = await db.article.update({
     where: {
@@ -139,10 +131,7 @@ export async function saveArticleAction(formData: FormData) {
       seoTitle: optional(formData, 'seoTitle'),
       seoDescription: optional(formData, 'seoDescription'),
       publishStatus,
-      publishedAt:
-        publishStatus === 'PUBLISHED'
-          ? current.publishedAt ?? new Date()
-          : null,
+      publishedAt: publishStatus === 'PUBLISHED' ? (current.publishedAt ?? new Date()) : null,
     },
   });
 

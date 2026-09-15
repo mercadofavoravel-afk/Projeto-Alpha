@@ -33,8 +33,15 @@ export function Footer() {
         <div className="luxury-footer-column">
           <span>Atendimento</span>
           <p>Atendimento reservado e orientado ao perfil de cada cliente.</p>
-          <a href={`mailto:${SITE_CONFIG.email}`}>{SITE_CONFIG.email}</a>
-          <a href={SITE_CONFIG.whatsappUrl} target="_blank" rel="noopener noreferrer">
+          <a aria-label="Enviar e-mail para Imóveis de Alto Padrão Rio" href={`mailto:${SITE_CONFIG.email}`}>
+            {SITE_CONFIG.email}
+          </a>
+          <a
+            aria-label="Abrir WhatsApp da Imóveis de Alto Padrão Rio"
+            href={SITE_CONFIG.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             WhatsApp: {SITE_CONFIG.whatsapp}
           </a>
         </div>

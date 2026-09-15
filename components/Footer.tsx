@@ -33,7 +33,10 @@ export function Footer() {
         <div className="luxury-footer-column">
           <span>Atendimento</span>
           <p>Atendimento reservado e orientado ao perfil de cada cliente.</p>
-          <a aria-label="Enviar e-mail para Imóveis de Alto Padrão Rio" href={`mailto:${SITE_CONFIG.email}`}>
+          <a
+            aria-label="Enviar e-mail para Imóveis de Alto Padrão Rio"
+            href={`mailto:${SITE_CONFIG.email}`}
+          >
             {SITE_CONFIG.email}
           </a>
           <a

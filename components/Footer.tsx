@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { SITE_CONFIG } from '@/lib/site-config';
+
 export function Footer() {
   return (
     <footer className="footer luxury-footer">
@@ -10,8 +12,8 @@ export function Footer() {
           <strong>IMÓVEIS DE ALTO PADRÃO</strong>
 
           <p>
-            Curadoria de residências e empreendimentos excepcionais
-            nos endereços mais desejados do Rio.
+            Curadoria de residências e empreendimentos excepcionais nos endereços mais desejados do
+            Rio.
           </p>
         </div>
 
@@ -30,16 +32,26 @@ export function Footer() {
 
         <div className="luxury-footer-column">
           <span>Atendimento</span>
-          <p>
-            Atendimento reservado e orientado ao perfil de cada cliente.
-          </p>
+          <p>Atendimento reservado e orientado ao perfil de cada cliente.</p>
+          <a
+            aria-label="Enviar e-mail para Imóveis de Alto Padrão Rio"
+            href={`mailto:${SITE_CONFIG.email}`}
+          >
+            {SITE_CONFIG.email}
+          </a>
+          <a
+            aria-label="Abrir WhatsApp da Imóveis de Alto Padrão Rio"
+            href={SITE_CONFIG.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp: {SITE_CONFIG.whatsapp}
+          </a>
         </div>
       </div>
 
       <div className="wrap luxury-footer-bottom">
-        <span>
-          © {new Date().getFullYear()} Imóveis de Alto Padrão Rio
-        </span>
+        <span>© {new Date().getFullYear()} Imóveis de Alto Padrão Rio</span>
 
         <span>Rio de Janeiro · Brasil</span>
       </div>

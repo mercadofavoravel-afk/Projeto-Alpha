@@ -57,8 +57,8 @@ export default async function ArticlesPage() {
 
             <div className="collections-hero-copy">
               <p>
-                Análises de bairros, empreendimentos e estratégias para quem quer morar,
-                investir ou preservar patrimônio no Rio de Janeiro.
+                Análises de bairros, empreendimentos e estratégias para quem quer morar, investir ou
+                preservar patrimônio no Rio de Janeiro.
               </p>
 
               <span>Conteúdo com curadoria da Imóveis de Alto Padrão Rio.</span>
@@ -73,15 +73,11 @@ export default async function ArticlesPage() {
                 {articles.map((article) => (
                   <article className="collection-card" key={article.id}>
                     <div className="collection-card-content">
-                      <div className="eyebrow">
-                        {article.category || 'Guia imobiliário'}
-                      </div>
+                      <div className="eyebrow">{article.category || 'Guia imobiliário'}</div>
 
                       <h2>{article.title}</h2>
 
-                      {formatDate(article.publishedAt) && (
-                        <p>{formatDate(article.publishedAt)}</p>
-                      )}
+                      {formatDate(article.publishedAt) && <p>{formatDate(article.publishedAt)}</p>}
 
                       <p>
                         {article.excerpt ||

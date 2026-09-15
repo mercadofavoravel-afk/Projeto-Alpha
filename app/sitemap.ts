@@ -1,7 +1,10 @@
 import type { MetadataRoute } from 'next';
 
+import { db } from '@/lib/db';
 import { projects } from '@/lib/projects';
 import { buildCanonical } from '@/lib/seo';
+
+export const dynamic = 'force-dynamic';
 
 const staticRoutes = [
   {
@@ -36,7 +39,20 @@ const staticRoutes = [
   },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const articles = await db.article.findMany({
+    where: {
+      publishStatus: 'PUBLISHED',
+    },
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      updatedAt: 'desc',
+    },
+  });
+
   return [
     ...staticRoutes.map((route) => ({
       url: buildCanonical(route.path),
@@ -48,6 +64,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: buildCanonical(`/empreendimentos/${project.slug}`),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
+    })),
+
+    ...articles.map((article) => ({
+      url: buildCanonical(`/artigos/${article.slug}`),
+      lastModified: article.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
     })),
   ];
 }

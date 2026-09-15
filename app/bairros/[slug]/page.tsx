@@ -432,11 +432,9 @@ export default async function BairroPage({
                 ) : (
                   <a
                     className="bairro-video-link"
-                    href={neighborhood.videoUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    href="#atendimento"
                   >
-                    Assistir vídeo sobre{' '}
+                    Receba uma seleção personalizada em{' '}
                     {neighborhood.name} →
                   </a>
                 )}

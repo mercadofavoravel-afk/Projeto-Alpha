@@ -25,11 +25,7 @@ export default async function ArticleEditorPage({
 }) {
   await requirePermission('catalog:write');
 
-  const [{ id }, query, user] = await Promise.all([
-    params,
-    searchParams,
-    getCurrentUser(),
-  ]);
+  const [{ id }, query, user] = await Promise.all([params, searchParams, getCurrentUser()]);
 
   const article = await db.article.findUnique({
     where: {
@@ -59,7 +55,9 @@ export default async function ArticleEditorPage({
         <Link href="/admin/artigos">← Voltar aos artigos</Link>
       </div>
 
-      {query.criado === '1' && <p className="notice">Rascunho criado. Preencha o conteúdo abaixo.</p>}
+      {query.criado === '1' && (
+        <p className="notice">Rascunho criado. Preencha o conteúdo abaixo.</p>
+      )}
 
       {query.salvo === '1' && <p className="notice">Artigo salvo com sucesso.</p>}
 
@@ -97,9 +95,7 @@ export default async function ArticleEditorPage({
                   </option>
                 ))}
 
-                {canPublish && (
-                  <option value="PUBLISHED">{statusLabels.PUBLISHED}</option>
-                )}
+                {canPublish && <option value="PUBLISHED">{statusLabels.PUBLISHED}</option>}
               </select>
             </label>
 

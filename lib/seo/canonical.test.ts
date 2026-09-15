@@ -22,4 +22,13 @@ describe('buildCanonical', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://alpha.example.com';
     expect(buildCanonical('/')).toBe('https://alpha.example.com/');
   });
+
+  it('usa o domínio público oficial sem variável de ambiente', () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+
+    expect(getSiteUrl()).toBe('https://www.imoveisdealtopadraorio.com.br');
+    expect(buildCanonical('/sitemap.xml')).toBe(
+      'https://www.imoveisdealtopadraorio.com.br/sitemap.xml',
+    );
+  });
 });

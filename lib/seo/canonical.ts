@@ -1,4 +1,6 @@
-const DEFAULT_SITE_URL = 'http://localhost:3000';
+import { SITE_CONFIG } from '../site-config';
+
+const DEFAULT_SITE_URL = SITE_CONFIG.url;
 
 export function getSiteUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL;

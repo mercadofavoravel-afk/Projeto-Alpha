@@ -170,6 +170,11 @@ export default async function SeoMissionControlPage() {
   const average = all.length
     ? Math.round(all.reduce((total, item) => total + item.percentage, 0) / all.length)
     : 0;
+  const categories: Array<[string, AuditItem[]]> = [
+    ['Empreendimentos', projectAudits],
+    ['Bairros', neighborhoodAudits],
+    ['Artigos', articleAudits],
+  ];
 
   return (
     <>
@@ -349,24 +354,18 @@ export default async function SeoMissionControlPage() {
             </thead>
 
             <tbody>
-              {[
-                ['Empreendimentos', projectAudits],
-                ['Bairros', neighborhoodAudits],
-                ['Artigos', articleAudits],
-              ].map(([label, items]) => {
-                const auditItems = items as AuditItem[];
-                const categoryAverage = auditItems.length
+              {categories.map(([label, items]) => {
+                const categoryAverage = items.length
                   ? Math.round(
-                      auditItems.reduce((total, item) => total + item.percentage, 0) /
-                        auditItems.length,
+                      items.reduce((total, item) => total + item.percentage, 0) / items.length,
                     )
                   : 0;
 
                 return (
                   <tr key={label}>
                     <td>{label}</td>
-                    <td>{auditItems.filter((item) => item.indexable).length}</td>
-                    <td>{auditItems.filter((item) => !item.indexable).length}</td>
+                    <td>{items.filter((item) => item.indexable).length}</td>
+                    <td>{items.filter((item) => !item.indexable).length}</td>
                     <td>{categoryAverage}%</td>
                   </tr>
                 );

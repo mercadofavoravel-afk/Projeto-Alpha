@@ -270,6 +270,93 @@ export default async function ArticlePage({ params }: PageProps) {
             />
           </div>
         </section>
+        <style>{`
+          .article-related {
+            padding: 95px 0 110px;
+            background: #f4efe6;
+          }
+
+          .article-related-head {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 90px;
+            align-items: end;
+            margin-bottom: 52px;
+          }
+
+          .article-related-head h2 {
+            max-width: 760px;
+            margin: 14px 0 0;
+            font: 500 clamp(2.5rem, 4vw, 4.2rem) / 1 Georgia, serif;
+            letter-spacing: -0.035em;
+          }
+
+          .article-related-head > p {
+            margin: 0;
+            color: var(--m);
+            line-height: 1.75;
+          }
+
+          .article-related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+          }
+
+          .article-related-group {
+            min-height: 100%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(22, 34, 29, 0.1);
+          }
+
+          .article-related-link {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 22px 0;
+            border-bottom: 1px solid rgba(22, 34, 29, 0.12);
+          }
+
+          .article-related-link:last-child {
+            border-bottom: 0;
+          }
+
+          .article-related-link span,
+          .article-related-link small {
+            color: #887550;
+            font-size: 0.63rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+          }
+
+          .article-related-link strong {
+            font: 500 1.35rem / 1.25 Georgia, serif;
+          }
+
+          .article-related-link:hover strong {
+            color: #8a7548;
+          }
+
+          @media (max-width: 900px) {
+            .article-related-head,
+            .article-related-grid {
+              grid-template-columns: 1fr;
+              gap: 38px;
+            }
+          }
+
+          @media (max-width: 620px) {
+            .article-related {
+              padding: 65px 0 80px;
+            }
+
+            .article-related-group {
+              padding: 24px 20px;
+            }
+          }
+        `}</style>
+
       </main>
 
       <Footer />

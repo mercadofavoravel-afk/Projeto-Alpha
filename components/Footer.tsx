@@ -21,6 +21,7 @@ export function Footer() {
           <span>Explorar</span>
           <Link href="/empreendimentos">Empreendimentos</Link>
           <Link href="/colecoes">Coleções</Link>
+          <Link href="/artigos">Conteúdos</Link>
           <Link href="/buscar">Buscar</Link>
         </div>
 

@@ -13,13 +13,11 @@ export function Header() {
           <small>RIO DE JANEIRO</small>
         </Link>
 
-        <nav
-          className="links luxury-nav-links"
-          aria-label="Navegação principal"
-        >
+        <nav className="links luxury-nav-links" aria-label="Navegação principal">
           <Link href="/buscar">Buscar</Link>
           <Link href="/empreendimentos">Empreendimentos</Link>
           <Link href="/colecoes">Coleções</Link>
+          <Link href="/artigos">Conteúdos</Link>
           <Link href="/descubra">Descubra</Link>
         </nav>
 

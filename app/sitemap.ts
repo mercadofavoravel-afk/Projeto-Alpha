@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+
 import { projects } from '@/lib/projects';
 import { buildCanonical } from '@/lib/seo';
 
@@ -15,6 +16,11 @@ const staticRoutes = [
   },
   {
     path: '/colecoes',
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  },
+  {
+    path: '/artigos',
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   },

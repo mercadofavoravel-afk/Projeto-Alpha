@@ -1,4 +1,4 @@
-import { SITE_CONFIG, siteUrl } from '@/lib/site-config';
+import { SITE_CONFIG, siteUrl } from './site-config';
 
 const PUBLIC_PATHS = ['/empreendimentos/', '/artigos/', '/bairros/'] as const;
 

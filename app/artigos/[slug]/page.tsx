@@ -71,6 +71,52 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
+  const [relatedArticles, featuredProjects] = await Promise.all([
+    db.article.findMany({
+      where: {
+        publishStatus: 'PUBLISHED',
+        id: {
+          not: article.id,
+        },
+        ...(article.category
+          ? {
+              category: article.category,
+            }
+          : {}),
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
+      take: 3,
+    }),
+    db.project.findMany({
+      where: {
+        publishStatus: 'PUBLISHED',
+      },
+      include: {
+        neighborhood: true,
+      },
+      orderBy: [
+        {
+          featured: 'desc',
+        },
+        {
+          updatedAt: 'desc',
+        },
+      ],
+      take: 3,
+    }),
+  ]);
+
+  const neighborhoods = Array.from(
+    new Map(
+      featuredProjects.map((project) => [
+        project.neighborhood.slug,
+        project.neighborhood,
+      ]),
+    ).values(),
+  ).slice(0, 3);
+
   const paragraphs = article.content
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
@@ -112,6 +158,97 @@ export default async function ArticlePage({ params }: PageProps) {
             </div>
           </div>
         </article>
+
+        <section className="article-related">
+          <div className="wrap">
+            <div className="article-related-head">
+              <div>
+                <div className="eyebrow">Continue sua pesquisa</div>
+
+                <h2>Conteúdo, localização e oportunidades no mesmo lugar.</h2>
+              </div>
+
+              <p>
+                Explore outras referências da Imóveis de Alto Padrão Rio e avance para uma conversa
+                orientada ao seu perfil.
+              </p>
+            </div>
+
+            <div className="article-related-grid">
+              <div className="article-related-group">
+                <div className="eyebrow">Mais conteúdos</div>
+
+                {relatedArticles.length > 0 ? (
+                  relatedArticles.map((relatedArticle) => (
+                    <Link
+                      className="article-related-link"
+                      href={`/artigos/${relatedArticle.slug}`}
+                      key={relatedArticle.id}
+                    >
+                      <span>{relatedArticle.category || 'Guia imobiliário'}</span>
+                      <strong>{relatedArticle.title}</strong>
+                      <small>Continuar lendo →</small>
+                    </Link>
+                  ))
+                ) : (
+                  <Link className="article-related-link" href="/artigos">
+                    <span>Conteúdos da curadoria</span>
+                    <strong>Explore os nossos guias imobiliários.</strong>
+                    <small>Ver todos os conteúdos →</small>
+                  </Link>
+                )}
+              </div>
+
+              <div className="article-related-group">
+                <div className="eyebrow">Empreendimentos publicados</div>
+
+                {featuredProjects.length > 0 ? (
+                  featuredProjects.map((project) => (
+                    <Link
+                      className="article-related-link"
+                      href={`/empreendimentos/${project.slug}`}
+                      key={project.id}
+                    >
+                      <span>{project.neighborhood.name} · Rio de Janeiro</span>
+                      <strong>{project.name}</strong>
+                      <small>Conhecer empreendimento →</small>
+                    </Link>
+                  ))
+                ) : (
+                  <Link className="article-related-link" href="/empreendimentos">
+                    <span>Portfólio selecionado</span>
+                    <strong>Conheça os empreendimentos da nossa curadoria.</strong>
+                    <small>Ver empreendimentos →</small>
+                  </Link>
+                )}
+              </div>
+
+              <div className="article-related-group">
+                <div className="eyebrow">Por localização</div>
+
+                {neighborhoods.length > 0 ? (
+                  neighborhoods.map((neighborhood) => (
+                    <Link
+                      className="article-related-link"
+                      href={`/bairros/${neighborhood.slug}`}
+                      key={neighborhood.slug}
+                    >
+                      <span>Inteligência local</span>
+                      <strong>Conheça {neighborhood.name}.</strong>
+                      <small>Explorar bairro →</small>
+                    </Link>
+                  ))
+                ) : (
+                  <Link className="article-related-link" href="/bairros">
+                    <span>Inteligência local</span>
+                    <strong>Explore os bairros da nossa curadoria.</strong>
+                    <small>Ver bairros →</small>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="collections-section" id="atendimento">
           <div className="wrap collections-hero-grid">

@@ -6,6 +6,7 @@ type LeadCaptureFormProps = {
   projectName: string;
   projectSlug: string;
   neighborhood: string;
+  source?: string;
 };
 
 function getSessionKey() {
@@ -23,6 +24,7 @@ export function LeadCaptureForm({
   projectName,
   projectSlug,
   neighborhood,
+  source,
 }: LeadCaptureFormProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -59,7 +61,7 @@ export function LeadCaptureForm({
           neighborhood,
           budgetMax: budgetMax ? Number(budgetMax) : undefined,
           message: message.trim() || undefined,
-          source: `empreendimento:${projectSlug}`.slice(0, 120),
+          source: (source || `empreendimento:${projectSlug}`).slice(0, 120),
           utmSource: params.get('utm_source') || undefined,
           utmMedium: params.get('utm_medium') || undefined,
           utmCampaign: params.get('utm_campaign') || undefined,

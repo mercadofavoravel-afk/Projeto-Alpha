@@ -76,8 +76,8 @@ export default async function ArticleEditorPage({
 
       {query.erro === 'destinos' && (
         <p className="notice">
-          A publicação foi bloqueada: use somente links do site, WhatsApp ou e-mail da Imóveis de Alto
-          Padrão Rio.
+          A publicação foi bloqueada: use somente links do site, WhatsApp ou e-mail da Imóveis de
+          Alto Padrão Rio.
         </p>
       )}
 

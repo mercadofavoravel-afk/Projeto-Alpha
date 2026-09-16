@@ -81,6 +81,18 @@ export default async function ArticleEditorPage({
         </p>
       )}
 
+      {query.erro === 'revisao' && (
+        <p className="notice">
+          Para publicar, salve o artigo primeiro com o status “Em revisão”.
+        </p>
+      )}
+
+      {query.erro === 'seo' && (
+        <p className="notice">
+          Para publicar, preencha categoria, resumo, título SEO e descrição SEO.
+        </p>
+      )}
+
       <form action={saveArticleAction} className="editor-form">
         <input type="hidden" name="id" value={article.id} />
 

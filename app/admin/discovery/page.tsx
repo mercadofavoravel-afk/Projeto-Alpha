@@ -290,6 +290,50 @@ export default function DiscoveryPage() {
     }
   }
 
+  async function importAllMatching() {
+    if (actionId || !data?.filters || !pagination?.total) {
+      return;
+    }
+
+    setActionId('import-filtered-candidates');
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/discovery-candidates/import', {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          scope: 'FILTERED',
+          filters: data.filters,
+        }),
+      });
+
+      const result = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Não foi possível importar os candidatos filtrados.');
+      }
+
+      setSelectedIds([]);
+      await loadCandidates();
+    } catch (importError) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : 'Não foi possível importar os candidatos filtrados.',
+      );
+    } finally {
+      setActionId(null);
+    }
+  }
+
   function toggleCandidate(id: string) {
     setSelectedIds((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
@@ -593,6 +637,17 @@ export default function DiscoveryPage() {
               onClick={() => void updateAllMatching('APPROVED')}
             >
               Aprovar todos os {pagination.total} filtrados
+            </button>
+          )}
+
+          {status === 'APPROVED' && pagination && pagination.total > 0 && (
+            <button
+              type="button"
+              className="import-all"
+              disabled={Boolean(actionId)}
+              onClick={() => void importAllMatching()}
+            >
+              Importar todos os {pagination.total} aprovados filtrados
             </button>
           )}
         </section>
@@ -959,6 +1014,11 @@ export default function DiscoveryPage() {
         .bulk-review .approve-all {
           color: #fff;
           background: #275d40;
+        }
+
+        .bulk-review .import-all {
+          color: #fff;
+          background: #345a7d;
         }
 
         .candidate-select {

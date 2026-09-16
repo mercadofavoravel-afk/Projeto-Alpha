@@ -20,6 +20,40 @@ function getSessionKey() {
   return key;
 }
 
+function pushLeadSubmittedEvent({
+  projectSlug,
+  neighborhood,
+  objective,
+  source,
+  utmSource,
+  utmMedium,
+  utmCampaign,
+}: {
+  projectSlug: string;
+  neighborhood: string;
+  objective: string;
+  source?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+}) {
+  const analyticsWindow = window as Window & {
+    dataLayer?: Array<Record<string, string | undefined>>;
+  };
+
+  analyticsWindow.dataLayer ||= [];
+  analyticsWindow.dataLayer.push({
+    event: 'lead_submit',
+    lead_source: source || `empreendimento:${projectSlug}`,
+    project_slug: projectSlug,
+    neighborhood,
+    lead_objective: objective,
+    utm_source: utmSource,
+    utm_medium: utmMedium,
+    utm_campaign: utmCampaign,
+  });
+}
+
 export function LeadCaptureForm({
   projectName,
   projectSlug,
@@ -74,6 +108,16 @@ export function LeadCaptureForm({
       if (!response.ok) {
         throw new Error(data.error || 'Não foi possível enviar sua solicitação.');
       }
+
+      pushLeadSubmittedEvent({
+        projectSlug,
+        neighborhood,
+        objective,
+        source,
+        utmSource: params.get('utm_source') || undefined,
+        utmMedium: params.get('utm_medium') || undefined,
+        utmCampaign: params.get('utm_campaign') || undefined,
+      });
 
       void fetch('/api/analytics', {
         method: 'POST',

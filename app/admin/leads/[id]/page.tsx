@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { ActivityForm } from './ActivityForm';
+import { LeadStatusForm } from './LeadStatusForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,11 +49,7 @@ function activityLabel(type: string) {
   return labels[type] || type;
 }
 
-export default async function LeadDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePermission('crm:read');
 
   const { id } = await params;
@@ -88,6 +85,13 @@ export default async function LeadDetailPage({
           Voltar para leads
         </Link>
       </div>
+
+      <section className="admin-card">
+        <div className="eyebrow">Controle de sequência</div>
+        <h2>Atualizar atendimento</h2>
+
+        <LeadStatusForm leadId={lead.id} initialStatus={lead.status} />
+      </section>
 
       <div className="editor-grid">
         <section className="admin-card">
@@ -198,21 +202,13 @@ export default async function LeadDetailPage({
                 <div>
                   <strong>{activityLabel(activity.type)}</strong>
 
-                  <div className="timeline-meta">
-                    {formatDate(activity.createdAt)}
-                  </div>
+                  <div className="timeline-meta">{formatDate(activity.createdAt)}</div>
 
                   {activity.note && <p>{activity.note}</p>}
 
-                  {activity.dueAt && (
-                    <p>Prazo: {formatDate(activity.dueAt)}</p>
-                  )}
+                  {activity.dueAt && <p>Prazo: {formatDate(activity.dueAt)}</p>}
 
-                  {activity.completedAt && (
-                    <p>
-                      Concluído em: {formatDate(activity.completedAt)}
-                    </p>
-                  )}
+                  {activity.completedAt && <p>Concluído em: {formatDate(activity.completedAt)}</p>}
                 </div>
               </article>
             ))}

@@ -1,24 +1,13 @@
+import type { Prisma } from '@prisma/client';
 import Link from 'next/link';
+
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-function countBy(values: string[]) {
-  return Array.from(
-    values.reduce((counts, value) => {
-      counts.set(value, (counts.get(value) || 0) + 1);
-      return counts;
-    }, new Map<string, number>()),
-  )
-    .map(([label, count]) => ({ label, count }))
-    .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
-    .slice(0, 5);
-}
+const leadStatuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED', 'WON', 'LOST'] as const;
 
-function articleFromSource(source: string) {
-  const match = source.match(/^Orgânico \| artigo: (.+) \| região:/);
-  return match?.[1] || source;
-}
+type LeadStatusFilter = (typeof leadStatuses)[number];
 
 type LeadItem = {
   id: string;
@@ -33,8 +22,90 @@ type LeadItem = {
   }>;
 };
 
-export default async function LeadsPage() {
+function countBy(values: string[]) {
+  return Array.from(
+    values.reduce((counts, value) => {
+      counts.set(value, (counts.get(value) || 0) + 1);
+      return counts;
+    }, new Map<string, number>()),
+  )
+    .map(([label, count]) => ({ label, count }))
+    .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
+    .slice(0, 5);
+}
+
+function articleFromSource(source: string) {
+  const match = source.match(/^Orgânico \\| artigo: (.+) \\| região:/);
+  return match?.[1] || source;
+}
+
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    NEW: 'Novo',
+    CONTACTED: 'Em atendimento',
+    QUALIFIED: 'Qualificado',
+    VISIT_SCHEDULED: 'Visita agendada',
+    WON: 'Ganho',
+    LOST: 'Perdido',
+  };
+
+  return labels[status] || status;
+}
+
+function validStatus(value: string | undefined): LeadStatusFilter | undefined {
+  return leadStatuses.includes(value as LeadStatusFilter) ? (value as LeadStatusFilter) : undefined;
+}
+
+export default async function LeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    channel?: string;
+    campaign?: string;
+    status?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const channel = ['organic', 'campaign', 'direct'].includes(params.channel || '')
+    ? params.channel
+    : undefined;
+  const campaign = params.campaign?.trim() || '';
+  const status = validStatus(params.status);
+
+  const where: Prisma.LeadWhereInput = {
+    ...(status ? { status } : {}),
+    ...(campaign
+      ? {
+          utmCampaign: {
+            contains: campaign,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {}),
+    ...(channel === 'organic'
+      ? {
+          source: {
+            startsWith: 'Orgânico | artigo:',
+          },
+        }
+      : {}),
+    ...(channel === 'campaign'
+      ? {
+          utmSource: {
+            not: null,
+          },
+        }
+      : {}),
+    ...(channel === 'direct'
+      ? {
+          source: null,
+          utmSource: null,
+        }
+      : {}),
+  };
+
   const leads = await db.lead.findMany({
+    where,
     include: {
       activities: {
         select: {
@@ -61,6 +132,7 @@ export default async function LeadsPage() {
   const organicByRegion = countBy(organicRegionLabels);
   const organicArticleCount = new Set(organicArticleLabels).size;
   const organicRegionCount = new Set(organicRegionLabels).size;
+  const hasFilters = Boolean(channel || campaign || status);
 
   return (
     <>
@@ -70,10 +142,62 @@ export default async function LeadsPage() {
       <section className="admin-card">
         <div className="head">
           <div>
+            <div className="eyebrow">Organização comercial</div>
+            <h2>Filtrar a base de leads</h2>
+          </div>
+          {hasFilters && <span>Filtros ativos</span>}
+        </div>
+
+        <form action="/admin/leads" className="editor-grid">
+          <label>
+            Canal de captação
+            <select defaultValue={channel || ''} name="channel">
+              <option value="">Todos os canais</option>
+              <option value="organic">Orgânico de artigos</option>
+              <option value="campaign">Campanhas com UTM</option>
+              <option value="direct">Direto / sem origem</option>
+            </select>
+          </label>
+
+          <label>
+            Campanha UTM
+            <input defaultValue={campaign} name="campaign" placeholder="Ex.: forms_leads_kronos" />
+          </label>
+
+          <label>
+            Estágio
+            <select defaultValue={status || ''} name="status">
+              <option value="">Todos os estágios</option>
+              {leadStatuses.map((item) => (
+                <option key={item} value={item}>
+                  {statusLabel(item)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div>
+            <button className="btn" type="submit">
+              Aplicar filtros
+            </button>
+            {hasFilters && (
+              <Link className="btn btn-ghost" href="/admin/leads">
+                Limpar filtros
+              </Link>
+            )}
+          </div>
+        </form>
+      </section>
+
+      <section className="admin-card">
+        <div className="head">
+          <div>
             <div className="eyebrow">Origem orgânica</div>
             <h2>Artigos e regiões que geram leads</h2>
           </div>
-          <span>Últimos {leads.length} leads</span>
+          <span>
+            {hasFilters ? 'Leads filtrados' : 'Últimos leads'}: {leads.length}
+          </span>
         </div>
 
         <div className="kpis">
@@ -134,19 +258,25 @@ export default async function LeadsPage() {
           </thead>
 
           <tbody>
-            {leads.map((lead: LeadItem) => (
-              <tr key={lead.id}>
-                <td>
-                  <Link href={`/admin/leads/${lead.id}`}>{lead.name}</Link>
-                </td>
-                <td>{lead.phone}</td>
-                <td>{lead.objective}</td>
-                <td>{lead.source || 'Site'}</td>
-                <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
-                <td>{lead.status}</td>
-                <td>{lead.activities.length}</td>
+            {leads.length === 0 ? (
+              <tr>
+                <td colSpan={7}>Nenhum lead encontrado para estes filtros.</td>
               </tr>
-            ))}
+            ) : (
+              leads.map((lead: LeadItem) => (
+                <tr key={lead.id}>
+                  <td>
+                    <Link href={`/admin/leads/${lead.id}`}>{lead.name}</Link>
+                  </td>
+                  <td>{lead.phone}</td>
+                  <td>{lead.objective}</td>
+                  <td>{lead.source || 'Site'}</td>
+                  <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
+                  <td>{statusLabel(lead.status)}</td>
+                  <td>{lead.activities.length}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

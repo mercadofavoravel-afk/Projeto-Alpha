@@ -44,9 +44,7 @@ export function LeadStatusForm({ leadId, initialStatus }: LeadStatusFormProps) {
       router.refresh();
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Não foi possível atualizar o atendimento.',
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar o atendimento.',
       );
     } finally {
       setSaving(false);
@@ -57,11 +55,7 @@ export function LeadStatusForm({ leadId, initialStatus }: LeadStatusFormProps) {
     <div className="quiz-block">
       <label htmlFor="lead-status">Status do atendimento</label>
 
-      <select
-        id="lead-status"
-        onChange={(event) => setStatus(event.target.value)}
-        value={status}
-      >
+      <select id="lead-status" onChange={(event) => setStatus(event.target.value)} value={status}>
         {statusOptions.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -70,8 +64,7 @@ export function LeadStatusForm({ leadId, initialStatus }: LeadStatusFormProps) {
       </select>
 
       <p>
-        Ao sair de “Novo”, os follow-ups programados são encerrados para evitar mensagens
-        indevidas.
+        Ao sair de “Novo”, os follow-ups programados são encerrados para evitar mensagens indevidas.
       </p>
 
       <button className="btn" disabled={saving} onClick={saveStatus} type="button">

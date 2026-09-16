@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requirePermission } from '@/lib/auth';
+import { createEditorialDraft, isEditorialDraft } from '@/lib/editorial-draft';
 import { db } from '@/lib/db';
 import { createSlug } from '@/lib/slug';
 
@@ -76,7 +77,7 @@ export async function createArticleAction(formData: FormData) {
     data: {
       title,
       slug,
-      content: '',
+      content: createEditorialDraft(title),
       publishStatus: 'DRAFT',
     },
   });
@@ -99,6 +100,10 @@ export async function saveArticleAction(formData: FormData) {
 
   if (publishStatus === 'PUBLISHED') {
     await requirePermission('catalog:publish');
+
+    if (isEditorialDraft(content)) {
+      redirect(`/admin/artigos/${id}?erro=rascunho`);
+    }
   }
 
   const current = await db.article.findUnique({

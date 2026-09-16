@@ -17,6 +17,14 @@ function originSummary(lead: FollowUpLead) {
   return lead.source || `Formulário do site | região: ${lead.neighborhood || 'Rio de Janeiro'}`;
 }
 
+function followUpMessage(lead: FollowUpLead, region: string, days: number) {
+  if (days === 3) {
+    return `Olá, ${lead.name}. A partir do seu interesse em ${region}, preparei uma curadoria objetiva sobre localização, perfil de imóveis e faixas que podem combinar com a sua busca. Posso enviar?`;
+  }
+
+  return `Olá, ${lead.name}. Para avançar na sua pesquisa em ${region}, posso preparar uma seleção breve de 2 ou 3 opções alinhadas ao conteúdo que você consultou. Assim você compara alternativas com mais clareza.`;
+}
+
 export function createOrganicFollowUpActivities(lead: FollowUpLead, createdAt = new Date()) {
   const origin = originSummary(lead);
   const region = lead.neighborhood || 'Rio de Janeiro';
@@ -29,7 +37,7 @@ export function createOrganicFollowUpActivities(lead: FollowUpLead, createdAt = 
       `Follow-up programado: ${days}º dia.`,
       `Origem: ${origin}.`,
       'Mensagem sugerida (não enviada automaticamente):',
-      `Olá, ${lead.name}. Vimos seu interesse em conteúdo sobre ${region}. A equipe da Imóveis de Alto Padrão Rio separou informações alinhadas ao seu perfil. Podemos ajudar?`,
+      followUpMessage(lead, region, days),
     ].join('\n'),
   }));
 }

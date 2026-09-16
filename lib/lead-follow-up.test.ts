@@ -21,5 +21,8 @@ describe('organic follow-up activities', () => {
     ]);
     expect(activities[0].note).toContain('artigo: Investir em Ipanema');
     expect(activities[0].note).toContain('Mensagem sugerida (não enviada automaticamente)');
+    expect(activities[0].note).toContain('curadoria objetiva');
+    expect(activities[1].note).toContain('seleção breve de 2 ou 3 opções');
+    expect(activities[0].note).not.toBe(activities[1].note);
   });
 });

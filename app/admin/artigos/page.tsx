@@ -19,6 +19,15 @@ export default async function ArticlesAdminPage() {
     },
   });
 
+  const suggestedTopics = [
+    'Por que investir em Ipanema: localização, liquidez e estilo de vida',
+    'Studios no Rio de Janeiro: quando o investimento faz sentido',
+    'Como escolher um imóvel de alto padrão na Barra da Tijuca',
+    'Morar ou investir em Leblon: o que avaliar antes da decisão',
+    'Valorização imobiliária no Rio: fatores que influenciam cada bairro',
+    'Imóvel novo ou pronto: qual opção combina com seu momento',
+  ];
+
   return (
     <>
       <div className="eyebrow">SEO editorial</div>
@@ -29,6 +38,23 @@ export default async function ArticlesAdminPage() {
         Crie conteúdo para captar buscas orgânicas. Somente artigos publicados aparecem no site
         público e no sitemap.
       </p>
+
+      <section className="panel">
+        <h2>Pautas próprias de SEO</h2>
+        <p>
+          Crie rascunhos a partir de temas de busca. Cada artigo deve usar pesquisa como referência,
+          texto original e CTA direcionado à Imóveis de Alto Padrão Rio.
+        </p>
+        <div className="topic-grid">
+          {suggestedTopics.map((topic) => (
+            <form action={createArticleAction} key={topic} className="topic-card">
+              <strong>{topic}</strong>
+              <input type="hidden" name="title" value={topic} />
+              <button className="secondary" type="submit">Criar rascunho</button>
+            </form>
+          ))}
+        </div>
+      </section>
 
       <form action={createArticleAction} className="panel form-grid">
         <label>

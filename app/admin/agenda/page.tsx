@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
+import { WhatsAppFollowUpActions } from './WhatsAppFollowUpActions';
 import { db } from '@/lib/db';
+import { createWhatsAppHref, getFollowUpMessage } from '@/lib/whatsapp-follow-up';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,13 +36,6 @@ function dueLabel(dueAt: Date, today: Date, tomorrow: Date) {
   }
 
   return formatDate(dueAt);
-}
-
-function whatsappLink(phone: string) {
-  const digits = phone.replace(/\D/g, '');
-  const destination = digits.startsWith('55') ? digits : `55${digits}`;
-
-  return `https://wa.me/${destination}`;
 }
 
 export default async function AgendaPage() {
@@ -135,14 +130,17 @@ export default async function AgendaPage() {
                     <td>{activity.lead.neighborhood || 'Rio de Janeiro'}</td>
                     <td>{activity.type === 'WHATSAPP' ? 'WhatsApp' : activity.type}</td>
                     <td>
-                      <a
-                        className="btn"
-                        href={whatsappLink(activity.lead.phone)}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        Abrir WhatsApp
-                      </a>
+                      <WhatsAppFollowUpActions
+                        activityId={activity.id}
+                        href={createWhatsAppHref(
+                          activity.lead.phone,
+                          getFollowUpMessage(
+                            activity.note,
+                            activity.lead.name,
+                            activity.lead.neighborhood,
+                          ),
+                        )}
+                      />
                     </td>
                   </tr>
                 ))}

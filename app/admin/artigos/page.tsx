@@ -42,8 +42,8 @@ export default async function ArticlesAdminPage() {
       <section className="panel">
         <h2>Pautas próprias de SEO</h2>
         <p>
-          Crie rascunhos a partir de temas de busca. Cada artigo deve usar pesquisa como referência,
-          texto original e CTA direcionado à Imóveis de Alto Padrão Rio.
+          Crie rascunhos a partir de temas de busca. Cada artigo deve usar pesquisa como
+          referência, texto original e CTA direcionado à Imóveis de Alto Padrão Rio.
         </p>
         <div className="topic-grid">
           {suggestedTopics.map((topic) => (

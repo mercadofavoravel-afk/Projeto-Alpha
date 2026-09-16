@@ -43,7 +43,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </>
         )}
 
-        {hasPermission(user.role, 'crm:write') && <Link href="/admin/leads">Leads</Link>}
+        {hasPermission(user.role, 'crm:write') && (
+          <>
+            <Link href="/admin/leads">Leads</Link>
+
+            <Link href="/admin/agenda">Agenda</Link>
+          </>
+        )}
 
         {hasPermission(user.role, 'media:write') && (
           <>

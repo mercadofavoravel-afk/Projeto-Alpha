@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
 import { requireApiPermission } from '@/lib/auth';
 import { leadSchema } from '@/lib/validation';
 
@@ -40,11 +41,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const lead = await db.lead.create({
-    data: {
-      ...parsed.data,
-      email: parsed.data.email || null,
-    },
+  const lead = await db.$transaction(async (transaction) => {
+    const createdLead = await transaction.lead.create({
+      data: {
+        ...parsed.data,
+        email: parsed.data.email || null,
+      },
+    });
+
+    if (createdLead.consent) {
+      await transaction.leadActivity.createMany({
+        data: createOrganicFollowUpActivities(createdLead, createdLead.createdAt),
+      });
+    }
+
+    return createdLead;
   });
 
   return NextResponse.json(

@@ -49,11 +49,7 @@ function activityLabel(type: string) {
   return labels[type] || type;
 }
 
-export default async function LeadDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePermission('crm:read');
 
   const { id } = await params;
@@ -206,21 +202,13 @@ export default async function LeadDetailPage({
                 <div>
                   <strong>{activityLabel(activity.type)}</strong>
 
-                  <div className="timeline-meta">
-                    {formatDate(activity.createdAt)}
-                  </div>
+                  <div className="timeline-meta">{formatDate(activity.createdAt)}</div>
 
                   {activity.note && <p>{activity.note}</p>}
 
-                  {activity.dueAt && (
-                    <p>Prazo: {formatDate(activity.dueAt)}</p>
-                  )}
+                  {activity.dueAt && <p>Prazo: {formatDate(activity.dueAt)}</p>}
 
-                  {activity.completedAt && (
-                    <p>
-                      Concluído em: {formatDate(activity.completedAt)}
-                    </p>
-                  )}
+                  {activity.completedAt && <p>Concluído em: {formatDate(activity.completedAt)}</p>}
                 </div>
               </article>
             ))}

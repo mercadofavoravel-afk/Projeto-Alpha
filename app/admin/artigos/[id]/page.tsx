@@ -1,3 +1,4 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -82,9 +83,7 @@ export default async function ArticleEditorPage({
       )}
 
       {query.erro === 'revisao' && (
-        <p className="notice">
-          Para publicar, salve o artigo primeiro com o status “Em revisão”.
-        </p>
+        <p className="notice">Para publicar, salve o artigo primeiro com o status “Em revisão”.</p>
       )}
 
       {query.erro === 'seo' && (

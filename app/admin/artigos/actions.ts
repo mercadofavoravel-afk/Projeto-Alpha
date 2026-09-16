@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requirePermission } from '@/lib/auth';
+import { findInvalidEditorialDestinations } from '@/lib/editorial-destination';
 import { createEditorialDraft, isEditorialDraft } from '@/lib/editorial-draft';
 import { db } from '@/lib/db';
 import { createSlug } from '@/lib/slug';
@@ -103,6 +104,20 @@ export async function saveArticleAction(formData: FormData) {
 
     if (isEditorialDraft(content)) {
       redirect(`/admin/artigos/${id}?erro=rascunho`);
+    }
+
+    const invalidDestinations = findInvalidEditorialDestinations(
+      [
+        title,
+        content,
+        String(formData.get('excerpt') ?? ''),
+        String(formData.get('seoTitle') ?? ''),
+        String(formData.get('seoDescription') ?? ''),
+      ].join('\n'),
+    );
+
+    if (invalidDestinations.length > 0) {
+      redirect(`/admin/artigos/${id}?erro=destinos`);
     }
   }
 

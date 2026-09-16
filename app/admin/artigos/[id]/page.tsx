@@ -74,6 +74,13 @@ export default async function ArticleEditorPage({
         </p>
       )}
 
+      {query.erro === 'destinos' && (
+        <p className="notice">
+          A publicação foi bloqueada: use somente links do site, WhatsApp ou e-mail da Imóveis de
+          Alto Padrão Rio.
+        </p>
+      )}
+
       <form action={saveArticleAction} className="editor-form">
         <input type="hidden" name="id" value={article.id} />
 

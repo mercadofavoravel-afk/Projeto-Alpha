@@ -8,6 +8,8 @@ type LeadItem = {
   name: string;
   phone: string;
   objective: string;
+  neighborhood: string | null;
+  source: string | null;
   status: string;
   activities: Array<{
     id: string;
@@ -41,6 +43,8 @@ export default async function LeadsPage() {
               <th>Nome</th>
               <th>Telefone</th>
               <th>Objetivo</th>
+              <th>Origem</th>
+              <th>Região</th>
               <th>Status</th>
               <th>Atividades</th>
             </tr>
@@ -54,6 +58,8 @@ export default async function LeadsPage() {
                 </td>
                 <td>{lead.phone}</td>
                 <td>{lead.objective}</td>
+                <td>{lead.source || 'Site'}</td>
+                <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
                 <td>{lead.status}</td>
                 <td>{lead.activities.length}</td>
               </tr>

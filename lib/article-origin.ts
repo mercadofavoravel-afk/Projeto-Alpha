@@ -16,7 +16,10 @@ const articleNeighborhoods = [
 ] as const;
 
 function normalize(value: string) {
-  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('pt-BR');
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLocaleLowerCase('pt-BR');
 }
 
 export function getArticleNeighborhood(title: string) {

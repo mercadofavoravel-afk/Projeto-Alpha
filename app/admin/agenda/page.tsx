@@ -76,12 +76,9 @@ export default async function AgendaPage() {
     take: 100,
   });
 
-  const overdue = activities.filter(
-    (activity) => activity.dueAt && activity.dueAt < today,
-  ).length;
+  const overdue = activities.filter((activity) => activity.dueAt && activity.dueAt < today).length;
   const dueToday = activities.filter(
-    (activity) =>
-      activity.dueAt && activity.dueAt >= today && activity.dueAt < tomorrow,
+    (activity) => activity.dueAt && activity.dueAt >= today && activity.dueAt < tomorrow,
   ).length;
 
   return (

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requirePermission } from '@/lib/auth';
+import { getArticlePublicationIssues } from '@/lib/article-publication';
 import { findInvalidEditorialDestinations } from '@/lib/editorial-destination';
 import { createEditorialDraft, isEditorialDraft } from '@/lib/editorial-draft';
 import { db } from '@/lib/db';
@@ -99,11 +100,43 @@ export async function saveArticleAction(formData: FormData) {
     redirect(`/admin/artigos/${id}?erro=campos`);
   }
 
+  const current = await db.article.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      publishStatus: true,
+      publishedAt: true,
+      slug: true,
+    },
+  });
+
+  if (!current) {
+    redirect('/admin/artigos?erro=nao-encontrado');
+  }
+
   if (publishStatus === 'PUBLISHED') {
     await requirePermission('catalog:publish');
 
+    if (current.publishStatus !== 'REVIEW' && current.publishStatus !== 'PUBLISHED') {
+      redirect(`/admin/artigos/${id}?erro=revisao`);
+    }
+
     if (isEditorialDraft(content)) {
       redirect(`/admin/artigos/${id}?erro=rascunho`);
+    }
+
+    const publicationIssues = getArticlePublicationIssues({
+      category: optional(formData, 'category') ?? '',
+      content,
+      excerpt: optional(formData, 'excerpt') ?? '',
+      seoDescription: optional(formData, 'seoDescription') ?? '',
+      seoTitle: optional(formData, 'seoTitle') ?? '',
+      title,
+    });
+
+    if (publicationIssues.length > 0) {
+      redirect(`/admin/artigos/${id}?erro=seo`);
     }
 
     const invalidDestinations = findInvalidEditorialDestinations(
@@ -119,20 +152,6 @@ export async function saveArticleAction(formData: FormData) {
     if (invalidDestinations.length > 0) {
       redirect(`/admin/artigos/${id}?erro=destinos`);
     }
-  }
-
-  const current = await db.article.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      publishedAt: true,
-      slug: true,
-    },
-  });
-
-  if (!current) {
-    redirect('/admin/artigos?erro=nao-encontrado');
   }
 
   const slug = await uniqueSlug(String(formData.get('slug') ?? title).trim() || title, id);

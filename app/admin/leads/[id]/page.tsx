@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { ActivityForm } from './ActivityForm';
+import { LeadStatusForm } from './LeadStatusForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,13 @@ export default async function LeadDetailPage({
           Voltar para leads
         </Link>
       </div>
+
+      <section className="admin-card">
+        <div className="eyebrow">Controle de sequência</div>
+        <h2>Atualizar atendimento</h2>
+
+        <LeadStatusForm leadId={lead.id} initialStatus={lead.status} />
+      </section>
 
       <div className="editor-grid">
         <section className="admin-card">

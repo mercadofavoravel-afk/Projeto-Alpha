@@ -30,5 +30,9 @@ export function getArticleNeighborhood(title: string) {
 }
 
 export function createOrganicArticleSource(title: string, neighborhood: string) {
-  return `Orgânico | artigo: ${title} | região: ${neighborhood}`.slice(0, 120);
+  const prefix = 'Orgânico | artigo: ';
+  const suffix = ` | região: ${neighborhood}`;
+  const titleLimit = Math.max(0, 120 - prefix.length - suffix.length);
+
+  return `${prefix}${title.slice(0, titleLimit)}${suffix}`;
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
 import { requireApiPermission } from '@/lib/auth';
 import { leadSchema } from '@/lib/validation';
 
@@ -7,10 +8,7 @@ export async function GET() {
   const auth = await requireApiPermission('crm:read');
 
   if (!auth.ok) {
-    return NextResponse.json(
-      { error: auth.error },
-      { status: auth.status },
-    );
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const leads = await db.lead.findMany({
@@ -40,11 +38,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const lead = await db.lead.create({
-    data: {
-      ...parsed.data,
-      email: parsed.data.email || null,
-    },
+  const lead = await db.$transaction(async (transaction) => {
+    const createdLead = await transaction.lead.create({
+      data: {
+        ...parsed.data,
+        email: parsed.data.email || null,
+      },
+    });
+
+    if (createdLead.consent) {
+      await transaction.leadActivity.createMany({
+        data: createOrganicFollowUpActivities(createdLead, createdLead.createdAt),
+      });
+    }
+
+    return createdLead;
   });
 
   return NextResponse.json(

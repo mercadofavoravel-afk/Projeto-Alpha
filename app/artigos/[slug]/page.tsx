@@ -6,6 +6,7 @@ import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
+import { createOrganicArticleSource, getArticleNeighborhood } from '@/lib/article-origin';
 import { createMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -113,6 +114,10 @@ export default async function ArticlePage({ params }: PageProps) {
       featuredProjects.map((project) => [project.neighborhood.slug, project.neighborhood]),
     ).values(),
   ).slice(0, 3);
+
+  const neighborhood = getArticleNeighborhood(
+    [article.title, article.excerpt, article.content].filter(Boolean).join(' '),
+  );
 
   const paragraphs = article.content
     .split(/\n{2,}/)
@@ -261,9 +266,10 @@ export default async function ArticlePage({ params }: PageProps) {
             </div>
 
             <LeadCaptureForm
-              neighborhood="Rio de Janeiro"
+              neighborhood={neighborhood}
               projectName={`Conteúdo: ${article.title}`}
               projectSlug={`artigo-${article.slug}`}
+              source={createOrganicArticleSource(article.title, neighborhood)}
             />
           </div>
         </section>

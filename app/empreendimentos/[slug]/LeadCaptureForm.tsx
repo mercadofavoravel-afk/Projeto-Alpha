@@ -72,9 +72,7 @@ export function LeadCaptureForm({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || 'Não foi possível enviar sua solicitação.',
-        );
+        throw new Error(data.error || 'Não foi possível enviar sua solicitação.');
       }
 
       void fetch('/api/analytics', {
@@ -125,8 +123,8 @@ export function LeadCaptureForm({
       <div className="concierge-form-intro">
         <span>Solicitação de atendimento</span>
         <p>
-          Preencha seus dados para receber informações comerciais e
-          disponibilidade deste empreendimento.
+          Preencha seus dados para receber informações comerciais e disponibilidade deste
+          empreendimento.
         </p>
       </div>
 
@@ -189,25 +187,19 @@ export function LeadCaptureForm({
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-budget">
-          Faixa de investimento
-        </label>
+        <label htmlFor="lead-budget">Faixa de investimento</label>
 
         <input
           id="lead-budget"
           inputMode="numeric"
           value={budgetMax}
-          onChange={(event) =>
-            setBudgetMax(event.target.value.replace(/\D/g, ''))
-          }
+          onChange={(event) => setBudgetMax(event.target.value.replace(/\D/g, ''))}
           placeholder="Valor máximo previsto"
         />
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-message">
-          Como podemos ajudar?
-        </label>
+        <label htmlFor="lead-message">Como podemos ajudar?</label>
 
         <textarea
           id="lead-message"

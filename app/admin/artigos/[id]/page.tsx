@@ -56,13 +56,21 @@ export default async function ArticleEditorPage({
       </div>
 
       {query.criado === '1' && (
-        <p className="notice">Rascunho criado. Preencha o conteúdo abaixo.</p>
+        <p className="notice">
+          Rascunho estruturado criado. Complete a pesquisa e revise o texto antes de publicar.
+        </p>
       )}
 
       {query.salvo === '1' && <p className="notice">Artigo salvo com sucesso.</p>}
 
       {query.erro === 'campos' && (
         <p className="notice">Informe título e conteúdo com pelo menos 50 caracteres.</p>
+      )}
+
+      {query.erro === 'rascunho' && (
+        <p className="notice">
+          Este texto ainda é um rascunho. Revise o conteúdo e remova o aviso de rascunho antes de publicar.
+        </p>
       )}
 
       <form action={saveArticleAction} className="editor-form">

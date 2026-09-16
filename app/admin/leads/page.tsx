@@ -1,13 +1,9 @@
-import type { Prisma } from '@prisma/client';
 import Link from 'next/link';
 
 import { db } from '@/lib/db';
+import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 
 export const dynamic = 'force-dynamic';
-
-const leadStatuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED', 'WON', 'LOST'] as const;
-
-type LeadStatusFilter = (typeof leadStatuses)[number];
 
 type LeadItem = {
   id: string;
@@ -39,23 +35,6 @@ function articleFromSource(source: string) {
   return match?.[1] || source;
 }
 
-function statusLabel(status: string) {
-  const labels: Record<string, string> = {
-    NEW: 'Novo',
-    CONTACTED: 'Em atendimento',
-    QUALIFIED: 'Qualificado',
-    VISIT_SCHEDULED: 'Visita agendada',
-    WON: 'Ganho',
-    LOST: 'Perdido',
-  };
-
-  return labels[status] || status;
-}
-
-function validStatus(value: string | undefined): LeadStatusFilter | undefined {
-  return leadStatuses.includes(value as LeadStatusFilter) ? (value as LeadStatusFilter) : undefined;
-}
-
 export default async function LeadsPage({
   searchParams,
 }: {
@@ -66,43 +45,16 @@ export default async function LeadsPage({
   }>;
 }) {
   const params = await searchParams;
-  const channel = ['organic', 'campaign', 'direct'].includes(params.channel || '')
-    ? params.channel
-    : undefined;
-  const campaign = params.campaign?.trim() || '';
-  const status = validStatus(params.status);
+  const filters = parseLeadFilters(params);
+  const { channel, campaign, status } = filters;
+  const where = buildLeadWhere(filters);
 
-  const where: Prisma.LeadWhereInput = {
-    ...(status ? { status } : {}),
-    ...(campaign
-      ? {
-          utmCampaign: {
-            contains: campaign,
-            mode: 'insensitive' as const,
-          },
-        }
-      : {}),
-    ...(channel === 'organic'
-      ? {
-          source: {
-            startsWith: 'Orgânico | artigo:',
-          },
-        }
-      : {}),
-    ...(channel === 'campaign'
-      ? {
-          utmSource: {
-            not: null,
-          },
-        }
-      : {}),
-    ...(channel === 'direct'
-      ? {
-          source: null,
-          utmSource: null,
-        }
-      : {}),
-  };
+  const exportParams = new URLSearchParams();
+  if (channel) exportParams.set('channel', channel);
+  if (campaign) exportParams.set('campaign', campaign);
+  if (status) exportParams.set('status', status);
+
+  const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
 
   const leads = await db.lead.findMany({
     where,
@@ -180,6 +132,9 @@ export default async function LeadsPage({
             <button className="btn" type="submit">
               Aplicar filtros
             </button>
+            <Link className="btn btn-ghost" href={exportHref}>
+              Exportar CSV
+            </Link>
             {hasFilters && (
               <Link className="btn btn-ghost" href="/admin/leads">
                 Limpar filtros

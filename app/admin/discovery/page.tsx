@@ -1,24 +1,10 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-type CandidateStatus =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'IMPORTED';
+type CandidateStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'IMPORTED';
 
-type CandidateKind =
-  | 'PROJECT'
-  | 'NEIGHBORHOOD'
-  | 'DOCUMENT'
-  | 'ARTICLE'
-  | 'DEVELOPER'
-  | 'OTHER';
+type CandidateKind = 'PROJECT' | 'NEIGHBORHOOD' | 'DOCUMENT' | 'ARTICLE' | 'DEVELOPER' | 'OTHER';
 
 type Candidate = {
   id: string;
@@ -86,258 +72,121 @@ type ApiResponse = {
   error?: string;
 };
 
-const kindLabels: Record<
-  CandidateKind,
-  string
-> = {
-  PROJECT:
-    'Empreendimento',
+const kindLabels: Record<CandidateKind, string> = {
+  PROJECT: 'Empreendimento',
 
-  NEIGHBORHOOD:
-    'Bairro',
+  NEIGHBORHOOD: 'Bairro',
 
-  DOCUMENT:
-    'Documento',
+  DOCUMENT: 'Documento',
 
-  ARTICLE:
-    'Conteúdo',
+  ARTICLE: 'Conteúdo',
 
-  DEVELOPER:
-    'Incorporadora',
+  DEVELOPER: 'Incorporadora',
 
-  OTHER:
-    'Outro',
+  OTHER: 'Outro',
 };
 
-const statusLabels: Record<
-  CandidateStatus,
-  string
-> = {
-  PENDING:
-    'Pendente',
+const statusLabels: Record<CandidateStatus, string> = {
+  PENDING: 'Pendente',
 
-  APPROVED:
-    'Aprovado',
+  APPROVED: 'Aprovado',
 
-  REJECTED:
-    'Rejeitado',
+  REJECTED: 'Rejeitado',
 
-  IMPORTED:
-    'Importado',
+  IMPORTED: 'Importado',
 };
 
-function formatDate(
-  value: string | null,
-) {
+function formatDate(value: string | null) {
   if (!value) {
     return '—';
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return '—';
   }
 
-  return new Intl.DateTimeFormat(
-    'pt-BR',
-    {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date);
 }
 
-function ScoreBadge({
-  score,
-}: {
-  score: number;
-}) {
-  const className =
-    score >= 70
-      ? 'score score-high'
-      : score >= 40
-        ? 'score score-medium'
-        : 'score';
+function ScoreBadge({ score }: { score: number }) {
+  const className = score >= 70 ? 'score score-high' : score >= 40 ? 'score score-medium' : 'score';
 
-  return (
-    <span className={className}>
-      {score}
-    </span>
-  );
+  return <span className={className}>{score}</span>;
 }
 
-function StatusBadge({
-  status,
-}: {
-  status: CandidateStatus;
-}) {
+function StatusBadge({ status }: { status: CandidateStatus }) {
   return (
-    <span
-      className={`status-badge status-${status.toLowerCase()}`}
-    >
-      {
-        statusLabels[
-          status
-        ]
-      }
-    </span>
+    <span className={`status-badge status-${status.toLowerCase()}`}>{statusLabels[status]}</span>
   );
 }
 
 export default function DiscoveryPage() {
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    actionId,
-    setActionId,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  const [actionId, setActionId] = useState<string | null>(null);
 
-  const [
-    selectedIds,
-    setSelectedIds,
-  ] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [
-    data,
-    setData,
-  ] =
-    useState<ApiResponse | null>(
-      null,
-    );
+  const [data, setData] = useState<ApiResponse | null>(null);
 
-  const [
-    error,
-    setError,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  const [error, setError] = useState<string | null>(null);
 
-  const [
-    status,
-    setStatus,
-  ] =
-    useState<
-      CandidateStatus | 'ALL'
-    >('PENDING');
+  const [status, setStatus] = useState<CandidateStatus | 'ALL'>('PENDING');
 
-  const [
-    kind,
-    setKind,
-  ] =
-    useState<
-      CandidateKind | 'ALL'
-    >('ALL');
+  const [kind, setKind] = useState<CandidateKind | 'ALL'>('ALL');
 
-  const [
-    searchInput,
-    setSearchInput,
-  ] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
-  const [
-    search,
-    setSearch,
-  ] = useState('');
+  const [search, setSearch] = useState('');
 
-  const [
-    market,
-    setMarket,
-  ] = useState<'RIO' | 'ALL'>('RIO');
+  const [market, setMarket] = useState<'RIO' | 'ALL'>('RIO');
 
-  const [
-    minScore,
-    setMinScore,
-  ] = useState(40);
+  const [minScore, setMinScore] = useState(40);
 
-  const [
-    page,
-    setPage,
-  ] = useState(1);
+  const [page, setPage] = useState(1);
 
-  const loadCandidates =
-    useCallback(
-      async () => {
-        setLoading(true);
-        setError(null);
+  const loadCandidates = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        try {
-          const params =
-            new URLSearchParams({
-              status,
-              kind,
-              page:
-                String(page),
-              pageSize:
-                '30',
-              minScore:
-                String(minScore),
-              market,
-            });
-
-          if (search) {
-            params.set(
-              'search',
-              search,
-            );
-          }
-
-          const response =
-            await fetch(
-              `/api/admin/discovery-candidates?${params.toString()}`,
-              {
-                cache:
-                  'no-store',
-              },
-            );
-
-          const result =
-            (await response.json()) as ApiResponse;
-
-          if (
-            !response.ok ||
-            !result.ok
-          ) {
-            throw new Error(
-              result.error ||
-                'Não foi possível carregar a fila.',
-            );
-          }
-
-          setData(result);
-        } catch (
-          loadError
-        ) {
-          setError(
-            loadError instanceof
-              Error
-              ? loadError.message
-              : 'Não foi possível carregar a fila.',
-          );
-        } finally {
-          setLoading(false);
-        }
-      },
-      [
+    try {
+      const params = new URLSearchParams({
         status,
         kind,
-        search,
+        page: String(page),
+        pageSize: '30',
+        minScore: String(minScore),
         market,
-        minScore,
-        page,
-      ],
-    );
+      });
+
+      if (search) {
+        params.set('search', search);
+      }
+
+      const response = await fetch(`/api/admin/discovery-candidates?${params.toString()}`, {
+        cache: 'no-store',
+      });
+
+      const result = (await response.json()) as ApiResponse;
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Não foi possível carregar a fila.');
+      }
+
+      setData(result);
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error ? loadError.message : 'Não foi possível carregar a fila.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [status, kind, search, market, minScore, page]);
 
   useEffect(() => {
     void loadCandidates();
@@ -345,19 +194,13 @@ export default function DiscoveryPage() {
 
   async function updateStatus(
     target: string | string[],
-    nextStatus:
-      | 'PENDING'
-      | 'APPROVED'
-      | 'REJECTED',
+    nextStatus: 'PENDING' | 'APPROVED' | 'REJECTED',
   ) {
     if (actionId) {
       return;
     }
 
-    const candidateIds =
-      Array.isArray(target)
-        ? target
-        : [target];
+    const candidateIds = Array.isArray(target) ? target : [target];
 
     if (candidateIds.length === 0) {
       return;
@@ -367,51 +210,33 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response =
-        await fetch(
-          '/api/admin/discovery-candidates',
-          {
-            method:
-              'PATCH',
+      const response = await fetch('/api/admin/discovery-candidates', {
+        method: 'PATCH',
 
-            headers: {
-              'Content-Type':
-                'application/json',
-            },
+        headers: {
+          'Content-Type': 'application/json',
+        },
 
-            body:
-              JSON.stringify({
-                ids: candidateIds,
-                status:
-                  nextStatus,
-              }),
-          },
-        );
+        body: JSON.stringify({
+          ids: candidateIds,
+          status: nextStatus,
+        }),
+      });
 
-      const result =
-        (await response.json()) as {
-          ok: boolean;
-          error?: string;
-        };
+      const result = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+      };
 
-      if (
-        !response.ok ||
-        !result.ok
-      ) {
-        throw new Error(
-          result.error ||
-            'Não foi possível atualizar o candidato.',
-        );
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Não foi possível atualizar o candidato.');
       }
 
       setSelectedIds([]);
       await loadCandidates();
-    } catch (
-      updateError
-    ) {
+    } catch (updateError) {
       setError(
-        updateError instanceof
-          Error
+        updateError instanceof Error
           ? updateError.message
           : 'Não foi possível atualizar o candidato.',
       );
@@ -420,13 +245,54 @@ export default function DiscoveryPage() {
     }
   }
 
-  function toggleCandidate(
-    id: string,
-  ) {
+  async function updateAllMatching(nextStatus: 'APPROVED' | 'REJECTED') {
+    if (actionId || !data?.filters || !pagination?.total) {
+      return;
+    }
+
+    setActionId('filtered-candidates');
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/discovery-candidates', {
+        method: 'PATCH',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          scope: 'FILTERED',
+          filters: data.filters,
+          status: nextStatus,
+        }),
+      });
+
+      const result = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Não foi possível atualizar os candidatos filtrados.');
+      }
+
+      setSelectedIds([]);
+      await loadCandidates();
+    } catch (updateError) {
+      setError(
+        updateError instanceof Error
+          ? updateError.message
+          : 'Não foi possível atualizar os candidatos filtrados.',
+      );
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  function toggleCandidate(id: string) {
     setSelectedIds((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id],
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     );
   }
 
@@ -441,63 +307,39 @@ export default function DiscoveryPage() {
     );
   }
 
-  function submitSearch(
-    event:
-      React.FormEvent<HTMLFormElement>,
-  ) {
+  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setPage(1);
 
-    setSearch(
-      searchInput
-        .trim(),
-    );
+    setSearch(searchInput.trim());
   }
 
-  function changeStatus(
-    value:
-      CandidateStatus | 'ALL',
-  ) {
+  function changeStatus(value: CandidateStatus | 'ALL') {
     setPage(1);
     setStatus(value);
   }
 
-  function changeKind(
-    value:
-      CandidateKind | 'ALL',
-  ) {
+  function changeKind(value: CandidateKind | 'ALL') {
     setPage(1);
     setKind(value);
   }
 
-  const summary =
-    data?.summary;
+  const summary = data?.summary;
 
-  const pagination =
-    data?.pagination;
+  const pagination = data?.pagination;
 
-  const items =
-    data?.items ?? [];
+  const items = data?.items ?? [];
 
   return (
     <>
-      <div className="eyebrow">
-        Inteligência de mercado
-      </div>
+      <div className="eyebrow">Inteligência de mercado</div>
 
-      <h1>
-        Fila de Discovery
-      </h1>
+      <h1>Fila de Discovery</h1>
 
       <p className="intro">
-        Revise as oportunidades
-        encontradas automaticamente
-        nas fontes monitoradas antes
-        que qualquer informação seja
-        transformada em conteúdo,
-        empreendimento ou ativo
-        público do Alpha.
+        Revise as oportunidades encontradas automaticamente nas fontes monitoradas antes que
+        qualquer informação seja transformada em conteúdo, empreendimento ou ativo público do Alpha.
       </p>
 
       {summary && (
@@ -505,236 +347,101 @@ export default function DiscoveryPage() {
           <section className="summary-grid">
             <button
               type="button"
-              className={
-                status ===
-                'PENDING'
-                  ? 'summary-card active'
-                  : 'summary-card'
-              }
-              onClick={() =>
-                changeStatus(
-                  'PENDING',
-                )
-              }
+              className={status === 'PENDING' ? 'summary-card active' : 'summary-card'}
+              onClick={() => changeStatus('PENDING')}
             >
-              <span>
-                Pendentes
-              </span>
+              <span>Pendentes</span>
 
-              <strong>
-                {
-                  summary
-                    .status
-                    .pending
-                }
-              </strong>
+              <strong>{summary.status.pending}</strong>
             </button>
 
             <button
               type="button"
-              className={
-                status ===
-                'APPROVED'
-                  ? 'summary-card active'
-                  : 'summary-card'
-              }
-              onClick={() =>
-                changeStatus(
-                  'APPROVED',
-                )
-              }
+              className={status === 'APPROVED' ? 'summary-card active' : 'summary-card'}
+              onClick={() => changeStatus('APPROVED')}
             >
-              <span>
-                Aprovados
-              </span>
+              <span>Aprovados</span>
 
-              <strong>
-                {
-                  summary
-                    .status
-                    .approved
-                }
-              </strong>
+              <strong>{summary.status.approved}</strong>
             </button>
 
             <button
               type="button"
-              className={
-                status ===
-                'REJECTED'
-                  ? 'summary-card active'
-                  : 'summary-card'
-              }
-              onClick={() =>
-                changeStatus(
-                  'REJECTED',
-                )
-              }
+              className={status === 'REJECTED' ? 'summary-card active' : 'summary-card'}
+              onClick={() => changeStatus('REJECTED')}
             >
-              <span>
-                Rejeitados
-              </span>
+              <span>Rejeitados</span>
 
-              <strong>
-                {
-                  summary
-                    .status
-                    .rejected
-                }
-              </strong>
+              <strong>{summary.status.rejected}</strong>
             </button>
 
             <button
               type="button"
-              className={
-                status ===
-                'IMPORTED'
-                  ? 'summary-card active'
-                  : 'summary-card'
-              }
-              onClick={() =>
-                changeStatus(
-                  'IMPORTED',
-                )
-              }
+              className={status === 'IMPORTED' ? 'summary-card active' : 'summary-card'}
+              onClick={() => changeStatus('IMPORTED')}
             >
-              <span>
-                Importados
-              </span>
+              <span>Importados</span>
 
-              <strong>
-                {
-                  summary
-                    .status
-                    .imported
-                }
-              </strong>
+              <strong>{summary.status.imported}</strong>
             </button>
           </section>
 
           <section className="kind-summary">
             <div>
-              <span>
-                Empreendimentos
-              </span>
+              <span>Empreendimentos</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .projects
-                }
-              </strong>
+              <strong>{summary.kind.projects}</strong>
             </div>
 
             <div>
-              <span>
-                Bairros
-              </span>
+              <span>Bairros</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .neighborhoods
-                }
-              </strong>
+              <strong>{summary.kind.neighborhoods}</strong>
             </div>
 
             <div>
-              <span>
-                Documentos
-              </span>
+              <span>Documentos</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .documents
-                }
-              </strong>
+              <strong>{summary.kind.documents}</strong>
             </div>
 
             <div>
-              <span>
-                Conteúdo
-              </span>
+              <span>Conteúdo</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .articles
-                }
-              </strong>
+              <strong>{summary.kind.articles}</strong>
             </div>
 
             <div>
-              <span>
-                Incorporadoras
-              </span>
+              <span>Incorporadoras</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .developers
-                }
-              </strong>
+              <strong>{summary.kind.developers}</strong>
             </div>
 
             <div>
-              <span>
-                Outros
-              </span>
+              <span>Outros</span>
 
-              <strong>
-                {
-                  summary
-                    .kind
-                    .other
-                }
-              </strong>
+              <strong>{summary.kind.other}</strong>
             </div>
           </section>
         </>
       )}
 
       <section className="filters">
-        <form
-          onSubmit={
-            submitSearch
-          }
-          className="search-form"
-        >
+        <form onSubmit={submitSearch} className="search-form">
           <input
-            value={
-              searchInput
-            }
-            onChange={(
-              event,
-            ) =>
-              setSearchInput(
-                event
-                  .target
-                  .value,
-              )
-            }
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
             placeholder="Buscar empreendimento, fonte ou URL..."
           />
 
-          <button type="submit">
-            Buscar
-          </button>
+          <button type="submit">Buscar</button>
 
           {search && (
             <button
               type="button"
               className="secondary"
               onClick={() => {
-                setSearchInput(
-                  '',
-                );
+                setSearchInput('');
 
                 setSearch('');
 
@@ -749,37 +456,17 @@ export default function DiscoveryPage() {
         <div className="filter-row">
           <select
             value={status}
-            onChange={(
-              event,
-            ) =>
-              changeStatus(
-                event
-                  .target
-                  .value as
-                  | CandidateStatus
-                  | 'ALL',
-              )
-            }
+            onChange={(event) => changeStatus(event.target.value as CandidateStatus | 'ALL')}
           >
-            <option value="PENDING">
-              Pendentes
-            </option>
+            <option value="PENDING">Pendentes</option>
 
-            <option value="APPROVED">
-              Aprovados
-            </option>
+            <option value="APPROVED">Aprovados</option>
 
-            <option value="REJECTED">
-              Rejeitados
-            </option>
+            <option value="REJECTED">Rejeitados</option>
 
-            <option value="IMPORTED">
-              Importados
-            </option>
+            <option value="IMPORTED">Importados</option>
 
-            <option value="ALL">
-              Todos os status
-            </option>
+            <option value="ALL">Todos os status</option>
           </select>
 
           <select
@@ -812,109 +499,61 @@ export default function DiscoveryPage() {
 
           <select
             value={kind}
-            onChange={(
-              event,
-            ) =>
-              changeKind(
-                event
-                  .target
-                  .value as
-                  | CandidateKind
-                  | 'ALL',
-              )
-            }
+            onChange={(event) => changeKind(event.target.value as CandidateKind | 'ALL')}
           >
-            <option value="ALL">
-              Todos os tipos
-            </option>
+            <option value="ALL">Todos os tipos</option>
 
-            <option value="PROJECT">
-              Empreendimentos
-            </option>
+            <option value="PROJECT">Empreendimentos</option>
 
-            <option value="NEIGHBORHOOD">
-              Bairros
-            </option>
+            <option value="NEIGHBORHOOD">Bairros</option>
 
-            <option value="DOCUMENT">
-              Documentos
-            </option>
+            <option value="DOCUMENT">Documentos</option>
 
-            <option value="ARTICLE">
-              Conteúdo
-            </option>
+            <option value="ARTICLE">Conteúdo</option>
 
-            <option value="DEVELOPER">
-              Incorporadoras
-            </option>
+            <option value="DEVELOPER">Incorporadoras</option>
 
-            <option value="OTHER">
-              Outros
-            </option>
+            <option value="OTHER">Outros</option>
           </select>
 
           <button
             type="button"
             className="refresh"
-            onClick={() =>
-              void loadCandidates()
-            }
+            onClick={() => void loadCandidates()}
             disabled={loading}
           >
-            {loading
-              ? 'Atualizando...'
-              : 'Atualizar fila'}
+            {loading ? 'Atualizando...' : 'Atualizar fila'}
           </button>
         </div>
       </section>
 
       {error && (
         <div className="message error">
-          <strong>
-            Não foi possível concluir a
-            operação.
-          </strong>
+          <strong>Não foi possível concluir a operação.</strong>
 
-          <span>
-            {error}
-          </span>
+          <span>{error}</span>
         </div>
       )}
 
-      {loading &&
-        !data && (
-          <section className="loading-box">
-            <div className="pulse" />
+      {loading && !data && (
+        <section className="loading-box">
+          <div className="pulse" />
 
-            <div>
-              <strong>
-                Carregando inteligência
-              </strong>
+          <div>
+            <strong>Carregando inteligência</strong>
 
-              <p>
-                Consultando a fila
-                persistente de
-                candidatos.
-              </p>
-            </div>
-          </section>
-        )}
+            <p>Consultando a fila persistente de candidatos.</p>
+          </div>
+        </section>
+      )}
 
-      {!loading &&
-        items.length ===
-          0 && (
-          <section className="empty">
-            <strong>
-              Nenhum candidato encontrado.
-            </strong>
+      {!loading && items.length === 0 && (
+        <section className="empty">
+          <strong>Nenhum candidato encontrado.</strong>
 
-            <p>
-              Altere os filtros ou
-              execute uma nova
-              varredura das fontes.
-            </p>
-          </section>
-        )}
+          <p>Altere os filtros ou execute uma nova varredura das fontes.</p>
+        </section>
+      )}
 
       {items.length > 0 && (
         <section className="bulk-review">
@@ -945,6 +584,17 @@ export default function DiscoveryPage() {
           >
             Rejeitar selecionados
           </button>
+
+          {status === 'PENDING' && pagination && pagination.total > 0 && (
+            <button
+              type="button"
+              className="approve-all"
+              disabled={Boolean(actionId)}
+              onClick={() => void updateAllMatching('APPROVED')}
+            >
+              Aprovar todos os {pagination.total} filtrados
+            </button>
+          )}
         </section>
       )}
 
@@ -952,268 +602,143 @@ export default function DiscoveryPage() {
         <section className="candidate-list">
           <div className="list-head">
             <div>
-              <div className="eyebrow">
-                Revisão humana
-              </div>
+              <div className="eyebrow">Revisão humana</div>
 
-              <h2>
-                Candidatos encontrados
-              </h2>
+              <h2>Candidatos encontrados</h2>
 
               <p>
-                Aprovar significa que o
-                item pode avançar para a
-                próxima etapa de
-                inteligência. Ainda não
-                significa publicação.
+                Aprovar significa que o item pode avançar para a próxima etapa de inteligência.
+                Ainda não significa publicação.
               </p>
             </div>
 
-            <strong>
-              {pagination?.total ??
-                items.length}
-            </strong>
+            <strong>{pagination?.total ?? items.length}</strong>
           </div>
 
           <div className="cards">
-            {items.map(
-              (candidate) => (
-                <article
-                  key={
-                    candidate.id
-                  }
-                  className="candidate-card"
-                >
-                  <div className="candidate-main">
-                    <label className="candidate-select">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(candidate.id)}
-                        onChange={() => toggleCandidate(candidate.id)}
-                      />
-                      Selecionar candidato
-                    </label>
+            {items.map((candidate) => (
+              <article key={candidate.id} className="candidate-card">
+                <div className="candidate-main">
+                  <label className="candidate-select">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(candidate.id)}
+                      onChange={() => toggleCandidate(candidate.id)}
+                    />
+                    Selecionar candidato
+                  </label>
 
-                    <div className="candidate-top">
-                      <div className="badges">
-                        <span className="kind-badge">
-                          {
-                            kindLabels[
-                              candidate
-                                .kind
-                            ]
-                          }
-                        </span>
+                  <div className="candidate-top">
+                    <div className="badges">
+                      <span className="kind-badge">{kindLabels[candidate.kind]}</span>
 
-                        <StatusBadge
-                          status={
-                            candidate.status
-                          }
-                        />
+                      <StatusBadge status={candidate.status} />
 
-                        <ScoreBadge
-                          score={
-                            candidate.score
-                          }
-                        />
-                      </div>
-
-                      <small>
-                        Última detecção:{' '}
-                        {formatDate(
-                          candidate.lastSeenAt,
-                        )}
-                      </small>
+                      <ScoreBadge score={candidate.score} />
                     </div>
 
-                    <h3>
-                      {candidate.title ||
-                        'Candidato sem título'}
-                    </h3>
+                    <small>Última detecção: {formatDate(candidate.lastSeenAt)}</small>
+                  </div>
 
-                    <a
-                      href={
-                        candidate.url
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="candidate-url"
-                    >
-                      {candidate.url}
-                    </a>
+                  <h3>{candidate.title || 'Candidato sem título'}</h3>
 
-                    <div className="source-info">
-                      <div>
-                        <span>
-                          Fonte
-                        </span>
+                  <a
+                    href={candidate.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="candidate-url"
+                  >
+                    {candidate.url}
+                  </a>
 
-                        <strong>
-                          {
-                            candidate.sourceRootName
-                          }
-                        </strong>
-                      </div>
+                  <div className="source-info">
+                    <div>
+                      <span>Fonte</span>
 
-                      <div>
-                        <span>
-                          Primeira detecção
-                        </span>
+                      <strong>{candidate.sourceRootName}</strong>
+                    </div>
 
-                        <strong>
-                          {formatDate(
-                            candidate.firstSeenAt,
-                          )}
-                        </strong>
-                      </div>
+                    <div>
+                      <span>Primeira detecção</span>
 
-                      <div>
-                        <span>
-                          Revisado
-                        </span>
+                      <strong>{formatDate(candidate.firstSeenAt)}</strong>
+                    </div>
 
-                        <strong>
-                          {formatDate(
-                            candidate.reviewedAt,
-                          )}
-                        </strong>
-                      </div>
+                    <div>
+                      <span>Revisado</span>
+
+                      <strong>{formatDate(candidate.reviewedAt)}</strong>
                     </div>
                   </div>
+                </div>
 
-                  <div className="candidate-actions">
-                    {candidate.status !==
-                      'APPROVED' && (
-                      <button
-                        type="button"
-                        className="approve"
-                        disabled={
-                          actionId ===
-                          candidate.id
-                        }
-                        onClick={() =>
-                          void updateStatus(
-                            candidate.id,
-                            'APPROVED',
-                          )
-                        }
-                      >
-                        Aprovar
-                      </button>
-                    )}
-
-                    {candidate.status !==
-                      'REJECTED' && (
-                      <button
-                        type="button"
-                        className="reject"
-                        disabled={
-                          actionId ===
-                          candidate.id
-                        }
-                        onClick={() =>
-                          void updateStatus(
-                            candidate.id,
-                            'REJECTED',
-                          )
-                        }
-                      >
-                        Rejeitar
-                      </button>
-                    )}
-
-                    {candidate.status !==
-                      'PENDING' &&
-                      candidate.status !==
-                        'IMPORTED' && (
-                        <button
-                          type="button"
-                          className="pending"
-                          disabled={
-                            actionId ===
-                            candidate.id
-                          }
-                          onClick={() =>
-                            void updateStatus(
-                              candidate.id,
-                              'PENDING',
-                            )
-                          }
-                        >
-                          Voltar para pendente
-                        </button>
-                      )}
-
-                    <a
-                      href={
-                        candidate.url
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="source-link"
+                <div className="candidate-actions">
+                  {candidate.status !== 'APPROVED' && (
+                    <button
+                      type="button"
+                      className="approve"
+                      disabled={actionId === candidate.id}
+                      onClick={() => void updateStatus(candidate.id, 'APPROVED')}
                     >
-                      Abrir fonte
-                    </a>
-                  </div>
-                </article>
-              ),
-            )}
+                      Aprovar
+                    </button>
+                  )}
+
+                  {candidate.status !== 'REJECTED' && (
+                    <button
+                      type="button"
+                      className="reject"
+                      disabled={actionId === candidate.id}
+                      onClick={() => void updateStatus(candidate.id, 'REJECTED')}
+                    >
+                      Rejeitar
+                    </button>
+                  )}
+
+                  {candidate.status !== 'PENDING' && candidate.status !== 'IMPORTED' && (
+                    <button
+                      type="button"
+                      className="pending"
+                      disabled={actionId === candidate.id}
+                      onClick={() => void updateStatus(candidate.id, 'PENDING')}
+                    >
+                      Voltar para pendente
+                    </button>
+                  )}
+
+                  <a href={candidate.url} target="_blank" rel="noreferrer" className="source-link">
+                    Abrir fonte
+                  </a>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}
 
-      {pagination &&
-        pagination.totalPages >
-          1 && (
-          <nav className="pagination">
-            <button
-              type="button"
-              disabled={
-                page <= 1 ||
-                loading
-              }
-              onClick={() =>
-                setPage(
-                  Math.max(
-                    1,
-                    page - 1,
-                  ),
-                )
-              }
-            >
-              Anterior
-            </button>
+      {pagination && pagination.totalPages > 1 && (
+        <nav className="pagination">
+          <button
+            type="button"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage(Math.max(1, page - 1))}
+          >
+            Anterior
+          </button>
 
-            <span>
-              Página{' '}
-              <strong>
-                {pagination.page}
-              </strong>{' '}
-              de{' '}
-              <strong>
-                {
-                  pagination.totalPages
-                }
-              </strong>
-            </span>
+          <span>
+            Página <strong>{pagination.page}</strong> de <strong>{pagination.totalPages}</strong>
+          </span>
 
-            <button
-              type="button"
-              disabled={
-                page >=
-                  pagination.totalPages ||
-                loading
-              }
-              onClick={() =>
-                setPage(
-                  page + 1,
-                )
-              }
-            >
-              Próxima
-            </button>
-          </nav>
-        )}
+          <button
+            type="button"
+            disabled={page >= pagination.totalPages || loading}
+            onClick={() => setPage(page + 1)}
+          >
+            Próxima
+          </button>
+        </nav>
+      )}
 
       <style>{`
         .intro {
@@ -1429,6 +954,11 @@ export default function DiscoveryPage() {
         .bulk-review button {
           min-height: 40px;
           padding: 0 16px;
+        }
+
+        .bulk-review .approve-all {
+          color: #fff;
+          background: #275d40;
         }
 
         .candidate-select {

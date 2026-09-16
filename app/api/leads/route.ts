@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+
 import { db } from '@/lib/db';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
-import { requireApiPermission } from '@/lib/auth';
+import { normalizeLeadUtms } from '@/lib/utm';
 import { leadSchema } from '@/lib/validation';
+import { requireApiPermission } from '@/lib/auth';
 
 export async function GET() {
   const auth = await requireApiPermission('crm:read');
@@ -38,10 +40,13 @@ export async function POST(request: Request) {
     );
   }
 
+  const utms = normalizeLeadUtms(parsed.data);
+
   const lead = await db.$transaction(async (transaction) => {
     const createdLead = await transaction.lead.create({
       data: {
         ...parsed.data,
+        ...utms,
         email: parsed.data.email || null,
       },
     });

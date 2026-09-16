@@ -5,11 +5,12 @@ import { createEditorialDraft, isEditorialDraft } from './editorial-draft';
 describe('editorial drafts', () => {
   it('creates a structured draft with only official contact destinations', () => {
     const draft = createEditorialDraft('Investir em Ipanema');
+    const destinations = [...draft.matchAll(/https?:\/\/\S+/g)].map((match) => match[0]);
 
     expect(draft).toContain('Perguntas frequentes');
     expect(draft).toContain('https://www.imoveisdealtopadraorio.com.br');
     expect(draft).toContain('https://wa.me/5521964261042');
-    expect([...draft.matchAll(/https?:\/\/\S+/g)].map((match) => match[0])).toEqual([
+    expect(destinations).toEqual([
       'https://www.imoveisdealtopadraorio.com.br,',
       'https://wa.me/5521964261042',
     ]);

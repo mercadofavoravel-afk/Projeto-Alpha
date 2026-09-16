@@ -69,7 +69,8 @@ export default async function ArticleEditorPage({
 
       {query.erro === 'rascunho' && (
         <p className="notice">
-          Este texto ainda é um rascunho. Revise o conteúdo e remova o aviso de rascunho antes de publicar.
+          Este texto ainda é um rascunho. Revise o conteúdo e remova o aviso de rascunho antes de
+          publicar.
         </p>
       )}
 

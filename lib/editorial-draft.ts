@@ -1,4 +1,4 @@
-import { SITE_CONFIG } from '@/lib/site-config';
+import { SITE_CONFIG } from './site-config';
 
 export const EDITORIAL_DRAFT_MARKER = '[RASCUNHO EDITORIAL — REVISÃO OBRIGATÓRIA]';
 

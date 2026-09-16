@@ -8,10 +8,7 @@ type WhatsAppFollowUpActionsProps = {
   href: string;
 };
 
-export function WhatsAppFollowUpActions({
-  activityId,
-  href,
-}: WhatsAppFollowUpActionsProps) {
+export function WhatsAppFollowUpActions({ activityId, href }: WhatsAppFollowUpActionsProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -33,9 +30,7 @@ export function WhatsAppFollowUpActions({
       router.refresh();
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Não foi possível atualizar o acompanhamento.',
+        cause instanceof Error ? cause.message : 'Não foi possível atualizar o acompanhamento.',
       );
     } finally {
       setSaving(false);

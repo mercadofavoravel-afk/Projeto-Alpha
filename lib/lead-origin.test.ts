@@ -9,9 +9,7 @@ describe('createOrganicLeadSource', () => {
         content: '  Guia | investimento em Ipanema  ',
         region: ' Ipanema ',
       }),
-    ).toBe(
-      'Orgânico | conteúdo: Guia / investimento em Ipanema | região: Ipanema',
-    );
+    ).toBe('Orgânico | conteúdo: Guia / investimento em Ipanema | região: Ipanema');
   });
 
   it('preserves the region when the content is long', () => {

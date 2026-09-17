@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
+import { createOrganicLeadSource } from '@/lib/lead-origin';
 import {
   breadcrumbJsonLd,
   createMetadata,
@@ -314,6 +315,10 @@ export default async function Page({ params }: PageProps) {
                 projectName={project.name}
                 projectSlug={project.slug}
                 neighborhood={project.neighborhood}
+                source={createOrganicLeadSource({
+                  content: `Empreendimento: ${project.name}`,
+                  region: project.neighborhood,
+                })}
               />
             </div>
           </div>

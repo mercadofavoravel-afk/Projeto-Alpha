@@ -214,6 +214,8 @@ const NEIGHBORHOOD_NAMES = [
   'higienopolis',
   'cambui',
   'sacoma',
+  'zona sul',
+  'zona-sul',
 ];
 
 const DEVELOPER_TERMS = [
@@ -600,11 +602,21 @@ function classifyDocument(url: string): Pick<DiscoveredSource, 'kind' | 'score'>
   };
 }
 
-function classifyUrl(url: string, title: string | null): Pick<DiscoveredSource, 'kind' | 'score'> {
+export function classifySourceUrl(
+  url: string,
+  title: string | null,
+): Pick<DiscoveredSource, 'kind' | 'score'> {
   if (isTechnicalHost(url)) {
     return {
       kind: 'other',
       score: 0,
+    };
+  }
+
+  if (isGatewayHost(url) && !isGoogleWorkspaceDocumentUrl(url)) {
+    return {
+      kind: 'other',
+      score: 20,
     };
   }
 
@@ -627,17 +639,6 @@ function classifyUrl(url: string, title: string | null): Pick<DiscoveredSource, 
   const titleText = normalizeText(title ?? '');
 
   const fullText = `${pathText} ${titleText}`;
-
-  /*
-   * Gateways são fontes intermediárias.
-   * Nunca são produto imobiliário.
-   */
-  if (isGatewayHost(url)) {
-    return {
-      kind: 'other',
-      score: 20,
-    };
-  }
 
   if (containsAny(fullText, STRONG_NEGATIVE_TERMS)) {
     return {
@@ -874,7 +875,7 @@ export async function discoverSources(
 
     const title = extractTitle(html);
 
-    const classification = classifyUrl(current.url, title);
+    const classification = classifySourceUrl(current.url, title);
 
     if (classification.score >= 20) {
       discovered.set(current.url, {

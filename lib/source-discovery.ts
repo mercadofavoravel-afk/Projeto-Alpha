@@ -613,6 +613,13 @@ export function classifySourceUrl(
     };
   }
 
+  if (isGatewayHost(url) && !isGoogleWorkspaceDocumentUrl(url)) {
+    return {
+      kind: 'other',
+      score: 20,
+    };
+  }
+
   if (isDocumentUrl(url)) {
     return classifyDocument(url);
   }
@@ -632,17 +639,6 @@ export function classifySourceUrl(
   const titleText = normalizeText(title ?? '');
 
   const fullText = `${pathText} ${titleText}`;
-
-  /*
-   * Gateways são fontes intermediárias.
-   * Nunca são produto imobiliário.
-   */
-  if (isGatewayHost(url)) {
-    return {
-      kind: 'other',
-      score: 20,
-    };
-  }
 
   if (containsAny(fullText, STRONG_NEGATIVE_TERMS)) {
     return {

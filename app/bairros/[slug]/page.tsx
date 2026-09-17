@@ -85,8 +85,7 @@ function parseHighlights(value: unknown): HighlightItem[] {
         return {
           title: item.title,
           description:
-            'description' in item &&
-            typeof item.description === 'string'
+            'description' in item && typeof item.description === 'string'
               ? item.description
               : undefined,
         };
@@ -94,9 +93,7 @@ function parseHighlights(value: unknown): HighlightItem[] {
 
       return null;
     })
-    .filter(
-      (item): item is HighlightItem => item !== null,
-    );
+    .filter((item): item is HighlightItem => item !== null);
 }
 
 function parseFaq(value: unknown): FaqItem[] {
@@ -133,29 +130,19 @@ function getVideoEmbed(url?: string | null) {
   try {
     const parsed = new URL(url);
 
-    if (
-      parsed.hostname.includes('youtube.com') &&
-      parsed.pathname === '/watch'
-    ) {
+    if (parsed.hostname.includes('youtube.com') && parsed.pathname === '/watch') {
       const id = parsed.searchParams.get('v');
 
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : null;
+      return id ? `https://www.youtube.com/embed/${id}` : null;
     }
 
     if (parsed.hostname === 'youtu.be') {
       const id = parsed.pathname.replace('/', '');
 
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : null;
+      return id ? `https://www.youtube.com/embed/${id}` : null;
     }
 
-    if (
-      parsed.hostname.includes('youtube.com') &&
-      parsed.pathname.startsWith('/embed/')
-    ) {
+    if (parsed.hostname.includes('youtube.com') && parsed.pathname.startsWith('/embed/')) {
       return url;
     }
 
@@ -165,9 +152,7 @@ function getVideoEmbed(url?: string | null) {
         .filter(Boolean)
         .find((part) => /^\d+$/.test(part));
 
-      return id
-        ? `https://player.vimeo.com/video/${id}`
-        : null;
+      return id ? `https://player.vimeo.com/video/${id}` : null;
     }
   } catch {
     return null;
@@ -176,17 +161,14 @@ function getVideoEmbed(url?: string | null) {
   return null;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const neighborhood = await getNeighborhood(slug);
 
   if (!neighborhood) {
     return createMetadata({
       title: 'Bairro não encontrado',
-      description:
-        'A localização solicitada não está disponível.',
+      description: 'A localização solicitada não está disponível.',
       path: `/bairros/${slug}`,
       noIndex: true,
     });
@@ -198,9 +180,7 @@ export async function generateMetadata({
     `Descubra como é viver em ${neighborhood.name}, no Rio de Janeiro. Conheça o estilo de vida da região e os empreendimentos de alto padrão disponíveis.`;
 
   return createMetadata({
-    title:
-      neighborhood.seoTitle ||
-      `Imóveis de alto padrão em ${neighborhood.name}`,
+    title: neighborhood.seoTitle || `Imóveis de alto padrão em ${neighborhood.name}`,
     description,
     path: `/bairros/${neighborhood.slug}`,
     image:
@@ -221,9 +201,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function BairroPage({
-  params,
-}: PageProps) {
+export default async function BairroPage({ params }: PageProps) {
   const { slug } = await params;
   const neighborhood = await getNeighborhood(slug);
 
@@ -231,9 +209,7 @@ export default async function BairroPage({
     notFound();
   }
 
-  const highlights = parseHighlights(
-    neighborhood.highlights,
-  );
+  const highlights = parseHighlights(neighborhood.highlights);
 
   const faq = parseFaq(neighborhood.faq);
 
@@ -243,22 +219,16 @@ export default async function BairroPage({
     neighborhood.projects[0]?.media[0]?.url ||
     '/images/og-default.webp';
 
-  const videoEmbed = getVideoEmbed(
-    neighborhood.videoUrl,
-  );
+  const videoEmbed = getVideoEmbed(neighborhood.videoUrl);
 
-  const experienceTitle =
-    neighborhood.experienceTitle ||
-    `Como é viver em ${neighborhood.name}`;
+  const experienceTitle = neighborhood.experienceTitle || `Como é viver em ${neighborhood.name}`;
 
   const experienceDescription =
     neighborhood.experienceDescription ||
     neighborhood.description ||
     `${neighborhood.name} reúne localização, conveniência e diferentes experiências de vida no Rio de Janeiro. Nossa curadoria acompanha os principais empreendimentos da região para ajudar você a compreender melhor cada oportunidade.`;
 
-  const ctaTitle =
-    neighborhood.ctaTitle ||
-    `Encontre o imóvel certo em ${neighborhood.name}.`;
+  const ctaTitle = neighborhood.ctaTitle || `Encontre o imóvel certo em ${neighborhood.name}.`;
 
   const ctaDescription =
     neighborhood.ctaDescription ||
@@ -276,9 +246,7 @@ export default async function BairroPage({
           }}
         >
           <div className="bairro-shell bairro-hero-inner">
-            <div className="bairro-kicker">
-              Rio de Janeiro · Curadoria local
-            </div>
+            <div className="bairro-kicker">Rio de Janeiro · Curadoria local</div>
 
             <h1>{neighborhood.name}</h1>
 
@@ -288,25 +256,17 @@ export default async function BairroPage({
             </p>
 
             <div className="bairro-hero-actions">
-              <a
-                className="bairro-primary"
-                href="#empreendimentos"
-              >
+              <a className="bairro-primary" href="#empreendimentos">
                 Explorar empreendimentos
               </a>
 
-              <a
-                className="bairro-secondary"
-                href="#atendimento"
-              >
+              <a className="bairro-secondary" href="#atendimento">
                 Receber seleção personalizada
               </a>
             </div>
 
             <div className="bairro-hero-stat">
-              <strong>
-                {neighborhood.projects.length}
-              </strong>
+              <strong>{neighborhood.projects.length}</strong>
 
               <span>
                 {neighborhood.projects.length === 1
@@ -320,9 +280,7 @@ export default async function BairroPage({
         <section className="bairro-experience">
           <div className="bairro-shell bairro-two-columns">
             <div>
-              <div className="bairro-kicker dark">
-                Experiência local
-              </div>
+              <div className="bairro-kicker dark">Experiência local</div>
 
               <h2>{experienceTitle}</h2>
             </div>
@@ -331,10 +289,8 @@ export default async function BairroPage({
               <p>{experienceDescription}</p>
 
               <p>
-                Para quem está chegando ao Rio, entender
-                uma localização vai além do endereço. É
-                compreender rotina, deslocamentos,
-                conveniência, lazer e o perfil dos imóveis
+                Para quem está chegando ao Rio, entender uma localização vai além do endereço. É
+                compreender rotina, deslocamentos, conveniência, lazer e o perfil dos imóveis
                 disponíveis.
               </p>
             </div>
@@ -346,38 +302,25 @@ export default async function BairroPage({
             <div className="bairro-shell">
               <div className="bairro-section-head">
                 <div>
-                  <div className="bairro-kicker dark">
-                    Por que escolher
-                  </div>
+                  <div className="bairro-kicker dark">Por que escolher</div>
 
-                  <h2>
-                    O que torna {neighborhood.name}{' '}
-                    especial.
-                  </h2>
+                  <h2>O que torna {neighborhood.name} especial.</h2>
                 </div>
 
                 <p>
-                  Aspectos que ajudam a compreender a
-                  experiência de morar, investir ou manter
+                  Aspectos que ajudam a compreender a experiência de morar, investir ou manter
                   patrimônio nesta região.
                 </p>
               </div>
 
               <div className="bairro-highlights">
                 {highlights.map((highlight, index) => (
-                  <article
-                    key={`${highlight.title}-${index}`}
-                    className="bairro-highlight"
-                  >
-                    <span>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
+                  <article key={`${highlight.title}-${index}`} className="bairro-highlight">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
 
                     <h3>{highlight.title}</h3>
 
-                    {highlight.description && (
-                      <p>{highlight.description}</p>
-                    )}
+                    {highlight.description && <p>{highlight.description}</p>}
                   </article>
                 ))}
               </div>
@@ -390,19 +333,13 @@ export default async function BairroPage({
             <div className="bairro-shell">
               <div className="bairro-section-head light">
                 <div>
-                  <div className="bairro-kicker">
-                    Conheça a região
-                  </div>
+                  <div className="bairro-kicker">Conheça a região</div>
 
-                  <h2>
-                    {neighborhood.videoTitle ||
-                      `${neighborhood.name} em movimento.`}
-                  </h2>
+                  <h2>{neighborhood.videoTitle || `${neighborhood.name} em movimento.`}</h2>
                 </div>
 
                 <p>
-                  Uma perspectiva visual para conhecer
-                  melhor o ritmo, a paisagem e a experiência
+                  Uma perspectiva visual para conhecer melhor o ritmo, a paisagem e a experiência
                   desta localização.
                 </p>
               </div>
@@ -411,24 +348,13 @@ export default async function BairroPage({
                 {videoEmbed ? (
                   <iframe
                     src={videoEmbed}
-                    title={
-                      neighborhood.videoTitle ||
-                      `Vídeo sobre ${neighborhood.name}`
-                    }
+                    title={neighborhood.videoTitle || `Vídeo sobre ${neighborhood.name}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
-                ) : /\.(mp4|webm)(\?.*)?$/i.test(
-                    neighborhood.videoUrl,
-                  ) ? (
-                  <video
-                    controls
-                    playsInline
-                    preload="metadata"
-                  >
-                    <source
-                      src={neighborhood.videoUrl}
-                    />
+                ) : /\.(mp4|webm)(\?.*)?$/i.test(neighborhood.videoUrl) ? (
+                  <video controls playsInline preload="metadata">
+                    <source src={neighborhood.videoUrl} />
                   </video>
                 ) : (
                   <a
@@ -436,8 +362,7 @@ export default async function BairroPage({
                     className="bairro-video-link"
                     href="#atendimento"
                   >
-                    Receba uma seleção personalizada em{' '}
-                    {neighborhood.name} →
+                    Receba uma seleção personalizada em {neighborhood.name} →
                   </a>
                 )}
               </div>
@@ -448,101 +373,69 @@ export default async function BairroPage({
         <section className="bairro-conversion-strip">
           <div className="bairro-shell bairro-conversion-inner">
             <div>
-              <div className="bairro-kicker">
-                Curadoria personalizada
-              </div>
+              <div className="bairro-kicker">Curadoria personalizada</div>
 
               <h2>{ctaTitle}</h2>
 
               <p>{ctaDescription}</p>
             </div>
 
-            <a
-              href="#atendimento"
-              className="bairro-primary light-button"
-            >
+            <a href="#atendimento" className="bairro-primary light-button">
               Quero receber oportunidades
             </a>
           </div>
         </section>
 
-        <section
-          id="empreendimentos"
-          className="bairro-projects"
-        >
+        <section id="empreendimentos" className="bairro-projects">
           <div className="bairro-shell">
             <div className="bairro-section-head">
               <div>
-                <div className="bairro-kicker dark">
-                  Portfólio local
-                </div>
+                <div className="bairro-kicker dark">Portfólio local</div>
 
-                <h2>
-                  Empreendimentos selecionados em{' '}
-                  {neighborhood.name}.
-                </h2>
+                <h2>Empreendimentos selecionados em {neighborhood.name}.</h2>
               </div>
 
-              <p>
-                Projetos publicados no Alpha e
-                acompanhados pela nossa curadoria.
-              </p>
+              <p>Projetos publicados no Alpha e acompanhados pela nossa curadoria.</p>
             </div>
 
             {neighborhood.projects.length > 0 ? (
               <div className="bairro-project-grid">
-                {neighborhood.projects.map(
-                  (project, index) => {
-                    const image =
-                      project.heroImage ||
-                      project.media[0]?.url ||
-                      '/images/og-default.webp';
+                {neighborhood.projects.map((project, index) => {
+                  const image =
+                    project.heroImage || project.media[0]?.url || '/images/og-default.webp';
 
-                    const typologies =
-                      project.typologies
-                        .map((item) => item.name)
-                        .slice(0, 3)
-                        .join(' · ');
+                  const typologies = project.typologies
+                    .map((item) => item.name)
+                    .slice(0, 3)
+                    .join(' · ');
 
-                    return (
-                      <Link
-                        href={`/empreendimentos/${project.slug}`}
-                        key={project.id}
-                        className={`bairro-project-card ${
-                          index === 0
-                            ? 'bairro-project-featured'
-                            : ''
-                        }`}
-                        style={{
-                          backgroundImage: `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${image}")`,
-                        }}
-                      >
-                        <div className="bairro-project-content">
-                          <span>
-                            {project.developer?.name ||
-                              neighborhood.name}
-                          </span>
+                  return (
+                    <Link
+                      href={`/empreendimentos/${project.slug}`}
+                      key={project.id}
+                      className={`bairro-project-card ${
+                        index === 0 ? 'bairro-project-featured' : ''
+                      }`}
+                      style={{
+                        backgroundImage: `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${image}")`,
+                      }}
+                    >
+                      <div className="bairro-project-content">
+                        <span>{project.developer?.name || neighborhood.name}</span>
 
-                          <h3>{project.name}</h3>
+                        <h3>{project.name}</h3>
 
-                          <p>
-                            {typologies ||
-                              project.description}
-                          </p>
+                        <p>{typologies || project.description}</p>
 
-                          <strong>
-                            Conhecer empreendimento →
-                          </strong>
-                        </div>
-                      </Link>
-                    );
-                  },
-                )}
+                        <strong>Conhecer empreendimento →</strong>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
               <div className="bairro-empty">
-                Nossa curadoria está atualizando as
-                oportunidades disponíveis nesta região.
+                Nossa curadoria está atualizando as oportunidades disponíveis nesta região.
               </div>
             )}
           </div>
@@ -552,24 +445,15 @@ export default async function BairroPage({
           <section className="bairro-faq">
             <div className="bairro-shell bairro-two-columns">
               <div>
-                <div className="bairro-kicker dark">
-                  Para quem está pesquisando
-                </div>
+                <div className="bairro-kicker dark">Para quem está pesquisando</div>
 
-                <h2>
-                  Perguntas sobre{' '}
-                  {neighborhood.name}.
-                </h2>
+                <h2>Perguntas sobre {neighborhood.name}.</h2>
               </div>
 
               <div className="bairro-faq-list">
                 {faq.map((item, index) => (
-                  <details
-                    key={`${item.question}-${index}`}
-                  >
-                    <summary>
-                      {item.question}
-                    </summary>
+                  <details key={`${item.question}-${index}`}>
+                    <summary>{item.question}</summary>
 
                     <p>{item.answer}</p>
                   </details>
@@ -579,39 +463,23 @@ export default async function BairroPage({
           </section>
         )}
 
-        <section
-          id="atendimento"
-          className="bairro-lead-section"
-        >
+        <section id="atendimento" className="bairro-lead-section">
           <div className="bairro-shell bairro-lead-grid">
             <div className="bairro-lead-copy">
-              <div className="bairro-kicker">
-                Atendimento reservado
-              </div>
+              <div className="bairro-kicker">Atendimento reservado</div>
 
-              <h2>
-                Receba uma seleção personalizada em{' '}
-                {neighborhood.name}.
-              </h2>
+              <h2>Receba uma seleção personalizada em {neighborhood.name}.</h2>
 
               <p>
-                Informe seu perfil e sua faixa de
-                investimento. Nossa equipe poderá apresentar
-                oportunidades alinhadas ao que você procura,
-                inclusive alternativas que façam sentido
-                para comparação.
+                Informe seu perfil e sua faixa de investimento. Nossa equipe poderá apresentar
+                oportunidades alinhadas ao que você procura, inclusive alternativas que façam
+                sentido para comparação.
               </p>
 
               <div className="bairro-lead-points">
-                <span>
-                  Curadoria orientada ao seu perfil
-                </span>
-                <span>
-                  Atendimento individual
-                </span>
-                <span>
-                  Informações comerciais sob consulta
-                </span>
+                <span>Curadoria orientada ao seu perfil</span>
+                <span>Atendimento individual</span>
+                <span>Informações comerciais sob consulta</span>
               </div>
             </div>
 

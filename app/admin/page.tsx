@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +10,12 @@ type LeadMetric = {
   utmCampaign: string | null;
   status: string;
 };
+
+function startOfDay(value: Date) {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
 
 function countBy(values: string[]) {
   return Array.from(
@@ -43,23 +51,45 @@ function statusLabel(status: string) {
 }
 
 export default async function Page() {
-  const [projects, leadCount, books, recentLeads] = await Promise.all([
-    db.project.count(),
-    db.lead.count(),
-    db.bookIngestion.count(),
-    db.lead.findMany({
-      select: {
-        source: true,
-        utmSource: true,
-        utmCampaign: true,
-        status: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 500,
-    }),
-  ]);
+  const today = startOfDay(new Date());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const [projects, leadCount, books, recentLeads, overdueActivities, dueTodayActivities] =
+    await Promise.all([
+      db.project.count(),
+      db.lead.count(),
+      db.bookIngestion.count(),
+      db.lead.findMany({
+        select: {
+          source: true,
+          utmSource: true,
+          utmCampaign: true,
+          status: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 500,
+      }),
+      db.leadActivity.count({
+        where: {
+          completedAt: null,
+          dueAt: {
+            lt: today,
+          },
+        },
+      }),
+      db.leadActivity.count({
+        where: {
+          completedAt: null,
+          dueAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+      }),
+    ]);
 
   const organicLeads = recentLeads.filter((lead: LeadMetric) =>
     lead.source?.startsWith('Orgânico | artigo:'),
@@ -71,6 +101,7 @@ export default async function Page() {
       .filter((campaign): campaign is string => Boolean(campaign)),
   );
   const statuses = countBy(recentLeads.map((lead: LeadMetric) => statusLabel(lead.status)));
+  const hasOperationalAlerts = overdueActivities > 0 || dueTodayActivities > 0;
 
   return (
     <>
@@ -91,6 +122,33 @@ export default async function Page() {
           <b>{books}</b>Books
         </div>
       </div>
+
+      <section className="admin-card">
+        <div className="head">
+          <div>
+            <div className="eyebrow">Prioridade operacional</div>
+            <h2>
+              {hasOperationalAlerts
+                ? 'Acompanhamentos que exigem ação'
+                : 'Nenhum acompanhamento pendente para hoje'}
+            </h2>
+          </div>
+          <Link href="/admin/agenda">Abrir agenda</Link>
+        </div>
+
+        {hasOperationalAlerts ? (
+          <div className="kpis">
+            <div className="kpi">
+              <b>{overdueActivities}</b>Em atraso
+            </div>
+            <div className="kpi">
+              <b>{dueTodayActivities}</b>Para hoje
+            </div>
+          </div>
+        ) : (
+          <p>Os próximos contatos continuam disponíveis na Agenda de acompanhamentos.</p>
+        )}
+      </section>
 
       <section className="admin-card">
         <div className="head">

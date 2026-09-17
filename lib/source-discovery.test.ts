@@ -1,12 +1,6 @@
-import {
-  describe,
-  expect,
-  it,
-} from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import {
-  classifySourceUrl,
-} from './source-discovery';
+import { classifySourceUrl } from './source-discovery';
 
 describe('source discovery classification', () => {
   it('treats Zona Sul as a neighborhood landing page', () => {
@@ -34,33 +28,20 @@ describe('source discovery classification', () => {
   });
 
   it('does not treat Linktree document-like paths as commercial documents', () => {
-    expect(
-      classifySourceUrl(
-        'https://linktr.ee/tech.doc',
-        null,
-      ),
-    ).toEqual({
+    expect(classifySourceUrl('https://linktr.ee/tech.doc', null)).toEqual({
       kind: 'other',
       score: 20,
     });
   });
 
   it('keeps commercial documents above institutional documents', () => {
-    expect(
-      classifySourceUrl(
-        'https://materiais.exemplo.com/book-apresentacao.pdf',
-        null,
-      ),
-    ).toEqual({
+    expect(classifySourceUrl('https://materiais.exemplo.com/book-apresentacao.pdf', null)).toEqual({
       kind: 'document',
       score: 75,
     });
 
     expect(
-      classifySourceUrl(
-        'https://materiais.exemplo.com/politica-privacidade.pdf',
-        null,
-      ),
+      classifySourceUrl('https://materiais.exemplo.com/politica-privacidade.pdf', null),
     ).toEqual({
       kind: 'document',
       score: 10,

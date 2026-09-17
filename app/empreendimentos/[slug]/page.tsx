@@ -7,11 +7,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
-import {
-  breadcrumbJsonLd,
-  createMetadata,
-  projectJsonLd,
-} from '@/lib/seo';
+import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
 import { LeadCaptureForm } from './LeadCaptureForm';
 
 export const dynamic = 'force-dynamic';
@@ -58,52 +54,36 @@ async function getPublishedProject(slug: string) {
   });
 }
 
-function projectViewModel(
-  project: NonNullable<
-    Awaited<ReturnType<typeof getPublishedProject>>
-  >,
-) {
+function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPublishedProject>>>) {
   const types = project.typologies.map((item) => item.name);
 
-  const collections = project.collections.map(
-    (item) => item.collection.name,
-  );
+  const collections = project.collections.map((item) => item.collection.name);
 
-  const highlights = project.amenities.map(
-    (item) => item.amenity.name,
-  );
+  const highlights = project.amenities.map((item) => item.amenity.name);
 
   return {
     name: project.name,
     slug: project.slug,
     description: project.description,
     neighborhood: project.neighborhood.name,
-    image:
-      project.heroImage ||
-      project.media[0]?.url ||
-      '/images/og-default.webp',
+    image: project.heroImage || project.media[0]?.url || '/images/og-default.webp',
     status:
       project.statusLabel ||
-      (project.publishStatus === 'PUBLISHED'
-        ? 'Disponível'
-        : project.publishStatus),
+      (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
     types,
     collections,
     highlights,
   };
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const project = await getPublishedProject(slug);
 
   if (!project) {
     return createMetadata({
       title: 'Empreendimento não encontrado',
-      description:
-        'O empreendimento solicitado não está disponível.',
+      description: 'O empreendimento solicitado não está disponível.',
       path: `/empreendimentos/${slug}`,
       noIndex: true,
     });
@@ -116,9 +96,7 @@ export async function generateMetadata({
     `${project.name}, em ${project.neighborhood.name}: ${project.description}. Consulte características, tipologias e disponibilidade.`;
 
   return createMetadata({
-    title:
-      project.seoTitle ||
-      `${project.name} em ${project.neighborhood.name}`,
+    title: project.seoTitle || `${project.name} em ${project.neighborhood.name}`,
     description,
     path: `/empreendimentos/${project.slug}`,
     image: view.image,
@@ -126,9 +104,7 @@ export async function generateMetadata({
     keywords: [
       project.name,
       project.neighborhood.name,
-      ...(project.developer?.name
-        ? [project.developer.name]
-        : []),
+      ...(project.developer?.name ? [project.developer.name] : []),
       ...view.types,
       ...view.collections,
     ],
@@ -187,9 +163,7 @@ export default async function Page({ params }: PageProps) {
           />
 
           <div className="wrap content property-hero-content">
-            <div className="eyebrow">
-              {project.neighborhood} · Rio de Janeiro
-            </div>
+            <div className="eyebrow">{project.neighborhood} · Rio de Janeiro</div>
 
             <h1>{project.name}</h1>
 
@@ -200,22 +174,16 @@ export default async function Page({ params }: PageProps) {
         <section className="property-overview">
           <div className="wrap property-overview-grid">
             <div>
-              <div className="eyebrow">
-                O empreendimento
-              </div>
+              <div className="eyebrow">O empreendimento</div>
 
-              <h2>
-                Um endereço singular em{' '}
-                {project.neighborhood}.
-              </h2>
+              <h2>Um endereço singular em {project.neighborhood}.</h2>
             </div>
 
             <div className="property-overview-copy">
               <p>{project.description}</p>
 
               <p className="property-disclaimer">
-                Informações comerciais, disponibilidade e
-                condições estão sujeitas à confirmação.
+                Informações comerciais, disponibilidade e condições estão sujeitas à confirmação.
               </p>
             </div>
           </div>
@@ -255,9 +223,7 @@ export default async function Page({ params }: PageProps) {
               {dbProject.developer?.name && (
                 <div className="property-detail-item">
                   <span>Incorporadora</span>
-                  <strong>
-                    {dbProject.developer.name}
-                  </strong>
+                  <strong>{dbProject.developer.name}</strong>
                 </div>
               )}
 
@@ -275,9 +241,7 @@ export default async function Page({ params }: PageProps) {
 
                 <div className="property-highlights-list">
                   {project.highlights.map((highlight) => (
-                    <span key={highlight}>
-                      {highlight}
-                    </span>
+                    <span key={highlight}>{highlight}</span>
                   ))}
                 </div>
               </div>
@@ -288,25 +252,17 @@ export default async function Page({ params }: PageProps) {
         <section className="property-concierge">
           <div className="wrap property-concierge-grid">
             <div className="property-concierge-intro">
-              <div className="eyebrow">
-                Atendimento reservado
-              </div>
+              <div className="eyebrow">Atendimento reservado</div>
 
-              <h2>
-                Conheça {project.name} com acompanhamento
-                personalizado.
-              </h2>
+              <h2>Conheça {project.name} com acompanhamento personalizado.</h2>
 
               <p>
-                Compartilhe seus dados para receber
-                informações de disponibilidade, condições
-                comerciais e uma seleção orientada ao seu
-                perfil.
+                Compartilhe seus dados para receber informações de disponibilidade, condições
+                comerciais e uma seleção orientada ao seu perfil.
               </p>
 
               <div className="property-concierge-note">
-                Atendimento individual, confidencial e sem
-                compromisso.
+                Atendimento individual, confidencial e sem compromisso.
               </div>
             </div>
 

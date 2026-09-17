@@ -214,6 +214,8 @@ const NEIGHBORHOOD_NAMES = [
   'higienopolis',
   'cambui',
   'sacoma',
+  'zona sul',
+  'zona-sul',
 ];
 
 const DEVELOPER_TERMS = [
@@ -600,7 +602,10 @@ function classifyDocument(url: string): Pick<DiscoveredSource, 'kind' | 'score'>
   };
 }
 
-function classifyUrl(url: string, title: string | null): Pick<DiscoveredSource, 'kind' | 'score'> {
+export function classifySourceUrl(
+  url: string,
+  title: string | null,
+): Pick<DiscoveredSource, 'kind' | 'score'> {
   if (isTechnicalHost(url)) {
     return {
       kind: 'other',
@@ -874,7 +879,7 @@ export async function discoverSources(
 
     const title = extractTitle(html);
 
-    const classification = classifyUrl(current.url, title);
+    const classification = classifySourceUrl(current.url, title);
 
     if (classification.score >= 20) {
       discovered.set(current.url, {

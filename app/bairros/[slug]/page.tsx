@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
+import { createOrganicLeadSource } from '@/lib/lead-origin';
 import { createMetadata } from '@/lib/seo';
 import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 
@@ -619,6 +620,10 @@ export default async function BairroPage({
                 projectName={`Curadoria em ${neighborhood.name}`}
                 projectSlug={`bairro-${neighborhood.slug}`}
                 neighborhood={neighborhood.name}
+                source={createOrganicLeadSource({
+                  content: `Guia de bairro: ${neighborhood.name}`,
+                  region: neighborhood.name,
+                })}
               />
             </div>
           </div>

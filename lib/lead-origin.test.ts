@@ -19,6 +19,6 @@ describe('createOrganicLeadSource', () => {
     });
 
     expect(source).toHaveLength(120);
-    expect(source).toEndWith(' | região: Barra da Tijuca');
+    expect(source.endsWith(' | região: Barra da Tijuca')).toBe(true);
   });
 });

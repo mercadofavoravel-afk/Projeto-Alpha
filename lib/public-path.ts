@@ -8,7 +8,7 @@ export function getAlphaBasePath() {
 }
 
 export function alphaPath(path = '/') {
-  const normalizedPath = `/${path}`.replace(/^\/+/,'/').replace(/\/{2,}/g, '/');
+  const normalizedPath = `/${path}`.replace(/^\/+/, '/').replace(/\/{2,}/g, '/');
   const basePath = getAlphaBasePath();
 
   if (normalizedPath === '/') {

@@ -1,0 +1,36 @@
+name: PR44 Autoformat
+
+on:
+  push:
+    branches:
+      - codex/publicar-alpha-em-diretorio
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/publicar-alpha-em-diretorio
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply project formatting
+        run: |
+          npx prettier --write             app/admin/discovery/page.tsx             app/admin/fontes/page.tsx             "app/admin/leads/[id]/ActivityForm.tsx"             app/descubra/RecommendationQuiz.tsx             lib/seo/canonical.ts
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             app/admin/discovery/page.tsx             app/admin/fontes/page.tsx             "app/admin/leads/[id]/ActivityForm.tsx"             app/descubra/RecommendationQuiz.tsx             lib/seo/canonical.ts
+          git commit -m "style: aplicar Prettier na PR 44"
+          git push origin HEAD:codex/publicar-alpha-em-diretorio

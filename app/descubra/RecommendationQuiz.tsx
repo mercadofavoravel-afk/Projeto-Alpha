@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
@@ -106,7 +108,7 @@ export function RecommendationQuiz() {
     setError('');
 
     try {
-      const response = await fetch('/api/recommendations', {
+      const response = await fetch(alphaPath('/api/recommendations'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

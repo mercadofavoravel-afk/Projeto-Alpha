@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -31,7 +33,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
 
     try {
       const response = await fetch(
-        `/api/admin/leads/${leadId}/activities`,
+        alphaPath(`/api/admin/leads/${leadId}/activities`),
         {
           method: 'POST',
           headers: {

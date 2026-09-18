@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { useState } from 'react';
 
 type ScanItem = {
@@ -291,7 +293,7 @@ export default function SourcesPage() {
     try {
       const response =
         await fetch(
-          '/api/admin/setup-discovery',
+          alphaPath('/api/admin/setup-discovery'),
           {
             method: 'POST',
           },
@@ -317,7 +319,7 @@ export default function SourcesPage() {
   ) {
     const response =
       await fetch(
-        '/api/admin/source-scan',
+        alphaPath('/api/admin/source-scan'),
         {
           method: 'POST',
 

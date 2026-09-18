@@ -31,16 +31,12 @@ export default async function Page() {
           {projects.map((p) => (
             <tr key={p.id}>
               <td>
-                <Link href={`/admin/empreendimentos/${p.id}`}>
-                  {p.name}
-                </Link>
+                <Link href={`/admin/empreendimentos/${p.id}`}>{p.name}</Link>
               </td>
 
               <td>{p.neighborhood.name}</td>
               <td>{p.publishStatus}</td>
-              <td>
-                {p.updatedAt.toLocaleDateString('pt-BR')}
-              </td>
+              <td>{p.updatedAt.toLocaleDateString('pt-BR')}</td>
             </tr>
           ))}
         </tbody>

@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { ProjectEditor } from './ProjectEditor';
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePermission('catalog:write');
+
   const { id } = await params;
   const project = await db.project.findUnique({ where: { id } });
   if (!project) notFound();

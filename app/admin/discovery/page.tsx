@@ -212,7 +212,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch(alphaPath('/api/admin/discovery-candidates', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates'), {
         method: 'PATCH',
 
         headers: {
@@ -256,7 +256,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch(alphaPath('/api/admin/discovery-candidates', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates'), {
         method: 'PATCH',
 
         headers: {
@@ -301,7 +301,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch(alphaPath('/api/admin/discovery-candidates/import', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates/import'), {
         method: 'POST',
 
         headers: {

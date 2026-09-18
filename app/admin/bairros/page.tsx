@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { calculateSeoScore } from '@/lib/seo/score';
 import { createNeighborhoodAction } from './actions';
 
@@ -19,6 +20,8 @@ type NeighborhoodItem = {
 };
 
 export default async function NeighborhoodsPage() {
+  await requirePermission('catalog:write');
+
   const neighborhoods = await db.neighborhood.findMany({
     include: {
       _count: {

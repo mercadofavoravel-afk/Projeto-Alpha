@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -28,7 +30,7 @@ export function LeadStatusForm({ leadId, initialStatus }: LeadStatusFormProps) {
     setError('');
 
     try {
-      const response = await fetch(`/api/admin/leads/${leadId}/status`, {
+      const response = await fetch(alphaPath(`/api/admin/leads/${leadId}/status`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

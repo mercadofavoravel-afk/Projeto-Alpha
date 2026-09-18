@@ -16,11 +16,15 @@ describe('site config', () => {
 
   it('monta URL pública na raiz por padrão', () => {
     delete process.env.NEXT_PUBLIC_ALPHA_BASE_PATH;
-    expect(siteUrl('/empreendimentos/kronos')).toBe('https://www.imoveisdealtopadraorio.com.br/empreendimentos/kronos');
+    expect(siteUrl('/empreendimentos/kronos')).toBe(
+      'https://www.imoveisdealtopadraorio.com.br/empreendimentos/kronos',
+    );
   });
 
   it('monta URL pública no diretório Alpha configurado', () => {
     process.env.NEXT_PUBLIC_ALPHA_BASE_PATH = '/alpha';
-    expect(siteUrl('/empreendimentos/kronos')).toBe('https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos');
+    expect(siteUrl('/empreendimentos/kronos')).toBe(
+      'https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos',
+    );
   });
 });

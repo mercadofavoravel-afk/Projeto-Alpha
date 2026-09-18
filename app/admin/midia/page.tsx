@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,8 @@ type MediaItem = {
 };
 
 export default async function MediaPage() {
+  await requirePermission('media:write');
+
   const media = await db.media.findMany({
     include: {
       project: {

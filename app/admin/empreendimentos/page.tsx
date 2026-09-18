@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
+  await requirePermission('catalog:write');
+
   const projects = await db.project.findMany({
     include: { neighborhood: true },
     orderBy: { updatedAt: 'desc' },
@@ -28,16 +31,12 @@ export default async function Page() {
           {projects.map((p) => (
             <tr key={p.id}>
               <td>
-                <Link href={`/admin/empreendimentos/${p.id}`}>
-                  {p.name}
-                </Link>
+                <Link href={`/admin/empreendimentos/${p.id}`}>{p.name}</Link>
               </td>
 
               <td>{p.neighborhood.name}</td>
               <td>{p.publishStatus}</td>
-              <td>
-                {p.updatedAt.toLocaleDateString('pt-BR')}
-              </td>
+              <td>{p.updatedAt.toLocaleDateString('pt-BR')}</td>
             </tr>
           ))}
         </tbody>

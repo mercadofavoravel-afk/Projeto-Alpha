@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { WhatsAppFollowUpActions } from './WhatsAppFollowUpActions';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { createWhatsAppHref, getFollowUpMessage } from '@/lib/whatsapp-follow-up';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +40,8 @@ function dueLabel(dueAt: Date, today: Date, tomorrow: Date) {
 }
 
 export default async function AgendaPage() {
+  await requirePermission('crm:read');
+
   const today = startOfDay(new Date());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);

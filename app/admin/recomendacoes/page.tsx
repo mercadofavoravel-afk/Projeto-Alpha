@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 export default async function Page() {
+  await requirePermission('analytics:read');
+
   const ps = await db.recommendationProfile.findMany({
     include: { results: { include: { project: true }, orderBy: { position: 'asc' }, take: 1 } },
     orderBy: { createdAt: 'desc' },

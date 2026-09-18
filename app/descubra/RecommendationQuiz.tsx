@@ -32,13 +32,7 @@ function getSessionKey() {
   return key;
 }
 
-function ResultMedia({
-  image,
-  name,
-}: {
-  image: string | null | undefined;
-  name: string;
-}) {
+function ResultMedia({ image, name }: { image: string | null | undefined; name: string }) {
   if (!image) {
     return null;
   }
@@ -83,15 +77,9 @@ export function RecommendationQuiz() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function toggle(
-    value: string,
-    current: string[],
-    setter: (values: string[]) => void,
-  ) {
+  function toggle(value: string, current: string[], setter: (values: string[]) => void) {
     setter(
-      current.includes(value)
-        ? current.filter((item) => item !== value)
-        : [...current, value],
+      current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
     );
   }
 
@@ -128,9 +116,7 @@ export function RecommendationQuiz() {
 
       setResults(data.results ?? []);
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : 'Erro inesperado',
-      );
+      setError(cause instanceof Error ? cause.message : 'Erro inesperado');
     } finally {
       setLoading(false);
     }
@@ -196,17 +182,13 @@ export function RecommendationQuiz() {
             id="recommendation-budget"
             inputMode="numeric"
             value={budget}
-            onChange={(event) =>
-              setBudget(event.target.value.replace(/\D/g, ''))
-            }
+            onChange={(event) => setBudget(event.target.value.replace(/\D/g, ''))}
             placeholder="Ex.: 3000000"
           />
         </div>
 
         <div className="quiz-block">
-          <label htmlFor="recommendation-beach">
-            Proximidade da praia: {beach}/5
-          </label>
+          <label htmlFor="recommendation-beach">Proximidade da praia: {beach}/5</label>
 
           <input
             id="recommendation-beach"
@@ -219,9 +201,7 @@ export function RecommendationQuiz() {
         </div>
 
         <div className="quiz-block">
-          <label htmlFor="recommendation-invest">
-            Foco em investimento: {invest}/5
-          </label>
+          <label htmlFor="recommendation-invest">Foco em investimento: {invest}/5</label>
 
           <input
             id="recommendation-invest"
@@ -234,9 +214,7 @@ export function RecommendationQuiz() {
         </div>
 
         <div className="quiz-block">
-          <label htmlFor="recommendation-life">
-            Estilo de vida: {life}/5
-          </label>
+          <label htmlFor="recommendation-life">Estilo de vida: {life}/5</label>
 
           <input
             id="recommendation-life"
@@ -291,10 +269,7 @@ export function RecommendationQuiz() {
                     ))}
                   </div>
 
-                  <Link
-                    className="btn"
-                    href={`/empreendimentos/${project.slug}`}
-                  >
+                  <Link className="btn" href={`/empreendimentos/${project.slug}`}>
                     Conhecer
                   </Link>
                 </div>

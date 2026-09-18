@@ -4,9 +4,10 @@ import { SITE_CONFIG } from '../site-config';
 const DEFAULT_SITE_URL = SITE_CONFIG.url;
 
 export function getSiteUrl() {
-  const configuredUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL
-  ).replace(/\/+$/, '');
+  const configuredUrl = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL).replace(
+    /\/+$/,
+    '',
+  );
   const basePath = getAlphaBasePath();
 
   return basePath && !configuredUrl.endsWith(basePath)
@@ -19,7 +20,5 @@ export function buildCanonical(path = '/') {
     .replace(/^\/+/, '/')
     .replace(/\/{2,}/g, '/')
     .replace(/\/$/, '');
-  return normalizedPath === ''
-    ? `${getSiteUrl()}/`
-    : `${getSiteUrl()}${normalizedPath}`;
+  return normalizedPath === '' ? `${getSiteUrl()}/` : `${getSiteUrl()}${normalizedPath}`;
 }

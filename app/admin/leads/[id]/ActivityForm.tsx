@@ -69,11 +69,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
       <div className="quiz-block">
         <label htmlFor="activity-type">Tipo de atividade</label>
 
-        <select
-          id="activity-type"
-          value={type}
-          onChange={(event) => setType(event.target.value)}
-        >
+        <select id="activity-type" value={type} onChange={(event) => setType(event.target.value)}>
           {activityTypes.map((activityType) => (
             <option key={activityType.value} value={activityType.value}>
               {activityType.label}

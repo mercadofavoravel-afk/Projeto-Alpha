@@ -170,9 +170,12 @@ export default function DiscoveryPage() {
         params.set('search', search);
       }
 
-      const response = await fetch(alphaPath(`/api/admin/discovery-candidates?${params.toString()}`), {
-        cache: 'no-store',
-      });
+      const response = await fetch(
+        alphaPath(`/api/admin/discovery-candidates?${params.toString()}`),
+        {
+          cache: 'no-store',
+        },
+      );
 
       const result = (await response.json()) as ApiResponse;
 

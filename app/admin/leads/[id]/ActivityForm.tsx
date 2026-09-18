@@ -32,27 +32,22 @@ export function ActivityForm({ leadId }: { leadId: string }) {
     setError('');
 
     try {
-      const response = await fetch(
-        alphaPath(`/api/admin/leads/${leadId}/activities`),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type,
-            note: note.trim() || undefined,
-            dueAt: dueAt || undefined,
-          }),
+      const response = await fetch(alphaPath(`/api/admin/leads/${leadId}/activities`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          type,
+          note: note.trim() || undefined,
+          dueAt: dueAt || undefined,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || 'Não foi possível registrar a atividade.',
-        );
+        throw new Error(data.error || 'Não foi possível registrar a atividade.');
       }
 
       setNote('');
@@ -62,9 +57,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
       router.refresh();
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Erro inesperado ao registrar a atividade.',
+        cause instanceof Error ? cause.message : 'Erro inesperado ao registrar a atividade.',
       );
     } finally {
       setLoading(false);
@@ -82,10 +75,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
           onChange={(event) => setType(event.target.value)}
         >
           {activityTypes.map((activityType) => (
-            <option
-              key={activityType.value}
-              value={activityType.value}
-            >
+            <option key={activityType.value} value={activityType.value}>
               {activityType.label}
             </option>
           ))}
@@ -106,9 +96,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="activity-due">
-          Prazo ou data do próximo contato
-        </label>
+        <label htmlFor="activity-due">Prazo ou data do próximo contato</label>
 
         <input
           id="activity-due"

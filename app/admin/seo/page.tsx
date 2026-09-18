@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { calculateSeoScore } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,8 @@ function findDuplicateTitles(items: AuditItem[]) {
 }
 
 export default async function SeoMissionControlPage() {
+  await requirePermission('analytics:read');
+
   const [projects, neighborhoods, articles] = await Promise.all([
     db.project.findMany({
       select: {

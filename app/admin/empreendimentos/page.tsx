@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
+  await requirePermission('catalog:write');
+
   const projects = await db.project.findMany({
     include: { neighborhood: true },
     orderBy: { updatedAt: 'desc' },

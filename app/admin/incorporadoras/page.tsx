@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { createDeveloperAction } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,8 @@ type DeveloperItem = {
 };
 
 export default async function DevelopersPage() {
+  await requirePermission('catalog:write');
+
   const developers = await db.developer.findMany({
     include: {
       _count: {

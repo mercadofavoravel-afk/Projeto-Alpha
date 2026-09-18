@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { createArticleAction } from './actions';
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,8 @@ const statusLabels = {
 };
 
 export default async function ArticlesAdminPage() {
+  await requirePermission('catalog:write');
+
   const articles = await db.article.findMany({
     orderBy: {
       updatedAt: 'desc',

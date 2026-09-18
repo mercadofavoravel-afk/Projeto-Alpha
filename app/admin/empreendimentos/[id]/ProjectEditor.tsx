@@ -32,7 +32,7 @@ export function ProjectEditor({ project }: { project: any }) {
       bedroomsFrom: form.bedroomsFrom || null,
       bedroomsTo: form.bedroomsTo || null,
     };
-    const response = await fetch(alphaPath(`/api/admin/projects/${project.id}`, {
+    const response = await fetch(alphaPath(`/api/admin/projects/${project.id}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

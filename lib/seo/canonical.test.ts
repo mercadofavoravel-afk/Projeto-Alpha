@@ -27,13 +27,17 @@ describe('canonical urls', () => {
   it('normaliza caminhos para URL canônica', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://www.imoveisdealtopadraorio.com.br';
     delete process.env.NEXT_PUBLIC_ALPHA_BASE_PATH;
-    expect(buildCanonical('empreendimentos//kronos/')).toBe('https://www.imoveisdealtopadraorio.com.br/empreendimentos/kronos');
+    expect(buildCanonical('empreendimentos//kronos/')).toBe(
+      'https://www.imoveisdealtopadraorio.com.br/empreendimentos/kronos',
+    );
   });
 
   it('inclui o diretório Alpha nas URLs canônicas', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://www.imoveisdealtopadraorio.com.br';
     process.env.NEXT_PUBLIC_ALPHA_BASE_PATH = '/alpha/';
     expect(getSiteUrl()).toBe('https://www.imoveisdealtopadraorio.com.br/alpha');
-    expect(buildCanonical('/empreendimentos/kronos')).toBe('https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos');
+    expect(buildCanonical('/empreendimentos/kronos')).toBe(
+      'https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos',
+    );
   });
 });

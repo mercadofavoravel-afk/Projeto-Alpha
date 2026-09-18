@@ -19,13 +19,7 @@ type RecommendationResult = {
 
 const bairros = ['Ipanema', 'Leblon', 'Copacabana', 'Barra da Tijuca'];
 
-const tipos = [
-  'Studio',
-  'Apartamento',
-  'Garden',
-  'Cobertura',
-  'Duplex',
-];
+const tipos = ['Studio', 'Apartamento', 'Garden', 'Cobertura', 'Duplex'];
 
 function getSessionKey() {
   let key = localStorage.getItem('alpha_session_key');
@@ -166,18 +160,8 @@ export function RecommendationQuiz() {
             {bairros.map((bairro) => (
               <button
                 type="button"
-                className={
-                  selectedBairros.includes(bairro)
-                    ? 'choice active'
-                    : 'choice'
-                }
-                onClick={() =>
-                  toggle(
-                    bairro,
-                    selectedBairros,
-                    setSelectedBairros,
-                  )
-                }
+                className={selectedBairros.includes(bairro) ? 'choice active' : 'choice'}
+                onClick={() => toggle(bairro, selectedBairros, setSelectedBairros)}
                 aria-pressed={selectedBairros.includes(bairro)}
                 key={bairro}
               >
@@ -194,14 +178,8 @@ export function RecommendationQuiz() {
             {tipos.map((tipo) => (
               <button
                 type="button"
-                className={
-                  selectedTypes.includes(tipo)
-                    ? 'choice active'
-                    : 'choice'
-                }
-                onClick={() =>
-                  toggle(tipo, selectedTypes, setSelectedTypes)
-                }
+                className={selectedTypes.includes(tipo) ? 'choice active' : 'choice'}
+                onClick={() => toggle(tipo, selectedTypes, setSelectedTypes)}
                 aria-pressed={selectedTypes.includes(tipo)}
                 key={tipo}
               >
@@ -212,9 +190,7 @@ export function RecommendationQuiz() {
         </div>
 
         <div className="quiz-block">
-          <label htmlFor="recommendation-budget">
-            Orçamento máximo
-          </label>
+          <label htmlFor="recommendation-budget">Orçamento máximo</label>
 
           <input
             id="recommendation-budget"
@@ -238,9 +214,7 @@ export function RecommendationQuiz() {
             min="0"
             max="5"
             value={beach}
-            onChange={(event) =>
-              setBeach(Number(event.target.value))
-            }
+            onChange={(event) => setBeach(Number(event.target.value))}
           />
         </div>
 
@@ -255,9 +229,7 @@ export function RecommendationQuiz() {
             min="0"
             max="5"
             value={invest}
-            onChange={(event) =>
-              setInvest(Number(event.target.value))
-            }
+            onChange={(event) => setInvest(Number(event.target.value))}
           />
         </div>
 
@@ -272,9 +244,7 @@ export function RecommendationQuiz() {
             min="0"
             max="5"
             value={life}
-            onChange={(event) =>
-              setLife(Number(event.target.value))
-            }
+            onChange={(event) => setLife(Number(event.target.value))}
           />
         </div>
 
@@ -290,39 +260,27 @@ export function RecommendationQuiz() {
       </form>
 
       {results.length > 0 && (
-        <section
-          className="recommendation-results"
-          aria-live="polite"
-        >
+        <section className="recommendation-results" aria-live="polite">
           <div className="head">
             <div>
-              <div className="eyebrow">
-                Seleção personalizada
-              </div>
+              <div className="eyebrow">Seleção personalizada</div>
               <h2>Maior aderência ao perfil.</h2>
             </div>
 
-            <p>
-              Ranking indicativo, sujeito à validação comercial.
-            </p>
+            <p>Ranking indicativo, sujeito à validação comercial.</p>
           </div>
 
           <div className="grid">
             {results.map((project, index) => (
               <article className="card" key={project.id}>
-                <ResultMedia
-                  image={project.heroImage}
-                  name={project.name}
-                />
+                <ResultMedia image={project.heroImage} name={project.name} />
 
                 <div className="copy">
                   <div className="recommendation-rank">
                     #{index + 1} · {project.score} pontos
                   </div>
 
-                  <div className="eyebrow">
-                    {project.neighborhood}
-                  </div>
+                  <div className="eyebrow">{project.neighborhood}</div>
 
                   <h3>{project.name}</h3>
                   <p>{project.description}</p>

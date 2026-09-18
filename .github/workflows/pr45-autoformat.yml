@@ -1,0 +1,36 @@
+name: PR45 Autoformat
+
+on:
+  push:
+    branches:
+      - codex/container-2-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/container-2-hardening
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply project formatting
+        run: |
+          npx prettier --write             app/admin/bairros/page.tsx             app/admin/empreendimentos/page.tsx
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/admin/bairros/page.tsx app/admin/empreendimentos/page.tsx
+          git commit -m "style: aplicar Prettier no hardening RBAC"
+          git push origin HEAD:codex/container-2-hardening

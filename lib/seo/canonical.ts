@@ -16,8 +16,10 @@ export function getSiteUrl() {
 
 export function buildCanonical(path = '/') {
   const normalizedPath = `/${path}`
-    .replace(/^\/+/,'/')
+    .replace(/^\/+/, '/')
     .replace(/\/{2,}/g, '/')
     .replace(/\/$/, '');
-  return normalizedPath === '' ? `${getSiteUrl()}/` : `${getSiteUrl()}${normalizedPath}`;
+  return normalizedPath === ''
+    ? `${getSiteUrl()}/`
+    : `${getSiteUrl()}${normalizedPath}`;
 }

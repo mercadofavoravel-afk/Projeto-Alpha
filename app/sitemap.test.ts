@@ -17,8 +17,7 @@ vi.mock('@/lib/db', () => ({
 }));
 
 vi.mock('@/lib/seo', () => ({
-  buildCanonical: (path: string) =>
-    `https://www.imoveisdealtopadraorio.com.br${path}`,
+  buildCanonical: (path: string) => `https://www.imoveisdealtopadraorio.com.br${path}`,
 }));
 
 import sitemap from './sitemap';

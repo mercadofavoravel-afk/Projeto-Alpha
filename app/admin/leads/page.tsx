@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +45,8 @@ export default async function LeadsPage({
     status?: string;
   }>;
 }) {
+  await requirePermission('crm:read');
+
   const params = await searchParams;
   const filters = parseLeadFilters(params);
   const { channel, campaign, status } = filters;

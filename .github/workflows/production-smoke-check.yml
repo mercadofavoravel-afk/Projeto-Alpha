@@ -1,0 +1,40 @@
+name: Production Smoke Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/production-smoke-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production routes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check() {
+            url="$1"
+            expected="$2"
+            code="$(curl -L --max-time 20 --connect-timeout 10 -sS -o /tmp/body -w '%{http_code}' "$url")"
+            echo "$url -> HTTP $code"
+            head -c 240 /tmp/body | tr '\n' ' ' || true
+            echo
+            if [[ ! "$code" =~ $expected ]]; then
+              echo "Unexpected status for $url: $code"
+              exit 1
+            fi
+          }
+
+          check "https://www.imoveisdealtopadraorio.com.br/" "^(200|301|302)$"
+          check "https://www.imoveisdealtopadraorio.com.br/zona-sul/" "^(200|301|302)$"
+          check "https://www.imoveisdealtopadraorio.com.br/alpha" "^(200|301|302)$"
+          check "https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos" "^(200|301|302)$"
+          check "https://www.imoveisdealtopadraorio.com.br/alpha/robots.txt" "^200$"
+          check "https://www.imoveisdealtopadraorio.com.br/alpha/sitemap.xml" "^200$"

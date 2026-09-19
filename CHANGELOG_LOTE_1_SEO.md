@@ -20,4 +20,5 @@ Definir `NEXT_PUBLIC_SITE_URL` com a URL pública final, sem barra no final. Exe
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://www.imoveisdealtopadraorio.com.br
+NEXT_PUBLIC_ALPHA_BASE_PATH=/alpha
 ```

@@ -1,4 +1,6 @@
 'use client';
+
+import { alphaPath } from '@/lib/public-path';
 import { useEffect } from 'react';
 export function TrackProjectView({ projectId }: { projectId: string }) {
   useEffect(() => {
@@ -7,7 +9,7 @@ export function TrackProjectView({ projectId }: { projectId: string }) {
       k = crypto.randomUUID();
       localStorage.setItem('alpha_session_key', k);
     }
-    void fetch('/api/analytics', {
+    void fetch(alphaPath('/api/analytics'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       keepalive: true,

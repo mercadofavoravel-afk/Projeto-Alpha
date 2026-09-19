@@ -1,3 +1,5 @@
+import { alphaPath } from './public-path';
+
 export const SITE_CONFIG = {
   name: 'Imóveis de Alto Padrão Rio',
   url: 'https://www.imoveisdealtopadraorio.com.br',
@@ -7,6 +9,5 @@ export const SITE_CONFIG = {
 } as const;
 
 export function siteUrl(path = '/') {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${SITE_CONFIG.url}${normalizedPath}`;
+  return `${SITE_CONFIG.url}${alphaPath(path)}`;
 }

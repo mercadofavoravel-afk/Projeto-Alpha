@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+
+import { alphaPath } from '@/lib/public-path';
 import { FormEvent, useState } from 'react';
 
 export function ProjectEditor({ project }: { project: any }) {
@@ -30,7 +32,7 @@ export function ProjectEditor({ project }: { project: any }) {
       bedroomsFrom: form.bedroomsFrom || null,
       bedroomsTo: form.bedroomsTo || null,
     };
-    const response = await fetch(`/api/admin/projects/${project.id}`, {
+    const response = await fetch(alphaPath(`/api/admin/projects/${project.id}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

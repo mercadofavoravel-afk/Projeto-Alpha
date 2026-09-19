@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { useCallback, useEffect, useState } from 'react';
 
 type CandidateStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'IMPORTED';
@@ -168,9 +170,12 @@ export default function DiscoveryPage() {
         params.set('search', search);
       }
 
-      const response = await fetch(`/api/admin/discovery-candidates?${params.toString()}`, {
-        cache: 'no-store',
-      });
+      const response = await fetch(
+        alphaPath(`/api/admin/discovery-candidates?${params.toString()}`),
+        {
+          cache: 'no-store',
+        },
+      );
 
       const result = (await response.json()) as ApiResponse;
 
@@ -210,7 +215,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/discovery-candidates', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates'), {
         method: 'PATCH',
 
         headers: {
@@ -254,7 +259,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/discovery-candidates', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates'), {
         method: 'PATCH',
 
         headers: {
@@ -299,7 +304,7 @@ export default function DiscoveryPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/discovery-candidates/import', {
+      const response = await fetch(alphaPath('/api/admin/discovery-candidates/import'), {
         method: 'POST',
 
         headers: {

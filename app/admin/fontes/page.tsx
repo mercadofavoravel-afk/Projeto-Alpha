@@ -1,17 +1,13 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { useState } from 'react';
 
 type ScanItem = {
   url: string;
   title: string | null;
-  kind:
-    | 'project'
-    | 'neighborhood'
-    | 'developer'
-    | 'article'
-    | 'document'
-    | 'other';
+  kind: 'project' | 'neighborhood' | 'developer' | 'article' | 'document' | 'other';
   score: number;
   sourceRootId: string;
   sourceRootName: string;
@@ -107,28 +103,20 @@ type AggregateResult = {
   errors: ScanError[];
 };
 
-function uniqueItems(
-  items: ScanItem[],
-) {
-  const seen =
-    new Set<string>();
+function uniqueItems(items: ScanItem[]) {
+  const seen = new Set<string>();
 
-  return items.filter(
-    (item) => {
-      const key =
-        item.url
-          .trim()
-          .toLowerCase();
+  return items.filter((item) => {
+    const key = item.url.trim().toLowerCase();
 
-      if (seen.has(key)) {
-        return false;
-      }
+    if (seen.has(key)) {
+      return false;
+    }
 
-      seen.add(key);
+    seen.add(key);
 
-      return true;
-    },
-  );
+    return true;
+  });
 }
 
 function ResultTable({
@@ -144,9 +132,7 @@ function ResultTable({
     <section className="sources-result">
       <div className="sources-result-head">
         <div>
-          <div className="eyebrow">
-            Descoberta automática
-          </div>
+          <div className="eyebrow">Descoberta automática</div>
 
           <h2>{title}</h2>
 
@@ -163,122 +149,71 @@ function ResultTable({
               <tr>
                 <th>Fonte</th>
 
-                <th>
-                  Página encontrada
-                </th>
+                <th>Página encontrada</th>
 
                 <th>Score</th>
               </tr>
             </thead>
 
             <tbody>
-              {items.map(
-                (item) => (
-                  <tr key={item.url}>
-                    <td>
-                      <strong>
-                        {
-                          item.sourceRootName
-                        }
-                      </strong>
+              {items.map((item) => (
+                <tr key={item.url}>
+                  <td>
+                    <strong>{item.sourceRootName}</strong>
 
-                      {item.discoveredFromExternal &&
-                        item.discoveredViaUrl && (
-                          <small>
-                            Via:{' '}
-                            {
-                              item.discoveredViaUrl
-                            }
-                          </small>
-                        )}
-                    </td>
+                    {item.discoveredFromExternal && item.discoveredViaUrl && (
+                      <small>Via: {item.discoveredViaUrl}</small>
+                    )}
+                  </td>
 
-                    <td>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {item.title ||
-                          item.url}
-                      </a>
+                  <td>
+                    <a href={item.url} target="_blank" rel="noreferrer">
+                      {item.title || item.url}
+                    </a>
 
-                      <small>
-                        {item.url}
-                      </small>
-                    </td>
+                    <small>{item.url}</small>
+                  </td>
 
-                    <td>
-                      <span
-                        className={
-                          item.score >= 70
-                            ? 'score score-high'
-                            : item.score >= 40
-                              ? 'score score-medium'
-                              : 'score'
-                        }
-                      >
-                        {item.score}
-                      </span>
-                    </td>
-                  </tr>
-                ),
-              )}
+                  <td>
+                    <span
+                      className={
+                        item.score >= 70
+                          ? 'score score-high'
+                          : item.score >= 40
+                            ? 'score score-medium'
+                            : 'score'
+                      }
+                    >
+                      {item.score}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <div className="sources-empty">
-          Nenhum item encontrado nesta
-          categoria.
-        </div>
+        <div className="sources-empty">Nenhum item encontrado nesta categoria.</div>
       )}
     </section>
   );
 }
 
 export default function SourcesPage() {
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [
-    progress,
-    setProgress,
-  ] = useState({
+  const [progress, setProgress] = useState({
     processed: 0,
     total: 0,
   });
 
-  const [
-    aggregate,
-    setAggregate,
-  ] =
-    useState<AggregateResult | null>(
-      null,
-    );
+  const [aggregate, setAggregate] = useState<AggregateResult | null>(null);
 
-  const [
-    scanError,
-    setScanError,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  const [scanError, setScanError] = useState<string | null>(null);
 
-  const [
-    setupLoading,
-    setSetupLoading,
-  ] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
 
-  const [
-    setupData,
-    setSetupData,
-  ] =
-    useState<SetupResponse | null>(
-      null,
-    );
+  const [setupData, setSetupData] = useState<SetupResponse | null>(null);
 
   async function runSetup() {
     if (setupLoading) {
@@ -289,61 +224,41 @@ export default function SourcesPage() {
     setSetupData(null);
 
     try {
-      const response =
-        await fetch(
-          '/api/admin/setup-discovery',
-          {
-            method: 'POST',
-          },
-        );
+      const response = await fetch(alphaPath('/api/admin/setup-discovery'), {
+        method: 'POST',
+      });
 
-      const result =
-        (await response.json()) as SetupResponse;
+      const result = (await response.json()) as SetupResponse;
 
       setSetupData(result);
     } catch {
       setSetupData({
         ok: false,
-        error:
-          'Não foi possível preparar a fila de candidatos.',
+        error: 'Não foi possível preparar a fila de candidatos.',
       });
     } finally {
       setSetupLoading(false);
     }
   }
 
-  async function requestBatch(
-    cursor: number,
-  ) {
-    const response =
-      await fetch(
-        '/api/admin/source-scan',
-        {
-          method: 'POST',
+  async function requestBatch(cursor: number) {
+    const response = await fetch(alphaPath('/api/admin/source-scan'), {
+      method: 'POST',
 
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
+      headers: {
+        'Content-Type': 'application/json',
+      },
 
-          body: JSON.stringify({
-            cursor,
-            batchSize: 3,
-          }),
-        },
-      );
+      body: JSON.stringify({
+        cursor,
+        batchSize: 3,
+      }),
+    });
 
-    const result =
-      (await response.json()) as BatchResponse;
+    const result = (await response.json()) as BatchResponse;
 
-    if (
-      !response.ok ||
-      !result.ok
-    ) {
-      throw new Error(
-        result.error ||
-          'Não foi possível executar este lote.',
-      );
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'Não foi possível executar este lote.');
     }
 
     return result;
@@ -365,146 +280,85 @@ export default function SourcesPage() {
 
     let cursor = 0;
 
-    let accumulated:
-      AggregateResult = {
-        totalSources: 0,
-        processedSources: 0,
-        externalTargetsScanned: 0,
+    let accumulated: AggregateResult = {
+      totalSources: 0,
+      processedSources: 0,
+      externalTargetsScanned: 0,
 
-        created: 0,
-        updated: 0,
+      created: 0,
+      updated: 0,
 
-        queue: {
-          pending: 0,
-          approved: 0,
-          rejected: 0,
-          imported: 0,
-        },
+      queue: {
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        imported: 0,
+      },
 
-        projects: [],
-        neighborhoods: [],
-        documents: [],
-        articles: [],
-        developers: [],
-        other: [],
-        errors: [],
-      };
+      projects: [],
+      neighborhoods: [],
+      documents: [],
+      articles: [],
+      developers: [],
+      other: [],
+      errors: [],
+    };
 
     try {
       while (true) {
-        const batch =
-          await requestBatch(
-            cursor,
-          );
+        const batch = await requestBatch(cursor);
 
-        if (
-          !batch.batch ||
-          !batch.result ||
-          !batch.persistence
-        ) {
-          throw new Error(
-            'Resposta incompleta do lote de varredura.',
-          );
+        if (!batch.batch || !batch.result || !batch.persistence) {
+          throw new Error('Resposta incompleta do lote de varredura.');
         }
 
         accumulated = {
-          totalSources:
-            batch.batch.totalSources,
+          totalSources: batch.batch.totalSources,
 
-          processedSources:
-            Math.min(
-              batch.batch.cursor +
-                batch.batch.batchSize,
-              batch.batch.totalSources,
-            ),
+          processedSources: Math.min(
+            batch.batch.cursor + batch.batch.batchSize,
+            batch.batch.totalSources,
+          ),
 
           externalTargetsScanned:
-            accumulated.externalTargetsScanned +
-            batch.batch.externalTargetsScanned,
+            accumulated.externalTargetsScanned + batch.batch.externalTargetsScanned,
 
-          created:
-            accumulated.created +
-            batch.persistence.created,
+          created: accumulated.created + batch.persistence.created,
 
-          updated:
-            accumulated.updated +
-            batch.persistence.updated,
+          updated: accumulated.updated + batch.persistence.updated,
 
-          queue:
-            batch.persistence.queue,
+          queue: batch.persistence.queue,
 
-          projects:
-            uniqueItems([
-              ...accumulated.projects,
-              ...batch.result.projects,
-            ]),
+          projects: uniqueItems([...accumulated.projects, ...batch.result.projects]),
 
-          neighborhoods:
-            uniqueItems([
-              ...accumulated.neighborhoods,
-              ...batch.result.neighborhoods,
-            ]),
+          neighborhoods: uniqueItems([...accumulated.neighborhoods, ...batch.result.neighborhoods]),
 
-          documents:
-            uniqueItems([
-              ...accumulated.documents,
-              ...batch.result.documents,
-            ]),
+          documents: uniqueItems([...accumulated.documents, ...batch.result.documents]),
 
-          articles:
-            uniqueItems([
-              ...accumulated.articles,
-              ...batch.result.articles,
-            ]),
+          articles: uniqueItems([...accumulated.articles, ...batch.result.articles]),
 
-          developers:
-            uniqueItems([
-              ...accumulated.developers,
-              ...batch.result.developers,
-            ]),
+          developers: uniqueItems([...accumulated.developers, ...batch.result.developers]),
 
-          other:
-            uniqueItems([
-              ...accumulated.other,
-              ...batch.result.other,
-            ]),
+          other: uniqueItems([...accumulated.other, ...batch.result.other]),
 
-          errors: [
-            ...accumulated.errors,
-            ...batch.result.errors,
-          ],
+          errors: [...accumulated.errors, ...batch.result.errors],
         };
 
-        setAggregate(
-          accumulated,
-        );
+        setAggregate(accumulated);
 
         setProgress({
-          processed:
-            accumulated.processedSources,
+          processed: accumulated.processedSources,
 
-          total:
-            accumulated.totalSources,
+          total: accumulated.totalSources,
         });
 
-        if (
-          !batch.batch.hasMore ||
-          batch.batch.nextCursor ===
-            null
-        ) {
+        if (!batch.batch.hasMore || batch.batch.nextCursor === null) {
           break;
         }
 
-        cursor =
-          batch.batch.nextCursor;
+        cursor = batch.batch.nextCursor;
 
-        await new Promise(
-          (resolve) =>
-            setTimeout(
-              resolve,
-              350,
-            ),
-        );
+        await new Promise((resolve) => setTimeout(resolve, 350));
       }
     } catch (error) {
       setScanError(
@@ -517,110 +371,67 @@ export default function SourcesPage() {
     }
   }
 
-  const totalDiscovered =
-    aggregate
-      ? uniqueItems([
-          ...aggregate.projects,
-          ...aggregate.neighborhoods,
-          ...aggregate.documents,
-          ...aggregate.articles,
-          ...aggregate.developers,
-          ...aggregate.other,
-        ]).length
-      : 0;
+  const totalDiscovered = aggregate
+    ? uniqueItems([
+        ...aggregate.projects,
+        ...aggregate.neighborhoods,
+        ...aggregate.documents,
+        ...aggregate.articles,
+        ...aggregate.developers,
+        ...aggregate.other,
+      ]).length
+    : 0;
 
   const progressPercent =
-    progress.total > 0
-      ? Math.round(
-          (progress.processed /
-            progress.total) *
-            100,
-        )
-      : 0;
+    progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0;
 
   return (
     <>
-      <div className="eyebrow">
-        Inteligência de mercado
-      </div>
+      <div className="eyebrow">Inteligência de mercado</div>
 
       <h1>Fontes</h1>
 
       <p className="sources-intro">
-        O Alpha monitora fontes
-        aprovadas para descobrir
-        empreendimentos, bairros,
-        documentos e conteúdos
-        relevantes. As fontes são
-        inteligência e evidência; o
-        conteúdo público do Alpha é
+        O Alpha monitora fontes aprovadas para descobrir empreendimentos, bairros, documentos e
+        conteúdos relevantes. As fontes são inteligência e evidência; o conteúdo público do Alpha é
         produzido separadamente.
       </p>
 
       <section className="discovery-setup">
         <div>
-          <div className="eyebrow">
-            Infraestrutura de
-            descoberta
-          </div>
+          <div className="eyebrow">Infraestrutura de descoberta</div>
 
-          <h2>
-            Fila persistente de
-            candidatos
-          </h2>
+          <h2>Fila persistente de candidatos</h2>
 
           <p>
-            Estrutura utilizada para
-            guardar permanentemente cada
-            oportunidade descoberta pelo
-            Alpha antes de qualquer
-            publicação.
+            Estrutura utilizada para guardar permanentemente cada oportunidade descoberta pelo Alpha
+            antes de qualquer publicação.
           </p>
 
           <div className="setup-flow">
-            <span>
-              Descoberto
-            </span>
+            <span>Descoberto</span>
 
             <b>→</b>
 
-            <span>
-              Pendente
-            </span>
+            <span>Pendente</span>
 
             <b>→</b>
 
-            <span>
-              Aprovado
-            </span>
+            <span>Aprovado</span>
 
             <b>→</b>
 
-            <span>
-              Importado
-            </span>
+            <span>Importado</span>
           </div>
         </div>
 
         <div className="setup-action">
-          <button
-            type="button"
-            onClick={runSetup}
-            disabled={
-              setupLoading ||
-              loading
-            }
-          >
-            {setupLoading
-              ? 'Preparando fila...'
-              : 'Preparar fila de candidatos'}
+          <button type="button" onClick={runSetup} disabled={setupLoading || loading}>
+            {setupLoading ? 'Preparando fila...' : 'Preparar fila de candidatos'}
           </button>
 
           <small>
-            Operação administrativa e
-            idempotente. Não apaga nem
-            altera empreendimentos
-            existentes.
+            Operação administrativa e idempotente. Não apaga nem altera empreendimentos existentes.
           </small>
         </div>
       </section>
@@ -630,113 +441,61 @@ export default function SourcesPage() {
           <div className="scan-pulse" />
 
           <div>
-            <strong>
-              Preparando estrutura
-            </strong>
+            <strong>Preparando estrutura</strong>
 
-            <p>
-              O Alpha está verificando a
-              fila persistente.
-            </p>
+            <p>O Alpha está verificando a fila persistente.</p>
           </div>
         </section>
       )}
 
       {setupData?.ok && (
         <div className="message success">
-          <strong>
-            Fila preparada com sucesso.
-          </strong>
+          <strong>Fila preparada com sucesso.</strong>
 
-          <span>
-            {setupData.message ??
-              'A estrutura DiscoveryCandidate está disponível.'}
-          </span>
+          <span>{setupData.message ?? 'A estrutura DiscoveryCandidate está disponível.'}</span>
         </div>
       )}
 
-      {setupData &&
-        !setupData.ok && (
-          <div className="message error">
-            <strong>
-              Não foi possível preparar
-              a fila.
-            </strong>
+      {setupData && !setupData.ok && (
+        <div className="message error">
+          <strong>Não foi possível preparar a fila.</strong>
 
-            <span>
-              {setupData.error ??
-                'Ocorreu um erro inesperado.'}
-            </span>
-          </div>
-        )}
+          <span>{setupData.error ?? 'Ocorreu um erro inesperado.'}</span>
+        </div>
+      )}
 
       <section className="scan-hero">
         <div>
-          <div className="eyebrow">
-            Source Discovery
-          </div>
+          <div className="eyebrow">Source Discovery</div>
 
-          <h2>
-            Monitore o mercado em lotes,
-            sem interromper a varredura.
-          </h2>
+          <h2>Monitore o mercado em lotes, sem interromper a varredura.</h2>
 
           <p>
-            O Alpha percorre as fontes
-            cadastradas em pequenos
-            grupos, segue gateways
-            externos quando permitido e
-            salva cada descoberta antes
-            de continuar para o próximo
-            lote.
+            O Alpha percorre as fontes cadastradas em pequenos grupos, segue gateways externos
+            quando permitido e salva cada descoberta antes de continuar para o próximo lote.
           </p>
 
           <div className="scan-features">
-            <span>
-              Incorporadoras
-            </span>
+            <span>Incorporadoras</span>
 
-            <span>
-              Linktrees
-            </span>
+            <span>Linktrees</span>
 
-            <span>
-              Portais
-            </span>
+            <span>Portais</span>
 
-            <span>
-              Empreendimentos
-            </span>
+            <span>Empreendimentos</span>
 
-            <span>
-              Documentos
-            </span>
+            <span>Documentos</span>
 
-            <span>
-              Conteúdo editorial
-            </span>
+            <span>Conteúdo editorial</span>
           </div>
         </div>
 
         <div className="scan-action">
-          <button
-            type="button"
-            onClick={runScan}
-            disabled={
-              loading ||
-              setupLoading
-            }
-          >
-            {loading
-              ? 'Varredura em andamento...'
-              : 'Varrer todas as fontes'}
+          <button type="button" onClick={runScan} disabled={loading || setupLoading}>
+            {loading ? 'Varredura em andamento...' : 'Varrer todas as fontes'}
           </button>
 
-          <small>
-            A tela chama os lotes
-            automaticamente até chegar
-            à última fonte.
-          </small>
+          <small>A tela chama os lotes automaticamente até chegar à última fonte.</small>
         </div>
       </section>
 
@@ -744,9 +503,7 @@ export default function SourcesPage() {
         <section className="progress-card">
           <div className="progress-head">
             <div>
-              <strong>
-                Varredura em andamento
-              </strong>
+              <strong>Varredura em andamento</strong>
 
               <p>
                 {progress.total > 0
@@ -755,17 +512,14 @@ export default function SourcesPage() {
               </p>
             </div>
 
-            <strong className="progress-number">
-              {progressPercent}%
-            </strong>
+            <strong className="progress-number">{progressPercent}%</strong>
           </div>
 
           <div className="progress-track">
             <div
               className="progress-fill"
               style={{
-                width:
-                  `${progressPercent}%`,
+                width: `${progressPercent}%`,
               }}
             />
           </div>
@@ -774,23 +528,13 @@ export default function SourcesPage() {
 
       {scanError && (
         <div className="message error">
-          <strong>
-            A varredura foi interrompida.
-          </strong>
+          <strong>A varredura foi interrompida.</strong>
 
-          <span>
-            {scanError}
-          </span>
+          <span>{scanError}</span>
 
-          {aggregate &&
-            aggregate.processedSources >
-              0 && (
-              <small>
-                Os lotes concluídos antes
-                do erro já foram salvos
-                no banco.
-              </small>
-            )}
+          {aggregate && aggregate.processedSources > 0 && (
+            <small>Os lotes concluídos antes do erro já foram salvos no banco.</small>
+          )}
         </div>
       )}
 
@@ -798,201 +542,109 @@ export default function SourcesPage() {
         <>
           <section className="scan-summary">
             <article>
-              <span>
-                Fontes processadas
-              </span>
+              <span>Fontes processadas</span>
 
               <strong>
-                {
-                  aggregate.processedSources
-                }
-                /
-                {
-                  aggregate.totalSources
-                }
+                {aggregate.processedSources}/{aggregate.totalSources}
               </strong>
             </article>
 
             <article>
-              <span>
-                Páginas descobertas
-              </span>
+              <span>Páginas descobertas</span>
 
-              <strong>
-                {totalDiscovered}
-              </strong>
+              <strong>{totalDiscovered}</strong>
             </article>
 
             <article>
-              <span>
-                Empreendimentos
-              </span>
+              <span>Empreendimentos</span>
 
-              <strong>
-                {
-                  aggregate.projects
-                    .length
-                }
-              </strong>
+              <strong>{aggregate.projects.length}</strong>
             </article>
 
             <article>
-              <span>
-                Destinos externos
-              </span>
+              <span>Destinos externos</span>
 
-              <strong>
-                {
-                  aggregate.externalTargetsScanned
-                }
-              </strong>
+              <strong>{aggregate.externalTargetsScanned}</strong>
             </article>
 
             <article>
-              <span>
-                Novos na fila
-              </span>
+              <span>Novos na fila</span>
 
-              <strong>
-                {aggregate.created}
-              </strong>
+              <strong>{aggregate.created}</strong>
             </article>
 
             <article>
-              <span>
-                Atualizados
-              </span>
+              <span>Atualizados</span>
 
-              <strong>
-                {aggregate.updated}
-              </strong>
+              <strong>{aggregate.updated}</strong>
             </article>
           </section>
 
           <section className="queue-summary">
             <article>
-              <span>
-                Pendentes
-              </span>
+              <span>Pendentes</span>
 
-              <strong>
-                {
-                  aggregate.queue
-                    .pending
-                }
-              </strong>
+              <strong>{aggregate.queue.pending}</strong>
             </article>
 
             <article>
-              <span>
-                Aprovados
-              </span>
+              <span>Aprovados</span>
 
-              <strong>
-                {
-                  aggregate.queue
-                    .approved
-                }
-              </strong>
+              <strong>{aggregate.queue.approved}</strong>
             </article>
 
             <article>
-              <span>
-                Rejeitados
-              </span>
+              <span>Rejeitados</span>
 
-              <strong>
-                {
-                  aggregate.queue
-                    .rejected
-                }
-              </strong>
+              <strong>{aggregate.queue.rejected}</strong>
             </article>
 
             <article>
-              <span>
-                Importados
-              </span>
+              <span>Importados</span>
 
-              <strong>
-                {
-                  aggregate.queue
-                    .imported
-                }
-              </strong>
+              <strong>{aggregate.queue.imported}</strong>
             </article>
           </section>
 
           <ResultTable
             title="Empreendimentos candidatos"
             description="Produtos imobiliários identificados nas fontes e gateways monitorados."
-            items={
-              aggregate.projects
-            }
+            items={aggregate.projects}
           />
 
           <ResultTable
             title="Bairros e localizações"
             description="Páginas territoriais candidatas à inteligência local do Alpha."
-            items={
-              aggregate.neighborhoods
-            }
+            items={aggregate.neighborhoods}
           />
 
           <ResultTable
             title="Documentos"
             description="Books, PDFs e materiais identificados para posterior ingestão de inteligência."
-            items={
-              aggregate.documents
-            }
+            items={aggregate.documents}
           />
 
           <ResultTable
             title="Conteúdo editorial"
             description="Conteúdo de mercado utilizado como fonte de evidência e inteligência, sem cópia automática para páginas públicas."
-            items={
-              aggregate.articles
-            }
+            items={aggregate.articles}
           />
 
-          {aggregate.errors.length >
-            0 && (
+          {aggregate.errors.length > 0 && (
             <section className="scan-errors">
-              <div className="eyebrow">
-                Fontes com falha
-              </div>
+              <div className="eyebrow">Fontes com falha</div>
 
-              <h2>
-                Algumas fontes não
-                responderam.
-              </h2>
+              <h2>Algumas fontes não responderam.</h2>
 
-              <p>
-                As demais continuam
-                processadas normalmente.
-              </p>
+              <p>As demais continuam processadas normalmente.</p>
 
-              {aggregate.errors.map(
-                (
-                  error,
-                  index,
-                ) => (
-                  <div
-                    key={`${error.sourceRootUrl}-${index}`}
-                    className="scan-error-item"
-                  >
-                    <strong>
-                      {
-                        error.sourceRootName
-                      }
-                    </strong>
+              {aggregate.errors.map((error, index) => (
+                <div key={`${error.sourceRootUrl}-${index}`} className="scan-error-item">
+                  <strong>{error.sourceRootName}</strong>
 
-                    <span>
-                      {error.message}
-                    </span>
-                  </div>
-                ),
-              )}
+                  <span>{error.message}</span>
+                </div>
+              ))}
             </section>
           )}
         </>

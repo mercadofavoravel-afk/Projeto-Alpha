@@ -16,32 +16,38 @@ APP_URL=https://www.imoveisdealtopadraorio.com.br/alpha
 
 ## Proxy no Cloudflare
 
-Crie um Worker com uma variável `ALPHA_ORIGIN` apontando para o domínio de produção atual da Vercel do Projeto Alpha (sem barra final). A rota do Worker deve ser:
+O Worker versionado está em `cloudflare/alpha-proxy/worker.js`. O arquivo `cloudflare/alpha-proxy/wrangler.toml.example` contém a rota esperada e deve ser copiado para `wrangler.toml` somente no ambiente de deploy.
+
+Configure `ALPHA_ORIGIN` com o domínio de produção atual da Vercel do Projeto Alpha, sem barra final. A rota deve ser exatamente:
 
 ```text
 www.imoveisdealtopadraorio.com.br/alpha*
 ```
 
-Use este código:
-
-```ts
-export default {
-  async fetch(request, env) {
-    const source = new URL(request.url);
-    const origin = new URL(env.ALPHA_ORIGIN);
-    const upstream = new URL(`${source.pathname}${source.search}`, origin);
-    return fetch(new Request(upstream, request));
-  },
-};
-```
-
 Não remova `/alpha` do caminho: o Next.js usa esse prefixo para resolver páginas, arquivos estáticos e APIs. Todo tráfego fora dessa rota continua na HostGator, sem alterações no WordPress.
+
+Antes de publicar o Worker, confirme:
+
+- a rota está limitada a `/alpha*`;
+- `ALPHA_ORIGIN` aponta para o domínio de produção da Vercel;
+- o Worker preserva o caminho `/alpha`;
+- nenhuma rota genérica como `www.imoveisdealtopadraorio.com.br/*` foi adicionada.
 
 ## Validação após o deploy
 
-- `/alpha`
-- `/alpha/empreendimentos`
-- `/alpha/robots.txt`
-- `/alpha/sitemap.xml`
-- envio de lead e páginas administrativas
-- URLs existentes do WordPress, como `/`, `/zona-sul/` e `/barra-da-tijuca/`
+Execute:
+
+```bash
+npm run smoke:production
+```
+
+O smoke test verifica o WordPress e o Alpha:
+
+- `/`;
+- `/zona-sul/`;
+- `/alpha`;
+- `/alpha/empreendimentos`;
+- `/alpha/robots.txt`;
+- `/alpha/sitemap.xml`.
+
+Depois valide manualmente o envio de lead e as páginas administrativas autenticadas. O comando aceita outra origem por `PRODUCTION_ORIGIN` quando necessário.

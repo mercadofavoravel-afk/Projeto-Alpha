@@ -24,7 +24,8 @@
     "dev:bootstrap": "bash scripts/bootstrap.sh",
     "db:reset": "prisma migrate reset --schema=prisma/schema.prisma --force",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke:production": "node scripts/smoke-production.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.16.2",

@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -18,7 +20,7 @@ export function WhatsAppFollowUpActions({ activityId, href }: WhatsAppFollowUpAc
     setError('');
 
     try {
-      const response = await fetch(`/api/admin/lead-activities/${activityId}/complete`, {
+      const response = await fetch(alphaPath(`/api/admin/lead-activities/${activityId}/complete`), {
         method: 'PATCH',
       });
       const data = await response.json();

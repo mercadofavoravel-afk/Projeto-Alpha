@@ -1,30 +1,30 @@
 const origin =
   process.env.PRODUCTION_ORIGIN ??
-  'https://www.imoveisdealtopadraorio.com.br';
+  'https://imoveisdealtopadraorio.com.br';
 
 const checks = [
-  ['/', [200]],
-  ['/zona-sul/', [200]],
-  ['/alpha', [200, 301, 302]],
-  ['/alpha/empreendimentos', [200, 301, 302]],
-  ['/alpha/robots.txt', [200]],
-  ['/alpha/sitemap.xml', [200]],
+  ['/', 200],
+  ['/zona-sul/', 200],
+  ['/alpha', 200],
+  ['/alpha/empreendimentos', 200],
+  ['/alpha/robots.txt', 200],
+  ['/alpha/sitemap.xml', 200],
 ];
 
 let failed = false;
 
-for (const [path, expectedStatuses] of checks) {
+for (const [path, expectedStatus] of checks) {
   const url = new URL(path, origin);
 
   try {
     const response = await fetch(url, {
-      redirect: 'manual',
+      redirect: 'follow',
       signal: AbortSignal.timeout(20_000),
     });
 
-    const ok = expectedStatuses.includes(response.status);
+    const ok = response.status === expectedStatus;
     console.log(
-      `${ok ? 'PASS' : 'FAIL'} ${url} -> HTTP ${response.status} (esperado: ${expectedStatuses.join(', ')})`,
+      `${ok ? 'PASS' : 'FAIL'} ${url} -> HTTP ${response.status}; final: ${response.url}`,
     );
 
     if (!ok) {

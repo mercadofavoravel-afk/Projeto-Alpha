@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { alphaPath } from '@/lib/public-path';
 import { buildCanonical } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
@@ -6,14 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
-        disallow: [
-          '/admin/',
-          '/api/',
-          '/login',
-          '/recuperar-senha',
-          '/redefinir-senha',
-        ],
+        allow: alphaPath('/'),
+        disallow: ['/admin/', '/api/', '/login', '/recuperar-senha', '/redefinir-senha'].map(
+          alphaPath,
+        ),
       },
     ],
     sitemap: buildCanonical('/sitemap.xml'),

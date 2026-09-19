@@ -1,5 +1,7 @@
 'use client';
 
+import { alphaPath } from '@/lib/public-path';
+
 import { FormEvent, useState } from 'react';
 
 type LeadCaptureFormProps = {
@@ -82,7 +84,7 @@ export function LeadCaptureForm({
       const params = new URLSearchParams(window.location.search);
       const sessionKey = getSessionKey();
 
-      const response = await fetch('/api/leads', {
+      const response = await fetch(alphaPath('/api/leads'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +121,7 @@ export function LeadCaptureForm({
         utmCampaign: params.get('utm_campaign') || undefined,
       });
 
-      void fetch('/api/analytics', {
+      void fetch(alphaPath('/api/analytics'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

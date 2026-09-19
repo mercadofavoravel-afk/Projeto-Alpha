@@ -7,5 +7,9 @@ workers_dev = false
 ALPHA_ORIGIN = "https://SEU-DOMINIO-DE-PRODUCAO.vercel.app"
 
 [[routes]]
+pattern = "imoveisdealtopadraorio.com.br/alpha*"
+zone_name = "imoveisdealtopadraorio.com.br"
+
+[[routes]]
 pattern = "www.imoveisdealtopadraorio.com.br/alpha*"
 zone_name = "imoveisdealtopadraorio.com.br"

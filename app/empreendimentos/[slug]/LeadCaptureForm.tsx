@@ -214,6 +214,7 @@ export function LeadCaptureForm({
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
           placeholder="Seu e-mail"
+          required
         />
       </div>
 

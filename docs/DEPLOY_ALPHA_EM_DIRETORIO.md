@@ -64,5 +64,10 @@ O smoke test segue redirects e exige HTTP 200 final para:
 - `/alpha/empreendimentos`;
 - `/alpha/robots.txt`;
 - `/alpha/sitemap.xml`.
+- `/alpha/api/health`.
+
+Além do status, ele confirma o endereço canônico nas páginas Alpha, o sitemap
+publicado e a conexão com o banco. Um HTTP 200 de uma página do WordPress no
+lugar do Alpha não passa na verificação.
 
 Depois valide manualmente o envio de lead e as páginas administrativas autenticadas. O comando aceita outra origem por `PRODUCTION_ORIGIN` quando necessário.

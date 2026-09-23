@@ -54,7 +54,7 @@ describe('POST /api/leads', () => {
         body: JSON.stringify({
           name: 'Cliente orgânico',
           phone: '(21) 96426-1042',
-          email: '',
+          email: 'cliente@example.com',
           objective: 'INVEST',
           neighborhood: 'Ipanema',
           source: 'Orgânico | artigo: investir em Ipanema | região: Ipanema',
@@ -74,7 +74,7 @@ describe('POST /api/leads', () => {
 
     expect(database.createLead).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        email: null,
+        email: 'cliente@example.com',
         utmSource: 'google',
         utmMedium: 'paid_social',
         utmCampaign: 'leads_ipanema_setembro',
@@ -101,6 +101,7 @@ describe('POST /api/leads', () => {
         body: JSON.stringify({
           name: 'Cliente sem consentimento',
           phone: '(21) 96426-1042',
+          email: 'cliente@example.com',
           consent: false,
         }),
       }),
@@ -109,5 +110,22 @@ describe('POST /api/leads', () => {
     expect(response.status).toBe(400);
     expect(database.createLead).not.toHaveBeenCalled();
     expect(database.createActivities).not.toHaveBeenCalled();
+  });
+
+  it('rejects a lead without email before writing to the CRM', async () => {
+    const response = await POST(
+      new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Cliente sem e-mail',
+          phone: '(21) 96426-1042',
+          consent: true,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(database.createLead).not.toHaveBeenCalled();
   });
 });

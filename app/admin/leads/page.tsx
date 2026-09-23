@@ -32,7 +32,7 @@ function countBy(values: string[]) {
 }
 
 function articleFromSource(source: string) {
-  const match = source.match(/^Orgânico \\| artigo: (.+) \\| região:/);
+  const match = source.match(/^Orgânico \| artigo: (.+) \| região:/);
   return match?.[1] || source;
 }
 

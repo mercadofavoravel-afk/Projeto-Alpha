@@ -3,10 +3,8 @@ import { z } from 'zod';
 export const leadSchema = z.object({
   name: z.string().trim().min(2).max(120),
   phone: z.string().trim().min(8).max(30),
-  email: z.string().email().optional().or(z.literal('')),
-  objective: z
-    .enum(['LIVE', 'INVEST', 'PATRIMONY', 'SELL', 'RENT', 'OTHER'])
-    .default('OTHER'),
+  email: z.string().trim().email(),
+  objective: z.enum(['LIVE', 'INVEST', 'PATRIMONY', 'SELL', 'RENT', 'OTHER']).default('OTHER'),
   neighborhood: z.string().trim().max(120).optional(),
   budgetMin: z.coerce.number().nonnegative().optional(),
   budgetMax: z.coerce.number().nonnegative().optional(),

@@ -16,6 +16,10 @@ NEXT_PUBLIC_ALPHA_BASE_PATH=/alpha
 APP_URL=https://imoveisdealtopadraorio.com.br/alpha
 ```
 
+Se `NEXT_PUBLIC_ALPHA_BASE_PATH` estiver ausente no build de produção, o projeto
+usa `/alpha` por padrão. Uma variável explicitamente vazia ainda seleciona a
+raiz; confirme seu valor na Vercel e faça um novo deploy após qualquer ajuste.
+
 `NEXT_PUBLIC_SITE_URL` deve ficar somente com a origem canônica. O aplicativo acrescenta `/alpha` para links internos, canonicals, sitemap e robots.
 
 ## Proxy no Cloudflare

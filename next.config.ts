@@ -11,8 +11,10 @@ const securityHeaders = [
 ];
 
 function getBasePath() {
+  const configured = process.env.NEXT_PUBLIC_ALPHA_BASE_PATH;
   const normalized =
-    process.env.NEXT_PUBLIC_ALPHA_BASE_PATH?.trim().replace(/^\/+|\/+$/g, '') ?? '';
+    configured?.trim().replace(/^\/+|\/+$/g, '') ??
+    (process.env.NODE_ENV === 'production' ? 'alpha' : '');
   return normalized ? `/${normalized}` : undefined;
 }
 

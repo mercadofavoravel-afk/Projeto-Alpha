@@ -4,7 +4,8 @@ function normalizeBasePath(value?: string) {
 }
 
 export function getAlphaBasePath() {
-  return normalizeBasePath(process.env.NEXT_PUBLIC_ALPHA_BASE_PATH);
+  const configured = process.env.NEXT_PUBLIC_ALPHA_BASE_PATH;
+  return normalizeBasePath(configured ?? (process.env.NODE_ENV === 'production' ? '/alpha' : ''));
 }
 
 export function alphaPath(path = '/') {

@@ -1,6 +1,11 @@
 export default {
   async fetch(request, env) {
     const source = new URL(request.url);
+    // The route /alpha* also matches /alphabet. Let the site's origin handle it.
+    if (source.pathname !== '/alpha' && !source.pathname.startsWith('/alpha/')) {
+      return fetch(request);
+    }
+
     const origin = new URL(env.ALPHA_ORIGIN);
     const upstream = new URL(`${source.pathname}${source.search}`, origin);
 

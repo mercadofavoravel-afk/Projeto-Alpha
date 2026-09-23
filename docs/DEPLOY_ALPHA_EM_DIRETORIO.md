@@ -38,7 +38,7 @@ Também mantenha a rota equivalente em `www` como proteção adicional:
 www.imoveisdealtopadraorio.com.br/alpha*
 ```
 
-Não remova `/alpha` do caminho: o Next.js usa esse prefixo para resolver páginas, arquivos estáticos e APIs. Todo tráfego fora dessas rotas continua na HostGator, sem alterações no WordPress.
+Não remova `/alpha` do caminho: o Next.js usa esse prefixo para resolver páginas, arquivos estáticos e APIs. A rota `/alpha*` também alcança caminhos como `/alphabet`; o Worker verifica o caminho e os encaminha à origem existente do WordPress. Todo tráfego fora dessas rotas continua na HostGator, sem alterações no WordPress.
 
 Antes de publicar o Worker, confirme:
 

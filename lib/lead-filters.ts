@@ -52,7 +52,7 @@ export function buildLeadWhere(filters: LeadFilters): Prisma.LeadWhereInput {
     ...(filters.channel === 'organic'
       ? {
           source: {
-            startsWith: 'Orgânico | artigo:',
+            startsWith: 'Orgânico | ',
           },
         }
       : {}),

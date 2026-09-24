@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
+import { organicContentFromSource } from '@/lib/lead-origin';
+import { alphaPath } from '@/lib/public-path';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,11 +31,6 @@ function countBy(values: string[]) {
     .map(([label, count]) => ({ label, count }))
     .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
     .slice(0, 5);
-}
-
-function articleFromSource(source: string) {
-  const match = source.match(/^Orgânico \| artigo: (.+) \| região:/);
-  return match?.[1] || source;
 }
 
 export default async function LeadsPage({
@@ -74,18 +71,16 @@ export default async function LeadsPage({
     take: 100,
   });
 
-  const organicLeads = leads.filter((lead: LeadItem) =>
-    lead.source?.startsWith('Orgânico | artigo:'),
-  );
-  const organicArticleLabels = organicLeads.map((lead: LeadItem) =>
-    articleFromSource(lead.source || ''),
+  const organicLeads = leads.filter((lead: LeadItem) => organicContentFromSource(lead.source));
+  const organicContentLabels = organicLeads.map(
+    (lead: LeadItem) => organicContentFromSource(lead.source) || '',
   );
   const organicRegionLabels = organicLeads.map(
     (lead: LeadItem) => lead.neighborhood || 'Rio de Janeiro',
   );
-  const organicByArticle = countBy(organicArticleLabels);
+  const organicByContent = countBy(organicContentLabels);
   const organicByRegion = countBy(organicRegionLabels);
-  const organicArticleCount = new Set(organicArticleLabels).size;
+  const organicContentCount = new Set(organicContentLabels).size;
   const organicRegionCount = new Set(organicRegionLabels).size;
   const hasFilters = Boolean(channel || campaign || status);
 
@@ -103,12 +98,12 @@ export default async function LeadsPage({
           {hasFilters && <span>Filtros ativos</span>}
         </div>
 
-        <form action="/admin/leads" className="editor-grid">
+        <form action={alphaPath('/admin/leads')} className="editor-grid">
           <label>
             Canal de captação
             <select defaultValue={channel || ''} name="channel">
               <option value="">Todos os canais</option>
-              <option value="organic">Orgânico de artigos</option>
+              <option value="organic">Orgânico de conteúdos</option>
               <option value="campaign">Campanhas com UTM</option>
               <option value="direct">Direto / sem origem</option>
             </select>
@@ -151,7 +146,7 @@ export default async function LeadsPage({
         <div className="head">
           <div>
             <div className="eyebrow">Origem orgânica</div>
-            <h2>Artigos e regiões que geram leads</h2>
+            <h2>Conteúdos e regiões que geram leads</h2>
           </div>
           <span>
             {hasFilters ? 'Leads filtrados' : 'Últimos leads'}: {leads.length}
@@ -164,8 +159,8 @@ export default async function LeadsPage({
             Leads orgânicos
           </div>
           <div className="kpi">
-            <b>{organicArticleCount}</b>
-            Artigos com conversão
+            <b>{organicContentCount}</b>
+            Conteúdos com conversão
           </div>
           <div className="kpi">
             <b>{organicRegionCount}</b>
@@ -176,9 +171,9 @@ export default async function LeadsPage({
         {organicLeads.length > 0 ? (
           <div className="editor-grid">
             <div>
-              <div className="eyebrow">Artigos</div>
+              <div className="eyebrow">Conteúdos</div>
               <ul>
-                {organicByArticle.map((item) => (
+                {organicByContent.map((item) => (
                   <li key={item.label}>
                     {item.label}: {item.count} lead{item.count === 1 ? '' : 's'}
                   </li>
@@ -197,7 +192,7 @@ export default async function LeadsPage({
             </div>
           </div>
         ) : (
-          <p>Os primeiros leads vindos de artigos aparecerão aqui com artigo e região.</p>
+          <p>Os primeiros leads orgânicos aparecerão aqui com conteúdo e região.</p>
         )}
       </section>
 

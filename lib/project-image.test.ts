@@ -9,4 +9,13 @@ describe('project photo attribution', () => {
     );
     expect(projectImage('parque-studios', '/images/parque-03.webp')).toBe('/images/parque-03.webp');
   });
+
+  it('uses the matching project book image when the database still points at Parque', () => {
+    expect(projectImage('be-in-rio-prudente-589', '/images/parque-05.webp')).toBe(
+      '/images/be-in-rio-prudente-589.jpg',
+    );
+    expect(projectImage('be-in-rio-nascimento-silva-387', '/images/parque-08.webp')).toBe(
+      '/images/be-in-rio-nascimento-silva-387.jpg',
+    );
+  });
 });

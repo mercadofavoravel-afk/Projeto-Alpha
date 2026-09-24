@@ -17,7 +17,11 @@ export function Card({ p }: { p: Project }) {
         {image ? (
           <Image
             src={alphaAssetPath(image)}
-            alt={`${p.name}, ${p.neighborhood}`}
+            alt={
+              image.includes('/images/be-in-rio-')
+                ? `Perspectiva ilustrativa da fachada do ${p.name}, ${p.neighborhood}`
+                : `${p.name}, ${p.neighborhood}`
+            }
             width={900}
             height={620}
             sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"

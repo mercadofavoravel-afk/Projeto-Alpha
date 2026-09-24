@@ -15,13 +15,13 @@
     "slug": "parque-studios",
     "name": "Parque Studios",
     "neighborhood": "Ipanema / Leblon",
-    "description": "Studios, double studios e coberturas",
+    "description": "Studios e lofts de 35 a 40 m², double studios de 55 a 59 m² e coberturas",
     "image": "/images/parque-01.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["Studio", "Double studio", "Cobertura"],
+    "types": ["Studio", "Loft", "Double studio", "Cobertura"],
     "collections": ["Studios", "Investimento", "Coberturas"],
-    "highlights": ["Jardim de Alah", "Uso flexível", "Compactos premium"]
+    "highlights": ["Jardim de Alah", "Lazer no rooftop", "Mini market e delivery"]
   },
   {
     "slug": "cronos-barra",

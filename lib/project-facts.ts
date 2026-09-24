@@ -1,10 +1,12 @@
 // Fallbacks are used only when a published project has no structured area in the CMS.
 // VIE and Bruma: existing catalog descriptions in data/projects.json.
 // Stay 360: developer's project page, https://arosinc.com.br/stay360-leblon-lp/.
+// Parque Studios: ficha técnica, página 41 do Book Digital Parque Studios fornecido pelo cliente.
 const confirmedAreas: Record<string, [number, number]> = {
   'vie-ipanema': [407, 565],
   'bruma-mozak': [225, 410],
   'stay-360-leblon': [28, 50],
+  'parque-studios': [35, 66],
 };
 
 function formatArea(value: number) {

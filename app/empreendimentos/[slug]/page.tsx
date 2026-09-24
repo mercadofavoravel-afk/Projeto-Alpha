@@ -37,7 +37,7 @@ const productIntroductions: Record<string, string> = {
   'bruma-mozak':
     'No Leblon, combina apartamentos, gardens e coberturas duplex em um edifício boutique. O catálogo apresenta opções de 4 e 5 suítes e uma unidade por andar.',
   'stay-360-leblon':
-    'Na Visconde de Albuquerque, no Leblon, reúne studios, gardens e coberturas compactas. O lazer no rooftop amplia as opções de uso dos espaços comuns.',
+    'Na Visconde de Albuquerque, no Leblon, reúne studios e gardens de 28 a 50 m², além de coberturas. O lazer no rooftop amplia as opções de uso dos espaços comuns.',
   'be-in-rio-prudente-589':
     'Na quadra da praia em Ipanema, reúne studios, gardens, up gardens, doubles e coberturas lineares. A área comum na cobertura tem piscina, lounge, fitness e sauna; o térreo inclui minimercado e espaço para entregas.',
   'be-in-rio-nascimento-silva-387':

@@ -53,6 +53,10 @@ export function projectAreaLabel(slug: string, areaFrom?: number | null, areaTo?
   if (minimum == null || maximum == null) return null;
   if (minimum === maximum) return `${formatArea(minimum)} m²`;
 
+  if (slug === 'stay-360-leblon' && areaFrom == null && areaTo == null) {
+    return `${formatArea(minimum)} a ${formatArea(maximum)} m² (studios e gardens)`;
+  }
+
   return `${formatArea(minimum)} a ${formatArea(maximum)} m²`;
 }
 

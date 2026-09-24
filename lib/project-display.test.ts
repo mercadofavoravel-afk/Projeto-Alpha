@@ -26,4 +26,16 @@ describe('published catalog copy', () => {
     });
     expect(result.description).toContain('28 a 50 m²');
   });
+
+  it('shows developer-confirmed Copacabana typologies even with the old database copy', () => {
+    const result = projectDisplay({
+      slug: 'be-in-rio-copacabana',
+      name: 'Be.in.Rio Copacabana',
+      description: 'Apartamentos, doubles e coberturas',
+      types: ['Apartamento', 'Double', 'Cobertura'],
+      highlights: [],
+    });
+    expect(result.description).toContain('37,12 a 153,24 m²');
+    expect(result.types).toContain('Up garden');
+  });
 });

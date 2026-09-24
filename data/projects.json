@@ -51,13 +51,13 @@
     "slug": "be-in-rio-copacabana",
     "name": "Be.in.Rio Copacabana",
     "neighborhood": "Copacabana",
-    "description": "Apartamentos, doubles e coberturas",
+    "description": "Apartamentos, up gardens, double suítes e coberturas · plantas de 37,12 a 153,24 m²",
     "image": "/images/parque-05.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["Apartamento", "Double", "Cobertura"],
+    "types": ["Apartamento", "Up garden", "Double suíte", "Cobertura linear"],
     "collections": [],
-    "highlights": []
+    "highlights": ["Siqueira Campos, 37", "Rooftop com piscina", "Coworking"]
   },
   {
     "slug": "bennett-flamengo",

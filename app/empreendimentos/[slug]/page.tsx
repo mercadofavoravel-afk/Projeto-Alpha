@@ -46,6 +46,8 @@ const productIntroductions: Record<string, string> = {
     'Na Barra da Tijuca, apresenta apartamentos de 2, 3 e 4 quartos e coberturas, com metragens de 77 a 301 m². A torre única reúne espaços de lazer e rooftop.',
   'be-in-rio-arpoador':
     'Na Rua Bulhões de Carvalho, no Arpoador, oferece apartamentos, double e triple suítes, além de cobertura duplex. O material da coleção apresenta plantas de 43,10 a 92,11 m².',
+  'be-in-rio-copacabana':
+    'Na Rua Siqueira Campos, 37, reúne apartamentos de 37,12 a 49,74 m², up gardens de 50,06 a 55,23 m², double suítes de 74,83 a 91,09 m² e coberturas lineares de 139,46 e 153,24 m². O projeto inclui rooftop com piscina, coworking e serviços de conveniência.',
   'guilherm-mozak':
     'Na Rua Almirante Guilhem, no Leblon, reúne estúdios, unidades sala/quarto e double suítes. As duas piscinas no rooftop, a academia, o coworking e os serviços de conveniência ampliam o uso do edifício.',
 };

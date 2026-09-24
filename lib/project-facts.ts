@@ -5,6 +5,7 @@
 // Prudente 589 and Nascimento Silva 387: their respective client-supplied digital books.
 // Kronos Barra: client-supplied kronos_barra_versao_web (1).html.
 // Arpoador: project listing printed in the client-supplied Nascimento Silva 387 book.
+// Copacabana: developer's project page, https://www.be-in-rio.com.br/praiacopacabana/.
 const confirmedAreas: Record<string, [number, number]> = {
   'vie-ipanema': [407, 565],
   'bruma-mozak': [225, 410],
@@ -14,6 +15,7 @@ const confirmedAreas: Record<string, [number, number]> = {
   'be-in-rio-nascimento-silva-387': [36.5, 75.16],
   'cronos-barra': [77, 301],
   'be-in-rio-arpoador': [43.1, 92.11],
+  'be-in-rio-copacabana': [37.12, 153.24],
 };
 
 // Ranges transcribed from the existing catalog descriptions in data/projects.json.

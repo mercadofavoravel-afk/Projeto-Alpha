@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { JsonLd } from '@/components/JsonLd';
 import { projects } from '@/lib/projects';
+import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata, siteConfig, websiteJsonLd } from '@/lib/seo';
 
 export const metadata = createMetadata({
@@ -27,7 +28,7 @@ export default function Home() {
       <main>
         <section className="hero hero-home">
           <Image
-            src="/images/vie-01.jpg"
+            src={alphaAssetPath('/images/vie-01.jpg')}
             alt="Residência de alto padrão no Rio de Janeiro"
             fill
             priority
@@ -44,8 +45,8 @@ export default function Home() {
             </h1>
 
             <p>
-              Uma seleção criteriosa de residências e empreendimentos
-              excepcionais nos endereços mais desejados do Rio de Janeiro.
+              Uma seleção criteriosa de residências e empreendimentos excepcionais nos endereços
+              mais desejados do Rio de Janeiro.
             </p>
 
             <Link className="hero-link" href="/descubra">
@@ -59,15 +60,11 @@ export default function Home() {
             <div className="eyebrow">Seleção privada</div>
 
             <div>
-              <h2>
-                Imóveis escolhidos por localização, arquitetura e
-                singularidade.
-              </h2>
+              <h2>Imóveis escolhidos por localização, arquitetura e singularidade.</h2>
 
               <p>
-                Nossa curadoria reúne propriedades para quem procura mais do
-                que metragem: vista, endereço, privacidade, desenho e valor
-                patrimonial.
+                Nossa curadoria reúne propriedades para quem procura mais do que metragem: vista,
+                endereço, privacidade, desenho e valor patrimonial.
               </p>
             </div>
           </div>
@@ -82,8 +79,7 @@ export default function Home() {
               </div>
 
               <p>
-                Conheça uma seleção de empreendimentos em regiões emblemáticas
-                do Rio de Janeiro.
+                Conheça uma seleção de empreendimentos em regiões emblemáticas do Rio de Janeiro.
               </p>
             </div>
 

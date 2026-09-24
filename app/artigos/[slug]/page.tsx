@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { createOrganicArticleSource, getArticleNeighborhood } from '@/lib/article-origin';
+import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -151,7 +152,9 @@ export default async function ArticlePage({ params }: PageProps) {
 
         <article className="collections-section">
           <div className="wrap">
-            {article.heroImage && <img src={article.heroImage} alt={article.title} />}
+            {article.heroImage && (
+              <img src={alphaAssetPath(article.heroImage)} alt={article.title} />
+            )}
 
             <div className="collection-card-content">
               {paragraphs.map((paragraph, index) => (

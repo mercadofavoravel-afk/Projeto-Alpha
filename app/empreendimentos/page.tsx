@@ -2,6 +2,8 @@ import { Card } from '@/components/Card';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
+import { projectDisplay } from '@/lib/project-display';
+import { projectImage } from '@/lib/project-image';
 import { createMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -51,27 +53,22 @@ export default async function Page() {
   });
 
   const projects = dbProjects.map((project) => ({
+    ...projectDisplay({
+      slug: project.slug,
+      name: project.name,
+      description: project.description,
+      types: project.typologies.map((item) => item.name),
+      highlights: project.amenities.map((item) => item.amenity.name),
+    }),
     slug: project.slug,
-    name: project.name,
     neighborhood: project.neighborhood.name,
-    description: project.description,
     image:
-      project.heroImage ||
-      project.media[0]?.url ||
-      '/images/og-default.webp',
+      projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
     status:
       project.statusLabel ||
-      (project.publishStatus === 'PUBLISHED'
-        ? 'Disponível'
-        : project.publishStatus),
+      (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
     objectives: [],
-    types: project.typologies.map((item) => item.name),
-    collections: project.collections.map(
-      (item) => item.collection.name,
-    ),
-    highlights: project.amenities.map(
-      (item) => item.amenity.name,
-    ),
+    collections: project.collections.map((item) => item.collection.name),
   }));
 
   return (
@@ -82,20 +79,14 @@ export default async function Page() {
         <section className="projects-hero">
           <div className="wrap projects-hero-grid">
             <div>
-              <div className="eyebrow">
-                Portfólio selecionado
-              </div>
+              <div className="eyebrow">Portfólio selecionado</div>
 
-              <h1>
-                Empreendimentos que traduzem diferentes
-                formas de viver o Rio.
-              </h1>
+              <h1>Empreendimentos que traduzem diferentes formas de viver o Rio.</h1>
             </div>
 
             <div className="projects-hero-copy">
               <p>
-                Uma seleção criteriosa de endereços com
-                relevância arquitetônica, localização
+                Uma seleção criteriosa de endereços com relevância arquitetônica, localização
                 privilegiada e vocação patrimonial.
               </p>
 
@@ -115,15 +106,11 @@ export default async function Page() {
               <div>
                 <div className="eyebrow">Curadoria</div>
 
-                <h2>
-                  Escolhas orientadas por qualidade, não por
-                  volume.
-                </h2>
+                <h2>Escolhas orientadas por qualidade, não por volume.</h2>
               </div>
 
               <p>
-                Explore o portfólio completo e conheça os
-                atributos que tornam cada empreendimento
+                Explore o portfólio completo e conheça os atributos que tornam cada empreendimento
                 singular.
               </p>
             </div>
@@ -131,22 +118,14 @@ export default async function Page() {
             {projects.length > 0 ? (
               <div className="grid projects-grid">
                 {projects.map((project) => (
-                  <Card
-                    key={project.slug}
-                    p={project}
-                  />
+                  <Card key={project.slug} p={project} />
                 ))}
               </div>
             ) : (
               <div className="projects-empty">
-                <div className="eyebrow">
-                  Portfólio em atualização
-                </div>
+                <div className="eyebrow">Portfólio em atualização</div>
 
-                <h2>
-                  Novos empreendimentos serão apresentados
-                  em breve.
-                </h2>
+                <h2>Novos empreendimentos serão apresentados em breve.</h2>
               </div>
             )}
           </div>

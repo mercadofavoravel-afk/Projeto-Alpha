@@ -1,8 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Project } from '@/lib/projects';
+import { alphaAssetPath } from '@/lib/public-path';
+import { projectImage } from '@/lib/project-image';
 
 export function Card({ p }: { p: Project }) {
+  const image = projectImage(p.slug, p.image);
+
   return (
     <article className="card luxury-card">
       <Link
@@ -10,17 +14,21 @@ export function Card({ p }: { p: Project }) {
         href={`/empreendimentos/${p.slug}`}
         aria-label={`Conhecer ${p.name}`}
       >
-        <Image
-          src={p.image}
-          alt={`${p.name}, ${p.neighborhood}`}
-          width={900}
-          height={620}
-          sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"
-        />
+        {image ? (
+          <Image
+            src={alphaAssetPath(image)}
+            alt={`${p.name}, ${p.neighborhood}`}
+            width={900}
+            height={620}
+            sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="luxury-card-no-photo" aria-hidden="true">
+            Imóveis de Alto Padrão
+          </div>
+        )}
 
-        <div className="luxury-card-location">
-          {p.neighborhood}
-        </div>
+        <div className="luxury-card-location">{p.neighborhood}</div>
       </Link>
 
       <div className="copy luxury-card-copy">
@@ -40,10 +48,7 @@ export function Card({ p }: { p: Project }) {
           </div>
         )}
 
-        <Link
-          className="luxury-card-link"
-          href={`/empreendimentos/${p.slug}`}
-        >
+        <Link className="luxury-card-link" href={`/empreendimentos/${p.slug}`}>
           Conhecer empreendimento
         </Link>
       </div>

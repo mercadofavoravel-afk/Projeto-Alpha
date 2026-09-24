@@ -18,3 +18,15 @@ export function alphaPath(path = '/') {
 
   return `${basePath}${normalizedPath}`;
 }
+
+// Next.js does not prepend basePath to public/ files, even when using next/image.
+export function alphaAssetPath(path: string) {
+  if (!path.startsWith('/') || path.startsWith('//')) return path;
+
+  const basePath = getAlphaBasePath();
+  if (basePath && (path === basePath || path.startsWith(`${basePath}/`))) {
+    return path;
+  }
+
+  return alphaPath(path);
+}

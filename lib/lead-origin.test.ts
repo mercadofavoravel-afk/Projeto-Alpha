@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createOrganicLeadSource } from './lead-origin';
+import { createOrganicLeadSource, organicContentFromSource } from './lead-origin';
 
 describe('createOrganicLeadSource', () => {
   it('keeps the content and region legible for CRM attribution', () => {
@@ -20,5 +20,19 @@ describe('createOrganicLeadSource', () => {
 
     expect(source).toHaveLength(120);
     expect(source.endsWith(' | região: Barra da Tijuca')).toBe(true);
+  });
+});
+
+describe('organicContentFromSource', () => {
+  it('attributes current project and neighborhood forms and older article leads', () => {
+    expect(
+      organicContentFromSource(
+        createOrganicLeadSource({ content: 'Empreendimento: Parque Studios', region: 'Ipanema' }),
+      ),
+    ).toBe('Empreendimento: Parque Studios');
+    expect(organicContentFromSource('Orgânico | artigo: Guia de Ipanema | região: Ipanema')).toBe(
+      'Guia de Ipanema',
+    );
+    expect(organicContentFromSource('Campanha: Google')).toBeNull();
   });
 });

@@ -28,7 +28,7 @@ describe('lead filters', () => {
       }),
     ).toEqual({
       source: {
-        startsWith: 'Orgânico | artigo:',
+        startsWith: 'Orgânico | ',
       },
       status: 'QUALIFIED',
       utmCampaign: {

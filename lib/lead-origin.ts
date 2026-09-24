@@ -15,3 +15,8 @@ export function createOrganicLeadSource({ content, region }: { content: string; 
 
   return `${prefix}${cleanSegment(content).slice(0, availableContentLength)}${regionSegment}`;
 }
+
+export function organicContentFromSource(source: string | null | undefined) {
+  const match = source?.match(/^Orgânico \| (?:conteúdo|artigo): (.+?)(?: \| região:|$)/);
+  return match?.[1] || null;
+}

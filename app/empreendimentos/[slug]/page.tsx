@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { projectDisplay } from '@/lib/project-display';
 import {
   projectAreaLabel,
   projectBedrooms,
@@ -14,7 +15,6 @@ import {
   projectSuites,
 } from '@/lib/project-facts';
 import { projectImage } from '@/lib/project-image';
-import { getProject } from '@/lib/projects';
 import { alphaAssetPath } from '@/lib/public-path';
 import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
 import { LeadCaptureForm } from './LeadCaptureForm';
@@ -38,6 +38,14 @@ const productIntroductions: Record<string, string> = {
     'No Leblon, combina apartamentos, gardens e coberturas duplex em um edifício boutique. O catálogo apresenta opções de 4 e 5 suítes e uma unidade por andar.',
   'stay-360-leblon':
     'Na Visconde de Albuquerque, no Leblon, reúne studios, gardens e coberturas compactas. O lazer no rooftop amplia as opções de uso dos espaços comuns.',
+  'be-in-rio-prudente-589':
+    'Na quadra da praia em Ipanema, reúne studios, gardens, up gardens, doubles e coberturas lineares. A área comum na cobertura tem piscina, lounge, fitness e sauna; o térreo inclui minimercado e espaço para entregas.',
+  'be-in-rio-nascimento-silva-387':
+    'Em Ipanema, reúne studios, gardens, up gardens, double suítes e coberturas lineares. Portaria com minimercado, espaço para entregas e coworking se somam ao fitness e lazer na cobertura.',
+  'cronos-barra':
+    'Na Barra da Tijuca, apresenta apartamentos de 2, 3 e 4 quartos e coberturas, com metragens de 77 a 301 m². A torre única reúne espaços de lazer e rooftop.',
+  'be-in-rio-arpoador':
+    'Na Rua Bulhões de Carvalho, no Arpoador, oferece apartamentos, double e triple suítes, além de cobertura duplex. O material da coleção apresenta plantas de 43,10 a 92,11 m².',
 };
 
 async function getPublishedProject(slug: string) {
@@ -77,26 +85,28 @@ async function getPublishedProject(slug: string) {
 }
 
 function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPublishedProject>>>) {
-  const catalogProject = getProject(project.slug);
-  const types = project.typologies.map((item) => item.name);
-
+  const display = projectDisplay({
+    slug: project.slug,
+    name: project.name,
+    description: project.description,
+    types: project.typologies.map((item) => item.name),
+    highlights: project.amenities.map((item) => item.amenity.name),
+  });
   const collections = project.collections.map((item) => item.collection.name);
 
-  const highlights = project.amenities.map((item) => item.amenity.name);
-
   return {
-    name: project.name,
+    name: display.name,
     slug: project.slug,
-    description: project.description,
+    description: display.description,
     neighborhood: project.neighborhood.name,
     image:
       projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
-    types: types.length > 0 ? types : (catalogProject?.types ?? []),
+    types: display.types,
     collections,
-    highlights: highlights.length > 0 ? highlights : (catalogProject?.highlights ?? []),
+    highlights: display.highlights,
   };
 }
 

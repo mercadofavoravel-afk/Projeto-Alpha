@@ -2,6 +2,7 @@ import { Card } from '@/components/Card';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
+import { projectDisplay } from '@/lib/project-display';
 import { projectImage } from '@/lib/project-image';
 import { createMetadata } from '@/lib/seo';
 
@@ -52,19 +53,22 @@ export default async function Page() {
   });
 
   const projects = dbProjects.map((project) => ({
+    ...projectDisplay({
+      slug: project.slug,
+      name: project.name,
+      description: project.description,
+      types: project.typologies.map((item) => item.name),
+      highlights: project.amenities.map((item) => item.amenity.name),
+    }),
     slug: project.slug,
-    name: project.name,
     neighborhood: project.neighborhood.name,
-    description: project.description,
     image:
       projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
     objectives: [],
-    types: project.typologies.map((item) => item.name),
     collections: project.collections.map((item) => item.collection.name),
-    highlights: project.amenities.map((item) => item.amenity.name),
   }));
 
   return (

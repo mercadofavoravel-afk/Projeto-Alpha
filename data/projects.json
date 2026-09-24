@@ -25,15 +25,15 @@
   },
   {
     "slug": "cronos-barra",
-    "name": "Cronos Barra",
+    "name": "Kronos Barra",
     "neighborhood": "Barra da Tijuca",
-    "description": "2, 3 e 4 quartos · rooftop e lazer",
+    "description": "Apartamentos de 2 a 4 quartos e coberturas de 77 a 301 m²",
     "image": "/images/parque-02.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
     "types": ["2 quartos", "3 quartos", "4 quartos"],
     "collections": [],
-    "highlights": []
+    "highlights": ["Torre única", "Rooftop", "Barra da Tijuca"]
   },
   {
     "slug": "bruma-mozak",
@@ -147,7 +147,7 @@
     "slug": "be-in-rio-arpoador",
     "name": "Be.in.Rio Arpoador",
     "neighborhood": "Arpoador",
-    "description": "Double e triple suítes, cobertura duplex",
+    "description": "Apartamentos, double e triple suítes e cobertura duplex de 43,10 a 92,11 m²",
     "image": "/images/parque-07.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
@@ -159,24 +159,24 @@
     "slug": "be-in-rio-prudente-589",
     "name": "Be.in.Rio Prudente 589",
     "neighborhood": "Ipanema",
-    "description": "Na quadra da praia · opções de double suites",
+    "description": "Studios, gardens, up gardens, doubles e coberturas de 38,07 a 83,45 m²",
     "image": "/images/parque-05.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["Apartamento", "Double suite", "Cobertura"],
+    "types": ["Studio", "Garden", "Up garden", "Double suíte", "Cobertura linear"],
     "collections": ["Be.in.Rio", "Investimento", "Lançamentos"],
-    "highlights": ["Quadra da praia", "Double suites", "Ipanema"]
+    "highlights": ["Quadra da praia", "Lazer na cobertura", "Minimercado e delivery"]
   },
   {
     "slug": "be-in-rio-nascimento-silva-387",
     "name": "Be.in.Rio Nascimento Silva 387",
     "neighborhood": "Ipanema",
-    "description": "Gardens, up gardens e opções de double suites",
+    "description": "Studios, gardens, up gardens, double suítes e coberturas de 36,50 a 75,16 m²",
     "image": "/images/parque-08.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["Apartamento", "Garden", "Up garden", "Double suite"],
+    "types": ["Studio", "Garden", "Up garden", "Double suíte", "Cobertura linear"],
     "collections": ["Be.in.Rio", "Investimento", "Lançamentos"],
-    "highlights": ["Próximo à Lagoa", "Gardens", "Ipanema"]
+    "highlights": ["Coworking", "Lazer no rooftop", "Minimercado e delivery"]
   }
 ]

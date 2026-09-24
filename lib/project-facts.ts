@@ -2,11 +2,18 @@
 // VIE and Bruma: existing catalog descriptions in data/projects.json.
 // Stay 360: developer's project page, https://arosinc.com.br/stay360-leblon-lp/.
 // Parque Studios: ficha técnica, página 41 do Book Digital Parque Studios fornecido pelo cliente.
+// Prudente 589 and Nascimento Silva 387: their respective client-supplied digital books.
+// Kronos Barra: client-supplied kronos_barra_versao_web (1).html.
+// Arpoador: project listing printed in the client-supplied Nascimento Silva 387 book.
 const confirmedAreas: Record<string, [number, number]> = {
   'vie-ipanema': [407, 565],
   'bruma-mozak': [225, 410],
   'stay-360-leblon': [28, 50],
   'parque-studios': [35, 66],
+  'be-in-rio-prudente-589': [38.07, 83.45],
+  'be-in-rio-nascimento-silva-387': [36.5, 75.16],
+  'cronos-barra': [77, 301],
+  'be-in-rio-arpoador': [43.1, 92.11],
 };
 
 // Ranges transcribed from the existing catalog descriptions in data/projects.json.

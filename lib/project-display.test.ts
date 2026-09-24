@@ -38,4 +38,19 @@ describe('published catalog copy', () => {
     expect(result.description).toContain('37,12 a 153,24 m²');
     expect(result.types).toContain('Up garden');
   });
+
+  it('replaces outdated Soul and Paradís typologies from a published database', () => {
+    const legacy = {
+      name: 'Empreendimento',
+      description: 'Studios, 2 quartos e coberturas',
+      types: ['Studio', 'Cobertura'],
+      highlights: [],
+    };
+    const soul = projectDisplay({ slug: 'soul-rio-gago-coutinho', ...legacy });
+    const paradis = projectDisplay({ slug: 'paradis-mozak', ...legacy });
+    expect(soul.description).toContain('27,81 a 82,65 m²');
+    expect(soul.types).toEqual(['Studio', 'Garden', '2 quartos com suíte']);
+    expect(paradis.description).toContain('62 a 147 m²');
+    expect(paradis.types).toEqual(['2 quartos', '3 quartos']);
+  });
 });

@@ -75,13 +75,13 @@
     "slug": "soul-rio-gago-coutinho",
     "name": "Soul Rio Gago Coutinho",
     "neighborhood": "Laranjeiras",
-    "description": "Studios, 2 quartos e coberturas",
+    "description": "Studios, gardens e 2 quartos com suíte · 27,81 a 82,65 m²",
     "image": "/images/parque-07.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["Studio", "2 quartos", "Cobertura"],
+    "types": ["Studio", "Garden", "2 quartos com suíte"],
     "collections": [],
-    "highlights": []
+    "highlights": ["Rua Gago Coutinho, 53", "Lazer em dois rooftops", "Coworking"]
   },
   {
     "slug": "green-park",
@@ -111,13 +111,13 @@
     "slug": "paradis-mozak",
     "name": "Paradís Mozak",
     "neighborhood": "Leblon",
-    "description": "2 e 3 quartos, gardens e coberturas",
+    "description": "Apartamentos de 2 e 3 quartos · 62 a 147 m²",
     "image": "/images/parque-04.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": ["2 quartos", "3 quartos", "Garden", "Cobertura"],
+    "types": ["2 quartos", "3 quartos"],
     "collections": [],
-    "highlights": []
+    "highlights": ["Almirante Guilhem, 234", "Uma quadra da praia", "Bicicletário e lounge externo"]
   },
   {
     "slug": "stay-360-leblon",

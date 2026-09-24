@@ -7,7 +7,12 @@ import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
-import { projectAreaLabel, projectRoomLabel } from '@/lib/project-facts';
+import {
+  projectAreaLabel,
+  projectBedrooms,
+  projectRoomLabel,
+  projectSuites,
+} from '@/lib/project-facts';
 import { projectImage } from '@/lib/project-image';
 import { getProject } from '@/lib/projects';
 import { alphaAssetPath } from '@/lib/public-path';
@@ -20,6 +25,19 @@ type PageProps = {
   params: Promise<{
     slug: string;
   }>;
+};
+
+// Editorial introductions based on the catalog, client's Parque Studios book,
+// and the Stay 360 developer page. Other projects use their saved description.
+const productIntroductions: Record<string, string> = {
+  'vie-ipanema':
+    'Na Vieira Souto, em frente ao mar, reúne apartamentos e coberturas de grandes metragens. Uma opção para quem busca plantas amplas em Ipanema.',
+  'parque-studios':
+    'Na região do Jardim de Alah, reúne studios e lofts de 35 a 40 m², double studios de 55 a 59 m² e coberturas. O projeto inclui lazer no rooftop e serviços como mini market e espaço para entregas.',
+  'bruma-mozak':
+    'No Leblon, combina apartamentos, gardens e coberturas duplex em um edifício boutique. O catálogo apresenta opções de 4 e 5 suítes e uma unidade por andar.',
+  'stay-360-leblon':
+    'Na Visconde de Albuquerque, no Leblon, reúne studios, gardens e coberturas compactas. O lazer no rooftop amplia as opções de uso dos espaços comuns.',
 };
 
 async function getPublishedProject(slug: string) {
@@ -131,8 +149,11 @@ export default async function Page({ params }: PageProps) {
     dbProject.areaFrom?.toNumber(),
     dbProject.areaTo?.toNumber(),
   );
-  const bedrooms = projectRoomLabel(dbProject.bedroomsFrom, dbProject.bedroomsTo);
-  const suites = projectRoomLabel(dbProject.suitesFrom, dbProject.suitesTo, 'suíte');
+  const bedrooms = projectBedrooms(project.slug, dbProject.bedroomsFrom, dbProject.bedroomsTo);
+  const suites = projectSuites(project.slug, dbProject.suitesFrom, dbProject.suitesTo);
+  const introduction =
+    productIntroductions[project.slug] ||
+    `${project.name} fica em ${project.neighborhood}. ${project.description.replace(/[.!?]+$/, '')}.`;
 
   const description = `${project.name}, em ${project.neighborhood}: ${project.description}.`;
 
@@ -195,12 +216,11 @@ export default async function Page({ params }: PageProps) {
             </div>
 
             <div className="property-overview-copy">
-              <p>
-                Em {project.neighborhood}, o empreendimento oferece as seguintes opções:{' '}
-                {project.description}.{area && ` As unidades anunciadas têm áreas de ${area}.`}
-                {project.types.length > 0 &&
-                  ` Conheça as opções de ${project.types.join(', ')} e compare as plantas de acordo com o seu perfil.`}
-              </p>
+              <p>{introduction}</p>
+
+              {project.types.length > 0 && (
+                <p>Explore as configurações de {project.types.join(', ')} e compare as plantas.</p>
+              )}
 
               <p className="property-disclaimer">
                 Informações comerciais, disponibilidade e condições estão sujeitas à confirmação.

@@ -9,6 +9,30 @@ const confirmedAreas: Record<string, [number, number]> = {
   'parque-studios': [35, 66],
 };
 
+// Ranges transcribed from the existing catalog descriptions in data/projects.json.
+const confirmedBedrooms: Record<string, [number, number]> = {
+  'cronos-barra': [2, 4],
+  'bennett-flamengo': [2, 3],
+  'green-park': [2, 3],
+  'paradis-mozak': [2, 3],
+};
+
+const confirmedSuites: Record<string, [number, number]> = {
+  'bruma-mozak': [4, 5],
+};
+
+export function projectBedrooms(slug: string, from?: number | null, to?: number | null) {
+  const [minimum, maximum] =
+    from != null || to != null ? [from, to] : (confirmedBedrooms[slug] ?? []);
+  return projectRoomLabel(minimum, maximum);
+}
+
+export function projectSuites(slug: string, from?: number | null, to?: number | null) {
+  const [minimum, maximum] =
+    from != null || to != null ? [from, to] : (confirmedSuites[slug] ?? []);
+  return projectRoomLabel(minimum, maximum, 'suíte');
+}
+
 function formatArea(value: number) {
   return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(value);
 }

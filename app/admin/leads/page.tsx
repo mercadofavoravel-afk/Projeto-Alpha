@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { organicContentFromSource } from '@/lib/lead-origin';
+import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ type LeadItem = {
   objective: string;
   neighborhood: string | null;
   source: string | null;
+  message: string | null;
   status: string;
   activities: Array<{
     id: string;
@@ -203,6 +205,7 @@ export default async function LeadsPage({
               <th>Nome</th>
               <th>Telefone</th>
               <th>Objetivo</th>
+              <th>Tipologia</th>
               <th>Origem</th>
               <th>Região</th>
               <th>Status</th>
@@ -213,7 +216,7 @@ export default async function LeadsPage({
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={7}>Nenhum lead encontrado para estes filtros.</td>
+                <td colSpan={8}>Nenhum lead encontrado para estes filtros.</td>
               </tr>
             ) : (
               leads.map((lead: LeadItem) => (
@@ -223,6 +226,7 @@ export default async function LeadsPage({
                   </td>
                   <td>{lead.phone}</td>
                   <td>{lead.objective}</td>
+                  <td>{typologyFromMessage(lead.message) || '—'}</td>
                   <td>{lead.source || 'Site'}</td>
                   <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
                   <td>{statusLabel(lead.status)}</td>

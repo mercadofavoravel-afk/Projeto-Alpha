@@ -8,6 +8,7 @@ type LeadCaptureFormProps = {
   projectName: string;
   projectSlug: string;
   neighborhood: string;
+  typologies?: string[];
   source?: string;
 };
 
@@ -60,6 +61,7 @@ export function LeadCaptureForm({
   projectName,
   projectSlug,
   neighborhood,
+  typologies = [],
   source,
 }: LeadCaptureFormProps) {
   const [name, setName] = useState('');
@@ -68,6 +70,7 @@ export function LeadCaptureForm({
   const [objective, setObjective] = useState('LIVE');
   const [budgetMax, setBudgetMax] = useState('');
   const [message, setMessage] = useState('');
+  const [typology, setTypology] = useState('');
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -97,6 +100,7 @@ export function LeadCaptureForm({
           neighborhood,
           budgetMax: budgetMax ? Number(budgetMax) : undefined,
           message: message.trim() || undefined,
+          typology: typology.trim(),
           source: (source || `empreendimento:${projectSlug}`).slice(0, 120),
           utmSource: params.get('utm_source') || undefined,
           utmMedium: params.get('utm_medium') || undefined,
@@ -148,6 +152,7 @@ export function LeadCaptureForm({
       setEmail('');
       setBudgetMax('');
       setMessage('');
+      setTypology('');
       setConsent(false);
 
       setSuccess(
@@ -256,6 +261,27 @@ export function LeadCaptureForm({
           rows={5}
           placeholder={`Gostaria de receber informações reservadas sobre ${projectName}.`}
         />
+      </div>
+
+      <div className="quiz-block">
+        <label htmlFor="lead-typology">Tipologia de interesse</label>
+        <input
+          id="lead-typology"
+          value={typology}
+          onChange={(event) => setTypology(event.target.value)}
+          placeholder="Ex.: studio, 2 quartos, cobertura"
+          list="lead-typology-options"
+          required
+          minLength={2}
+          maxLength={120}
+        />
+        {typologies.length > 0 && (
+          <datalist id="lead-typology-options">
+            {typologies.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
+        )}
       </div>
 
       <div className="quiz-block concierge-consent">

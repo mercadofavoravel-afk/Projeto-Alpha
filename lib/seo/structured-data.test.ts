@@ -48,6 +48,21 @@ describe('structured data', () => {
     expect(schema.address.addressNeighborhood).toBe('Ipanema');
   });
 
+  it('não anuncia a página inicial como imagem quando o empreendimento não tem foto', () => {
+    const schema = projectJsonLd({
+      name: 'Vista Mar',
+      slug: 'vista-mar',
+      description: 'Residência próxima ao mar.',
+      image: '',
+      neighborhood: 'Ipanema',
+      status: 'Consultar',
+      types: ['Apartamento'],
+      highlights: [],
+    });
+
+    expect(schema).not.toHaveProperty('image');
+  });
+
   it('escapa tags HTML na serialização', () => {
     expect(serializeJsonLd({ value: '</script>' })).not.toContain('</script>');
   });

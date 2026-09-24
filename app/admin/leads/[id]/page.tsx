@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
+import { typologyFromMessage } from '@/lib/lead-typology';
 import { ActivityForm } from './ActivityForm';
 import { LeadStatusForm } from './LeadStatusForm';
 
@@ -139,6 +140,10 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <div className="eyebrow">Origem</div>
 
           <dl className="detail-list">
+            <div>
+              <dt>Tipologia de interesse</dt>
+              <dd>{typologyFromMessage(lead.message) || 'Não informada'}</dd>
+            </div>
             <div>
               <dt>Fonte</dt>
               <dd>{lead.source || 'Não informado'}</dd>

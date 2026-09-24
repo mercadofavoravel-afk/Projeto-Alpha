@@ -1074,6 +1074,34 @@ td small {
     serif;
 }
 
+.property-plan-link {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.property-plan-link img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #f8f5ee;
+}
+
+.property-plan-link span {
+  color: var(--g);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.property-plan-link:hover,
+.property-plan-link:focus-visible {
+  border-color: var(--g);
+  background: #f8f5ee;
+}
+
 .property-highlights {
   display: grid;
   grid-template-columns: 0.65fr 2fr;

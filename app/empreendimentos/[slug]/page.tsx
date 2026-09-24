@@ -181,6 +181,22 @@ export default async function Page({ params }: PageProps) {
 
   const description = `${project.name}, em ${project.neighborhood}: ${project.description}.`;
 
+  const floorPlans = [
+    ...dbProject.typologies.map((item) => ({
+      url: item.floorPlan,
+      label: `Planta ${item.name}`,
+    })),
+    ...dbProject.media
+      .filter((item) => item.kind === 'FLOOR_PLAN')
+      .map((item) => ({
+        url: item.url,
+        label: item.caption || item.alt || 'Planta do empreendimento',
+      })),
+  ].filter((plan): plan is { url: string; label: string } =>
+    Boolean(plan.url && (/^https?:\/\//i.test(plan.url) || /^\/(?!\/)/.test(plan.url))),
+  );
+  const distinctFloorPlans = [...new Map(floorPlans.map((plan) => [plan.url, plan])).values()];
+
   const schemas = [
     breadcrumbJsonLd([
       {
@@ -330,6 +346,31 @@ export default async function Page({ params }: PageProps) {
                         <span>{projectRoomLabel(item.suites, null, 'suíte')}</span>
                       )}
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {distinctFloorPlans.length > 0 && (
+              <div className="property-plans">
+                <h3>Plantas para conhecer em detalhe</h3>
+                <div className="property-plans-grid">
+                  {distinctFloorPlans.map((plan) => (
+                    <a
+                      className="property-plan property-plan-link"
+                      href={alphaAssetPath(plan.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={plan.url}
+                    >
+                      {/\.(?:jpe?g|png|webp|avif)(?:\?|$)/i.test(plan.url) && (
+                        // Media URLs come from the CMS and may use hosts outside Next Image configuration.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={alphaAssetPath(plan.url)} alt={plan.label} loading="lazy" />
+                      )}
+                      <strong>{plan.label}</strong>
+                      <span>Ampliar planta ↗</span>
+                    </a>
                   ))}
                 </div>
               </div>

@@ -15,4 +15,15 @@ describe('published catalog copy', () => {
     expect(result.description).toContain('77 a 301 m²');
     expect(result.types).toContain('4 quartos');
   });
+
+  it('shows Stay area in the catalog even with the old database description', () => {
+    const result = projectDisplay({
+      slug: 'stay-360-leblon',
+      name: 'Stay 360 Leblon',
+      description: 'Studios, gardens e coberturas',
+      types: [],
+      highlights: [],
+    });
+    expect(result.description).toContain('28 a 50 m²');
+  });
 });

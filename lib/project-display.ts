@@ -1,6 +1,6 @@
 import { getProject } from '@/lib/projects';
 
-// These catalog entries have newer facts confirmed against client-provided material.
+// These catalog entries have newer facts confirmed against client books or developer pages.
 // The legacy database was seeded before these corrections and may still have old copy.
 const verifiedCatalogSlugs = new Set([
   'parque-studios',
@@ -8,6 +8,8 @@ const verifiedCatalogSlugs = new Set([
   'be-in-rio-prudente-589',
   'be-in-rio-nascimento-silva-387',
   'be-in-rio-arpoador',
+  'stay-360-leblon',
+  'guilherm-mozak',
 ]);
 
 export function projectDisplay(project: {
@@ -20,7 +22,9 @@ export function projectDisplay(project: {
   const catalog = getProject(project.slug);
   const verified = verifiedCatalogSlugs.has(project.slug) && catalog;
   return {
-    name: project.slug === 'cronos-barra' ? (catalog?.name ?? project.name) : project.name,
+    name: ['cronos-barra', 'guilherm-mozak'].includes(project.slug)
+      ? (catalog?.name ?? project.name)
+      : project.name,
     description: verified ? catalog.description : project.description,
     types: verified ? catalog.types : project.types.length ? project.types : (catalog?.types ?? []),
     highlights: project.highlights.length ? project.highlights : (catalog?.highlights ?? []),

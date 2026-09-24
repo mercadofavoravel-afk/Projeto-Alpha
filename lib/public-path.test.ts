@@ -39,9 +39,7 @@ describe('public path', () => {
   it('carrega imagens de public/ pelo diretório do Alpha sem alterar URLs externas', () => {
     process.env.NEXT_PUBLIC_ALPHA_BASE_PATH = 'alpha';
     expect(alphaAssetPath('/images/parque-01.webp')).toBe('/alpha/images/parque-01.webp');
-    expect(alphaAssetPath('/alpha/images/parque-01.webp')).toBe(
-      '/alpha/images/parque-01.webp',
-    );
+    expect(alphaAssetPath('/alpha/images/parque-01.webp')).toBe('/alpha/images/parque-01.webp');
     expect(alphaAssetPath('https://cdn.example.com/project.jpg')).toBe(
       'https://cdn.example.com/project.jpg',
     );

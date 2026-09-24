@@ -1,6 +1,7 @@
 'use client';
 
 import { alphaAssetPath, alphaPath } from '@/lib/public-path';
+import { projectImage } from '@/lib/project-image';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -251,7 +252,10 @@ export function RecommendationQuiz() {
           <div className="grid">
             {results.map((project, index) => (
               <article className="card" key={project.id}>
-                <ResultMedia image={project.heroImage} name={project.name} />
+                <ResultMedia
+                  image={projectImage(project.slug, project.heroImage)}
+                  name={project.name}
+                />
 
                 <div className="copy">
                   <div className="recommendation-rank">

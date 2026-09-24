@@ -8,6 +8,7 @@ import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
 import { projectAreaLabel, projectRoomLabel } from '@/lib/project-facts';
+import { projectImage } from '@/lib/project-image';
 import { getProject } from '@/lib/projects';
 import { alphaAssetPath } from '@/lib/public-path';
 import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
@@ -70,7 +71,8 @@ function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPubl
     slug: project.slug,
     description: project.description,
     neighborhood: project.neighborhood.name,
-    image: project.heroImage || project.media[0]?.url || '/images/og-default.webp',
+    image:
+      projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
@@ -103,7 +105,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: project.seoTitle || `${project.name} em ${project.neighborhood.name}`,
     description,
     path: `/empreendimentos/${project.slug}`,
-    image: view.image,
+    image: view.image || undefined,
     imageAlt: `${project.name} — ${project.neighborhood.name}`,
     keywords: [
       project.name,
@@ -165,13 +167,15 @@ export default async function Page({ params }: PageProps) {
 
       <main>
         <section className="hero property-hero">
-          <Image
-            src={alphaAssetPath(project.image)}
-            alt={`${project.name}, ${project.neighborhood}`}
-            fill
-            priority
-            sizes="100vw"
-          />
+          {project.image && (
+            <Image
+              src={alphaAssetPath(project.image)}
+              alt={`${project.name}, ${project.neighborhood}`}
+              fill
+              priority
+              sizes="100vw"
+            />
+          )}
 
           <div className="wrap content property-hero-content">
             <div className="eyebrow">{project.neighborhood} · Rio de Janeiro</div>
@@ -192,9 +196,8 @@ export default async function Page({ params }: PageProps) {
 
             <div className="property-overview-copy">
               <p>
-                Em {project.neighborhood}, o empreendimento oferece as seguintes opções:
-                {' '}{project.description}.
-                {area && ` As unidades anunciadas têm áreas de ${area}.`}
+                Em {project.neighborhood}, o empreendimento oferece as seguintes opções:{' '}
+                {project.description}.{area && ` As unidades anunciadas têm áreas de ${area}.`}
                 {project.types.length > 0 &&
                   ` Conheça as opções de ${project.types.join(', ')} e compare as plantas de acordo com o seu perfil.`}
               </p>
@@ -275,7 +278,9 @@ export default async function Page({ params }: PageProps) {
                       <strong>{item.name}</strong>
                       {item.area && <span>{item.area.toNumber().toLocaleString('pt-BR')} m²</span>}
                       {item.bedrooms != null && <span>{projectRoomLabel(item.bedrooms)}</span>}
-                      {item.suites != null && <span>{projectRoomLabel(item.suites, null, 'suíte')}</span>}
+                      {item.suites != null && (
+                        <span>{projectRoomLabel(item.suites, null, 'suíte')}</span>
+                      )}
                     </div>
                   ))}
                 </div>

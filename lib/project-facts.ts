@@ -11,11 +11,7 @@ function formatArea(value: number) {
   return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(value);
 }
 
-export function projectAreaLabel(
-  slug: string,
-  areaFrom?: number | null,
-  areaTo?: number | null,
-) {
+export function projectAreaLabel(slug: string, areaFrom?: number | null, areaTo?: number | null) {
   const [minimum, maximum] =
     areaFrom != null || areaTo != null
       ? [areaFrom ?? areaTo, areaTo ?? areaFrom]

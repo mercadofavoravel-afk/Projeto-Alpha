@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { projectImage } from '@/lib/project-image';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
 import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
@@ -186,9 +187,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     path: `/bairros/${neighborhood.slug}`,
     image:
       neighborhood.heroImage ||
-      neighborhood.projects[0]?.heroImage ||
-      neighborhood.projects[0]?.media[0]?.url ||
-      '/images/og-default.webp',
+      neighborhood.projects
+        .map((project) =>
+          projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)),
+        )
+        .find(Boolean),
     imageAlt: `${neighborhood.name} — Rio de Janeiro`,
     keywords: [
       `imóveis em ${neighborhood.name}`,
@@ -216,9 +219,11 @@ export default async function BairroPage({ params }: PageProps) {
 
   const heroImage =
     neighborhood.heroImage ||
-    neighborhood.projects[0]?.heroImage ||
-    neighborhood.projects[0]?.media[0]?.url ||
-    '/images/og-default.webp';
+    neighborhood.projects
+      .map((project) =>
+        projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)),
+      )
+      .find(Boolean);
 
   const videoEmbed = getVideoEmbed(neighborhood.videoUrl);
 
@@ -243,7 +248,9 @@ export default async function BairroPage({ params }: PageProps) {
         <section
           className="bairro-hero"
           style={{
-            backgroundImage: `linear-gradient(90deg, rgba(9, 15, 18, 0.82) 0%, rgba(9, 15, 18, 0.54) 48%, rgba(9, 15, 18, 0.15) 100%), url("${alphaAssetPath(heroImage)}")`,
+            backgroundImage: heroImage
+              ? `linear-gradient(90deg, rgba(9, 15, 18, 0.82) 0%, rgba(9, 15, 18, 0.54) 48%, rgba(9, 15, 18, 0.15) 100%), url("${alphaAssetPath(heroImage)}")`
+              : undefined,
           }}
         >
           <div className="bairro-shell bairro-hero-inner">
@@ -402,8 +409,11 @@ export default async function BairroPage({ params }: PageProps) {
             {neighborhood.projects.length > 0 ? (
               <div className="bairro-project-grid">
                 {neighborhood.projects.map((project, index) => {
-                  const image =
-                    project.heroImage || project.media[0]?.url || '/images/og-default.webp';
+                  const image = projectImage(
+                    project.slug,
+                    project.heroImage,
+                    ...project.media.map((item) => item.url),
+                  );
 
                   const typologies = project.typologies
                     .map((item) => item.name)
@@ -418,7 +428,9 @@ export default async function BairroPage({ params }: PageProps) {
                         index === 0 ? 'bairro-project-featured' : ''
                       }`}
                       style={{
-                        backgroundImage: `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${alphaAssetPath(image)}")`,
+                        backgroundImage: image
+                          ? `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${alphaAssetPath(image)}")`
+                          : undefined,
                       }}
                     >
                       <div className="bairro-project-content">

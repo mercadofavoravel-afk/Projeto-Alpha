@@ -48,6 +48,10 @@ const productIntroductions: Record<string, string> = {
     'Na Rua Bulhões de Carvalho, no Arpoador, oferece apartamentos, double e triple suítes, além de cobertura duplex. O material da coleção apresenta plantas de 43,10 a 92,11 m².',
   'be-in-rio-copacabana':
     'Na Rua Siqueira Campos, 37, reúne apartamentos de 37,12 a 49,74 m², up gardens de 50,06 a 55,23 m², double suítes de 74,83 a 91,09 m² e coberturas lineares de 139,46 e 153,24 m². O projeto inclui rooftop com piscina, coworking e serviços de conveniência.',
+  'soul-rio-gago-coutinho':
+    'Na Rua Gago Coutinho, 53, em Laranjeiras, oferece studios, gardens e apartamentos de 2 quartos com suíte, com plantas de 27,81 a 82,65 m². O edifício inclui lazer distribuído em dois rooftops e espaço de coworking.',
+  'paradis-mozak':
+    'Na Rua Almirante Guilhem, 234, no Leblon, apresenta apartamentos de 2 e 3 quartos de 62 a 147 m². O projeto combina a fachada preservada com um edifício contemporâneo, além de bicicletário e lounge externo.',
   'guilherm-mozak':
     'Na Rua Almirante Guilhem, no Leblon, reúne estúdios, unidades sala/quarto e double suítes. As duas piscinas no rooftop, a academia, o coworking e os serviços de conveniência ampliam o uso do edifício.',
 };

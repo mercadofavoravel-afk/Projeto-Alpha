@@ -53,7 +53,9 @@ const productIntroductions: Record<string, string> = {
   'paradis-mozak':
     'Na Rua Almirante Guilhem, 234, no Leblon, apresenta apartamentos de 2 e 3 quartos de 62 a 147 m². O projeto combina a fachada preservada com um edifício contemporâneo, além de bicicletário e lounge externo.',
   'guilherm-mozak':
-    'Na Rua Almirante Guilhem, no Leblon, reúne estúdios, unidades sala/quarto e double suítes. As duas piscinas no rooftop, a academia, o coworking e os serviços de conveniência ampliam o uso do edifício.',
+    'Na Rua Almirante Guilhem, 115, no Leblon, reúne unidades sala/quarto de 29 a 34 m², gardens e doubles de 37 a 49 m², além de opção de 77 m². As duas piscinas no rooftop, a academia e o coworking ampliam os espaços de uso comum.',
+  'bennett-flamengo':
+    'Na Rua Marquês de Abrantes, 55, no Flamengo, o pré-lançamento prevê apartamentos de 2 quartos com aproximadamente 75 m², de 3 quartos com aproximadamente 100 m² e coberturas duplex. As metragens são preliminares e devem ser confirmadas na apresentação comercial.',
   'green-park':
     'Na Barra da Tijuca, reúne apartamentos de 2 e 3 quartos, gardens e coberturas. As plantas dos apartamentos vão de 64 a 137 m²; os gardens, de 109 a 153 m²; e as coberturas, de 151 a 265 m².',
   'be-in-rio-pompeu':

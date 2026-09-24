@@ -13,3 +13,8 @@ it('shows developer-confirmed Soul and Paradís area spans on their pages', () =
   expect(projectAreaLabel('soul-rio-gago-coutinho')).toBe('27,81 a 82,65 m²');
   expect(projectAreaLabel('paradis-mozak')).toBe('62 a 147 m²');
 });
+
+it('shows the area spans published by the client for Green Park and Pompeu', () => {
+  expect(projectAreaLabel('green-park')).toBe('64 a 265 m²');
+  expect(projectAreaLabel('be-in-rio-pompeu')).toBe('30 a 80,01 m²');
+});

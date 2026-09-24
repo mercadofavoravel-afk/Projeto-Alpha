@@ -8,6 +8,7 @@
 // Copacabana: developer's project page, https://www.be-in-rio.com.br/praiacopacabana/.
 // Soul Rio: Monza's project page, https://monzainc.com.br/empreendimentos/gago-coutinho-53.
 // Paradís: Mozak's project page, https://mozak.rio/projetos/disponiveis/paradis/.
+// Green Park and Pompeu: project listings on the client's own website.
 const confirmedAreas: Record<string, [number, number]> = {
   'vie-ipanema': [407, 565],
   'bruma-mozak': [225, 410],
@@ -20,6 +21,8 @@ const confirmedAreas: Record<string, [number, number]> = {
   'be-in-rio-copacabana': [37.12, 153.24],
   'soul-rio-gago-coutinho': [27.81, 82.65],
   'paradis-mozak': [62, 147],
+  'green-park': [64, 265],
+  'be-in-rio-pompeu': [30, 80.01],
 };
 
 // Ranges transcribed from the existing catalog descriptions in data/projects.json.

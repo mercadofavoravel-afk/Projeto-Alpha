@@ -135,7 +135,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const description =
     project.seoDescription ||
-    `${project.name}, em ${project.neighborhood.name}: ${project.description}. Consulte características, tipologias e disponibilidade.`;
+    `${project.name}, em ${project.neighborhood.name}: ${view.description}. Consulte características, tipologias e disponibilidade.`;
 
   return createMetadata({
     title: project.seoTitle || `${project.name} em ${project.neighborhood.name}`,
@@ -365,6 +365,7 @@ export default async function Page({ params }: PageProps) {
                 projectName={project.name}
                 projectSlug={project.slug}
                 neighborhood={project.neighborhood}
+                typologies={project.types}
                 source={createOrganicLeadSource({
                   content: `Empreendimento: ${project.name}`,
                   region: project.neighborhood,

@@ -67,7 +67,11 @@ export function projectJsonLd(project: ProjectSchemaInput) {
     name: project.name,
     url: buildCanonical(`/empreendimentos/${project.slug}`),
     description: project.description,
-    image: buildCanonical(project.image),
+    ...(project.image
+      ? {
+          image: /^https?:\/\//.test(project.image) ? project.image : buildCanonical(project.image),
+        }
+      : {}),
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Rio de Janeiro',

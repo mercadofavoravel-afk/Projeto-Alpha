@@ -41,13 +41,18 @@ export async function POST(request: Request) {
   }
 
   const utms = normalizeLeadUtms(parsed.data);
+  const { typology, ...leadData } = parsed.data;
+  const message = typology
+    ? `Tipologia desejada: ${typology.replace(/\s+/g, ' ')}${leadData.message ? `\n\n${leadData.message}` : ''}`
+    : leadData.message;
 
   const lead = await db.$transaction(async (transaction) => {
     const createdLead = await transaction.lead.create({
       data: {
-        ...parsed.data,
+        ...leadData,
         ...utms,
         email: parsed.data.email || null,
+        message,
       },
     });
 

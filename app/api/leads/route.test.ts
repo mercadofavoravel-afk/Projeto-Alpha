@@ -55,6 +55,7 @@ describe('POST /api/leads', () => {
           name: 'Cliente orgânico',
           phone: '(21) 96426-1042',
           email: 'cliente@example.com',
+          typology: 'Studio',
           objective: 'INVEST',
           neighborhood: 'Ipanema',
           source: 'Orgânico | artigo: investir em Ipanema | região: Ipanema',
@@ -75,6 +76,7 @@ describe('POST /api/leads', () => {
     expect(database.createLead).toHaveBeenCalledWith({
       data: expect.objectContaining({
         email: 'cliente@example.com',
+        message: 'Tipologia desejada: Studio',
         utmSource: 'google',
         utmMedium: 'paid_social',
         utmCampaign: 'leads_ipanema_setembro',

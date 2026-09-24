@@ -9,6 +9,7 @@ export const leadSchema = z.object({
   budgetMin: z.coerce.number().nonnegative().optional(),
   budgetMax: z.coerce.number().nonnegative().optional(),
   message: z.string().trim().max(2000).optional(),
+  typology: z.string().trim().min(2).max(120).optional(),
   source: z.string().trim().max(120).optional(),
   utmSource: z.string().trim().max(200).optional(),
   utmMedium: z.string().trim().max(200).optional(),

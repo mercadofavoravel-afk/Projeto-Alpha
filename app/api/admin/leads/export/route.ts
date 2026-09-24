@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { requireApiPermission } from '@/lib/auth';
 import { buildLeadWhere, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
+import { typologyFromMessage } from '@/lib/lead-typology';
 
 function csvCell(value: unknown) {
   const text = String(value ?? '');
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
       phone: true,
       email: true,
       objective: true,
+      message: true,
       neighborhood: true,
       source: true,
       utmSource: true,
@@ -56,6 +58,7 @@ export async function GET(request: Request) {
       'Telefone',
       'E-mail',
       'Objetivo',
+      'Tipologia',
       'Região',
       'Origem',
       'UTM Source',
@@ -71,6 +74,7 @@ export async function GET(request: Request) {
         lead.phone,
         lead.email,
         lead.objective,
+        typologyFromMessage(lead.message),
         lead.neighborhood,
         lead.source,
         lead.utmSource,

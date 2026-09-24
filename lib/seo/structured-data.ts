@@ -13,7 +13,6 @@ export function organizationJsonLd() {
     '@type': 'RealEstateAgent',
     name: siteConfig.name,
     url: buildCanonical('/'),
-    logo: buildCanonical(siteConfig.defaultImage),
     areaServed: {
       '@type': 'City',
       name: 'Rio de Janeiro',

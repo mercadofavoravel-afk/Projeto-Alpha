@@ -57,6 +57,20 @@ describe('createMetadata', () => {
     });
   });
 
+  it('não atribui a foto de outro empreendimento à página sem imagem própria', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://alpha.example.com';
+
+    const metadata = createMetadata({
+      title: 'Green Park',
+      description: 'Apartamentos, gardens e coberturas na Barra da Tijuca.',
+      path: '/empreendimentos/green-park',
+      image: null,
+    });
+
+    expect(metadata.openGraph?.images).toBeUndefined();
+    expect(metadata.twitter).toMatchObject({ card: 'summary', images: undefined });
+  });
+
   it('marca páginas privadas como não indexáveis', () => {
     const metadata = createMetadata({
       title: 'Área privada',

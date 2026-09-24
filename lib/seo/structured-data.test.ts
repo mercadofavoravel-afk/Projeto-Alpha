@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { breadcrumbJsonLd, projectJsonLd, serializeJsonLd, websiteJsonLd } from './structured-data';
+import {
+  breadcrumbJsonLd,
+  organizationJsonLd,
+  projectJsonLd,
+  serializeJsonLd,
+  websiteJsonLd,
+} from './structured-data';
 
 const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -9,6 +15,10 @@ afterEach(() => {
 });
 
 describe('structured data', () => {
+  it('não usa foto de empreendimento como logomarca da imobiliária', () => {
+    expect(organizationJsonLd()).not.toHaveProperty('logo');
+  });
+
   it('gera WebSite com ação de busca', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://alpha.example.com';
     const schema = websiteJsonLd();

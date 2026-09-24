@@ -54,6 +54,10 @@ const productIntroductions: Record<string, string> = {
     'Na Rua Almirante Guilhem, 234, no Leblon, apresenta apartamentos de 2 e 3 quartos de 62 a 147 m². O projeto combina a fachada preservada com um edifício contemporâneo, além de bicicletário e lounge externo.',
   'guilherm-mozak':
     'Na Rua Almirante Guilhem, no Leblon, reúne estúdios, unidades sala/quarto e double suítes. As duas piscinas no rooftop, a academia, o coworking e os serviços de conveniência ampliam o uso do edifício.',
+  'green-park':
+    'Na Barra da Tijuca, reúne apartamentos de 2 e 3 quartos, gardens e coberturas. As plantas dos apartamentos vão de 64 a 137 m²; os gardens, de 109 a 153 m²; e as coberturas, de 151 a 265 m².',
+  'be-in-rio-pompeu':
+    'Na Rua Pompeu Loureiro, 110, em Copacabana, reúne apartamentos de 30 a 32,98 m², double suítes de 46 a 64,35 m², garden e up garden de cerca de 65 m² e cobertura de 80,01 m².',
 };
 
 async function getPublishedProject(slug: string) {
@@ -141,7 +145,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: project.seoTitle || `${project.name} em ${project.neighborhood.name}`,
     description,
     path: `/empreendimentos/${project.slug}`,
-    image: view.image || undefined,
+    image: view.image || null,
     imageAlt: `${project.name} — ${project.neighborhood.name}`,
     keywords: [
       project.name,

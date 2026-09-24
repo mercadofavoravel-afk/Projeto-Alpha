@@ -4,6 +4,7 @@ import { siteConfig } from './site';
 import type { MetadataOptions } from './types';
 
 function resolveImage(image?: string | null) {
+  if (image === null) return undefined;
   if (!image) return buildCanonical(siteConfig.defaultImage);
   if (/^https?:\/\//.test(image)) return image;
   return buildCanonical(image);
@@ -39,13 +40,13 @@ export function createMetadata(options: MetadataOptions): Metadata {
       title: options.title,
       description: options.description,
       url: canonical,
-      images: [{ url: image, alt: imageAlt }],
+      images: image ? [{ url: image, alt: imageAlt }] : undefined,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: image ? 'summary_large_image' : 'summary',
       title: options.title,
       description: options.description,
-      images: [image],
+      images: image ? [image] : undefined,
       site: siteConfig.twitterHandle,
     },
   };

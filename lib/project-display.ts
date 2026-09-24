@@ -8,6 +8,7 @@ const verifiedCatalogSlugs = new Set([
   'be-in-rio-prudente-589',
   'be-in-rio-nascimento-silva-387',
   'be-in-rio-arpoador',
+  'be-in-rio-copacabana',
   'stay-360-leblon',
   'guilherm-mozak',
 ]);

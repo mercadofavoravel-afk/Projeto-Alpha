@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { JsonLd } from '@/components/JsonLd';
 import { projects } from '@/lib/projects';
+import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata, siteConfig, websiteJsonLd } from '@/lib/seo';
 
 export const metadata = createMetadata({
@@ -27,7 +28,7 @@ export default function Home() {
       <main>
         <section className="hero hero-home">
           <Image
-            src="/images/vie-01.jpg"
+            src={alphaAssetPath('/images/vie-01.jpg')}
             alt="Residência de alto padrão no Rio de Janeiro"
             fill
             priority

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
+import { alphaAssetPath } from '@/lib/public-path';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +52,7 @@ export default async function MediaPage() {
           <article className="media-item" key={item.id}>
             {item.kind === 'IMAGE' ? (
               <Image
-                src={item.url}
+                src={alphaAssetPath(item.url)}
                 alt={item.alt ?? ''}
                 width={640}
                 height={420}

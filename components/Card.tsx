@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Project } from '@/lib/projects';
+import { alphaAssetPath } from '@/lib/public-path';
 
 export function Card({ p }: { p: Project }) {
   return (
@@ -11,7 +12,7 @@ export function Card({ p }: { p: Project }) {
         aria-label={`Conhecer ${p.name}`}
       >
         <Image
-          src={p.image}
+          src={alphaAssetPath(p.image)}
           alt={`${p.name}, ${p.neighborhood}`}
           width={900}
           height={620}

@@ -31,7 +31,7 @@
     "image": "/images/parque-02.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["2 quartos", "3 quartos", "4 quartos"],
     "collections": [],
     "highlights": []
   },
@@ -55,7 +55,7 @@
     "image": "/images/parque-05.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Apartamento", "Double", "Cobertura"],
     "collections": [],
     "highlights": []
   },
@@ -67,7 +67,7 @@
     "image": "/images/parque-06.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["2 quartos", "3 quartos", "Cobertura duplex"],
     "collections": [],
     "highlights": []
   },
@@ -79,7 +79,7 @@
     "image": "/images/parque-07.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Studio", "2 quartos", "Cobertura"],
     "collections": [],
     "highlights": []
   },
@@ -91,7 +91,7 @@
     "image": "/images/parque-08.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["2 quartos", "3 quartos", "Garden", "Cobertura"],
     "collections": [],
     "highlights": []
   },
@@ -103,7 +103,7 @@
     "image": "/images/parque-03.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Garden", "Compacto", "Double", "2 quartos"],
     "collections": [],
     "highlights": []
   },
@@ -115,7 +115,7 @@
     "image": "/images/parque-04.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["2 quartos", "3 quartos", "Garden", "Cobertura"],
     "collections": [],
     "highlights": []
   },
@@ -127,9 +127,9 @@
     "image": "/images/parque-05.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Studio", "Garden", "Cobertura"],
     "collections": [],
-    "highlights": []
+    "highlights": ["Lazer no rooftop", "Visconde de Albuquerque", "Leblon"]
   },
   {
     "slug": "be-in-rio-pompeu",
@@ -139,7 +139,7 @@
     "image": "/images/parque-04.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Studio", "Double suíte", "Garden", "Cobertura"],
     "collections": [],
     "highlights": []
   },
@@ -151,7 +151,7 @@
     "image": "/images/parque-07.webp",
     "status": "Consultar",
     "objectives": ["Morar", "Investir"],
-    "types": [],
+    "types": ["Double suíte", "Triple suíte", "Cobertura duplex"],
     "collections": [],
     "highlights": []
   },

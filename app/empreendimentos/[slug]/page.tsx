@@ -7,6 +7,9 @@ import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { projectAreaLabel, projectRoomLabel } from '@/lib/project-facts';
+import { getProject } from '@/lib/projects';
+import { alphaAssetPath } from '@/lib/public-path';
 import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
 import { LeadCaptureForm } from './LeadCaptureForm';
 
@@ -55,6 +58,7 @@ async function getPublishedProject(slug: string) {
 }
 
 function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPublishedProject>>>) {
+  const catalogProject = getProject(project.slug);
   const types = project.typologies.map((item) => item.name);
 
   const collections = project.collections.map((item) => item.collection.name);
@@ -70,9 +74,9 @@ function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPubl
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
-    types,
+    types: types.length > 0 ? types : (catalogProject?.types ?? []),
     collections,
-    highlights,
+    highlights: highlights.length > 0 ? highlights : (catalogProject?.highlights ?? []),
   };
 }
 
@@ -120,6 +124,13 @@ export default async function Page({ params }: PageProps) {
   }
 
   const project = projectViewModel(dbProject);
+  const area = projectAreaLabel(
+    project.slug,
+    dbProject.areaFrom?.toNumber(),
+    dbProject.areaTo?.toNumber(),
+  );
+  const bedrooms = projectRoomLabel(dbProject.bedroomsFrom, dbProject.bedroomsTo);
+  const suites = projectRoomLabel(dbProject.suitesFrom, dbProject.suitesTo, 'suíte');
 
   const description = `${project.name}, em ${project.neighborhood}: ${project.description}.`;
 
@@ -155,7 +166,7 @@ export default async function Page({ params }: PageProps) {
       <main>
         <section className="hero property-hero">
           <Image
-            src={project.image}
+            src={alphaAssetPath(project.image)}
             alt={`${project.name}, ${project.neighborhood}`}
             fill
             priority
@@ -176,11 +187,17 @@ export default async function Page({ params }: PageProps) {
             <div>
               <div className="eyebrow">O empreendimento</div>
 
-              <h2>Um endereço singular em {project.neighborhood}.</h2>
+              <h2>O que você encontra em {project.name}.</h2>
             </div>
 
             <div className="property-overview-copy">
-              <p>{project.description}</p>
+              <p>
+                Em {project.neighborhood}, o empreendimento oferece as seguintes opções:
+                {' '}{project.description}.
+                {area && ` As unidades anunciadas têm áreas de ${area}.`}
+                {project.types.length > 0 &&
+                  ` Conheça as opções de ${project.types.join(', ')} e compare as plantas de acordo com o seu perfil.`}
+              </p>
 
               <p className="property-disclaimer">
                 Informações comerciais, disponibilidade e condições estão sujeitas à confirmação.
@@ -191,7 +208,30 @@ export default async function Page({ params }: PageProps) {
 
         <section className="property-details">
           <div className="wrap">
+            <div className="eyebrow">Produto e plantas</div>
+            <h2 className="property-details-title">Configurações do empreendimento</h2>
             <div className="property-detail-grid">
+              {area && (
+                <div className="property-detail-item">
+                  <span>Metragens</span>
+                  <strong>{area}</strong>
+                </div>
+              )}
+
+              {bedrooms && (
+                <div className="property-detail-item">
+                  <span>Dormitórios</span>
+                  <strong>{bedrooms}</strong>
+                </div>
+              )}
+
+              {suites && (
+                <div className="property-detail-item">
+                  <span>Suítes</span>
+                  <strong>{suites}</strong>
+                </div>
+              )}
+
               <div className="property-detail-item">
                 <span>Localização</span>
                 <strong>{project.neighborhood}</strong>
@@ -211,15 +251,6 @@ export default async function Page({ params }: PageProps) {
                 </strong>
               </div>
 
-              <div className="property-detail-item">
-                <span>Perfil</span>
-                <strong>
-                  {project.collections.length > 0
-                    ? project.collections.join(' · ')
-                    : 'Curadoria residencial'}
-                </strong>
-              </div>
-
               {dbProject.developer?.name && (
                 <div className="property-detail-item">
                   <span>Incorporadora</span>
@@ -235,9 +266,25 @@ export default async function Page({ params }: PageProps) {
               )}
             </div>
 
+            {dbProject.typologies.some((item) => item.area != null) && (
+              <div className="property-plans">
+                <h3>Plantas por tipologia</h3>
+                <div className="property-plans-grid">
+                  {dbProject.typologies.map((item) => (
+                    <div className="property-plan" key={item.id}>
+                      <strong>{item.name}</strong>
+                      {item.area && <span>{item.area.toNumber().toLocaleString('pt-BR')} m²</span>}
+                      {item.bedrooms != null && <span>{projectRoomLabel(item.bedrooms)}</span>}
+                      {item.suites != null && <span>{projectRoomLabel(item.suites, null, 'suíte')}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {project.highlights.length > 0 && (
               <div className="property-highlights">
-                <div className="eyebrow">Destaques</div>
+                <div className="eyebrow">Diferenciais do projeto</div>
 
                 <div className="property-highlights-list">
                   {project.highlights.map((highlight) => (

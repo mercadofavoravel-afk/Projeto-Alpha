@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
 import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 
@@ -242,7 +243,7 @@ export default async function BairroPage({ params }: PageProps) {
         <section
           className="bairro-hero"
           style={{
-            backgroundImage: `linear-gradient(90deg, rgba(9, 15, 18, 0.82) 0%, rgba(9, 15, 18, 0.54) 48%, rgba(9, 15, 18, 0.15) 100%), url("${heroImage}")`,
+            backgroundImage: `linear-gradient(90deg, rgba(9, 15, 18, 0.82) 0%, rgba(9, 15, 18, 0.54) 48%, rgba(9, 15, 18, 0.15) 100%), url("${alphaAssetPath(heroImage)}")`,
           }}
         >
           <div className="bairro-shell bairro-hero-inner">
@@ -417,7 +418,7 @@ export default async function BairroPage({ params }: PageProps) {
                         index === 0 ? 'bairro-project-featured' : ''
                       }`}
                       style={{
-                        backgroundImage: `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${image}")`,
+                        backgroundImage: `linear-gradient(0deg, rgba(8, 14, 17, 0.88) 0%, rgba(8, 14, 17, 0.10) 72%), url("${alphaAssetPath(image)}")`,
                       }}
                     >
                       <div className="bairro-project-content">

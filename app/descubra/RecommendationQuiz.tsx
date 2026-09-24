@@ -1,6 +1,6 @@
 'use client';
 
-import { alphaPath } from '@/lib/public-path';
+import { alphaAssetPath, alphaPath } from '@/lib/public-path';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,7 +40,7 @@ function ResultMedia({ image, name }: { image: string | null | undefined; name: 
   if (image.startsWith('/')) {
     return (
       <Image
-        src={image}
+        src={alphaAssetPath(image)}
         alt={name}
         width={900}
         height={560}

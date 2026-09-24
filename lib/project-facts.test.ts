@@ -18,3 +18,8 @@ it('shows the area spans published by the client for Green Park and Pompeu', () 
   expect(projectAreaLabel('green-park')).toBe('64 a 265 m²');
   expect(projectAreaLabel('be-in-rio-pompeu')).toBe('30 a 80,01 m²');
 });
+
+it('shows the verified Guilhem area span without inventing Bennett duplex areas', () => {
+  expect(projectAreaLabel('guilherm-mozak')).toBe('29 a 77 m²');
+  expect(projectAreaLabel('bennett-flamengo')).toBeNull();
+});

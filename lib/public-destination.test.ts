@@ -17,5 +17,7 @@ describe('public destinations', () => {
     expect(
       isPublicSiteUrl('https://www.imoveisdealtopadraorio.com.br/empreendimentos/kronos'),
     ).toBe(true);
+    expect(isPublicSiteUrl('https://imoveisdealtopadraorio.com.br/green-park/')).toBe(true);
+    expect(isPublicSiteUrl('https://imoveisdealtopadraorio.com.br.evil.example/')).toBe(false);
   });
 });

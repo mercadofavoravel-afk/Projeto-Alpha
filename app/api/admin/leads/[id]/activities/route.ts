@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireApiPermission } from '@/lib/auth';
 import { audit } from '@/lib/audit';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 const activitySchema = z.object({
   type: z.enum(['NOTE', 'CALL', 'WHATSAPP', 'EMAIL', 'VISIT', 'TASK']),
@@ -11,10 +12,15 @@ const activitySchema = z.object({
 });
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
-  const auth = await requireApiPermission('crm:write');
+  const auth = await requireApiPermission('crm:read');
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { id } = await context.params;
+  const lead = await db.lead.findFirst({
+    where: { id, ...leadAccessWhere(auth.user) },
+    select: { id: true },
+  });
+  if (!lead) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
   return NextResponse.json(
     await db.leadActivity.findMany({ where: { leadId: id }, orderBy: { createdAt: 'desc' } }),
   );
@@ -32,6 +38,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       { status: 400 },
     );
   }
+  const lead = await db.lead.findFirst({
+    where: { id, ...leadAccessWhere(auth.user) },
+    select: { id: true },
+  });
+  if (!lead) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
   const activity = await db.leadActivity.create({ data: { ...parsed.data, leadId: id } });
   await audit('lead.activity_created', 'Lead', id, auth.user.id, { type: parsed.data.type });
 

@@ -4,6 +4,7 @@ import { WhatsAppFollowUpActions } from './WhatsAppFollowUpActions';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { createWhatsAppHref, getFollowUpMessage } from '@/lib/whatsapp-follow-up';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ function dueLabel(dueAt: Date, today: Date, tomorrow: Date) {
 }
 
 export default async function AgendaPage() {
-  await requirePermission('crm:read');
+  const user = await requirePermission('crm:read');
 
   const today = startOfDay(new Date());
   const tomorrow = new Date(today);
@@ -52,6 +53,7 @@ export default async function AgendaPage() {
 
   const activities = await db.leadActivity.findMany({
     where: {
+      lead: leadAccessWhere(user),
       completedAt: null,
       dueAt: {
         lte: windowEnd,

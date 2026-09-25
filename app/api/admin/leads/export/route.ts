@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { requireApiPermission } from '@/lib/auth';
 import { buildLeadWhere, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { typologyFromMessage } from '@/lib/lead-typology';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 function csvCell(value: unknown) {
   const text = String(value ?? '');
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
   });
 
   const leads = await db.lead.findMany({
-    where: buildLeadWhere(filters),
+    where: { ...buildLeadWhere(filters), ...leadAccessWhere(auth.user) },
     select: {
       createdAt: true,
       name: true,

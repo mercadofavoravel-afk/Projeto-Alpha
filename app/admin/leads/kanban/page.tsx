@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { leadStatuses, statusLabel } from '@/lib/lead-filters';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,10 @@ type KanbanLead = {
 };
 
 export default async function LeadKanbanPage() {
-  await requirePermission('crm:read');
+  const user = await requirePermission('crm:read');
 
   const leads = await db.lead.findMany({
+    where: leadAccessWhere(user),
     include: {
       activities: {
         select: {

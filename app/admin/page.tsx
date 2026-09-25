@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,7 @@ function statusLabel(status: string) {
 
 export default async function Page() {
   const user = await requireUser();
+  const leadScope = leadAccessWhere(user);
   const today = startOfDay(new Date());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -61,9 +63,10 @@ export default async function Page() {
   const [projects, leadCount, books, recentLeads, overdueActivities, dueTodayActivities] =
     await Promise.all([
       db.project.count(),
-      db.lead.count(),
+      db.lead.count({ where: leadScope }),
       db.bookIngestion.count(),
       db.lead.findMany({
+        where: leadScope,
         select: {
           source: true,
           utmSource: true,
@@ -77,6 +80,7 @@ export default async function Page() {
       }),
       db.leadActivity.count({
         where: {
+          lead: leadScope,
           completedAt: null,
           dueAt: {
             lt: today,
@@ -85,6 +89,7 @@ export default async function Page() {
       }),
       db.leadActivity.count({
         where: {
+          lead: leadScope,
           completedAt: null,
           dueAt: {
             gte: today,

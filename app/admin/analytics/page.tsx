@@ -1,53 +1,48 @@
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AnalyticsPage() {
-  await requirePermission('analytics:read');
+  const user = await requirePermission('analytics:read');
 
-  const [
-    totalEvents,
-    projectViews,
-    recommendations,
-    leadConversions,
-    leads,
-    sessions,
-  ] = await Promise.all([
-    db.analyticsEvent.count(),
+  const [totalEvents, projectViews, recommendations, leadConversions, leads, sessions] =
+    await Promise.all([
+      db.analyticsEvent.count(),
 
-    db.analyticsEvent.count({
-      where: {
-        name: 'project_view',
-      },
-    }),
-
-    db.analyticsEvent.count({
-      where: {
-        name: 'recommendation_generated',
-      },
-    }),
-
-    db.analyticsEvent.count({
-      where: {
-        name: 'lead_submitted',
-      },
-    }),
-
-    db.lead.count(),
-
-    db.analyticsEvent.findMany({
-      where: {
-        sessionKey: {
-          not: null,
+      db.analyticsEvent.count({
+        where: {
+          name: 'project_view',
         },
-      },
-      select: {
-        sessionKey: true,
-      },
-      distinct: ['sessionKey'],
-    }),
-  ]);
+      }),
+
+      db.analyticsEvent.count({
+        where: {
+          name: 'recommendation_generated',
+        },
+      }),
+
+      db.analyticsEvent.count({
+        where: {
+          name: 'lead_submitted',
+        },
+      }),
+
+      db.lead.count({ where: leadAccessWhere(user) }),
+
+      db.analyticsEvent.findMany({
+        where: {
+          sessionKey: {
+            not: null,
+          },
+        },
+        select: {
+          sessionKey: true,
+        },
+        distinct: ['sessionKey'],
+      }),
+    ]);
 
   return (
     <>
@@ -56,10 +51,7 @@ export default async function AnalyticsPage() {
       <div className="head">
         <div>
           <h1>Analytics</h1>
-          <p>
-            Visão consolidada de comportamento, recomendação e
-            conversão.
-          </p>
+          <p>Visão consolidada de comportamento, recomendação e conversão.</p>
         </div>
       </div>
 

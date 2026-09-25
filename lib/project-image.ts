@@ -25,6 +25,29 @@ export function projectImageFromMedia(
   return projectImage(
     slug,
     heroImage,
-    ...media.filter((item) => item.kind === 'IMAGE').map((item) => item.url),
+    ...media
+      .filter((item) => item.kind === 'IMAGE' && isPublicImageUrl(item.url))
+      .map((item) => item.url),
   );
+}
+
+function isPublicImageUrl(url: string) {
+  return /^(https?:\/\/|\/(?!\/))/.test(url) && !/\.(?:pdf|mp4|mov|webm)(?:[?#]|$)/i.test(url);
+}
+
+export function projectGalleryImages<T extends { kind: string; url: string }>(
+  slug: string,
+  heroImage: string | null | undefined,
+  media: T[],
+) {
+  const cover = projectImageFromMedia(slug, heroImage, media);
+  const seen = new Set<string>();
+
+  return media.filter((item) => {
+    if (item.kind !== 'IMAGE' || item.url === cover || seen.has(item.url)) return false;
+    if (!isPublicImageUrl(item.url)) return false;
+    if (projectImage(slug, item.url) !== item.url) return false;
+    seen.add(item.url);
+    return true;
+  });
 }

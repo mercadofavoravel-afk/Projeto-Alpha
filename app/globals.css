@@ -1102,6 +1102,37 @@ td small {
   background: #f8f5ee;
 }
 
+.property-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.property-gallery-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.property-gallery-link img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #f8f5ee;
+}
+
+.property-gallery-link span {
+  display: block;
+  padding-top: 10px;
+  line-height: 1.4;
+}
+
+.property-gallery-link:focus-visible img {
+  outline: 2px solid var(--g);
+  outline-offset: 3px;
+}
+
 .property-highlights {
   display: grid;
   grid-template-columns: 0.65fr 2fr;

@@ -11,7 +11,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const project = await db.project.findUnique({
     where: { id },
-    include: { media: { where: { kind: 'FLOOR_PLAN' }, orderBy: { position: 'asc' } } },
+    include: { media: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] } },
   });
   if (!project) notFound();
   const serialized = JSON.parse(JSON.stringify(project));
@@ -32,16 +32,35 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         </div>
         <ProjectEditor project={serialized} />
         <section className="property-plans">
+          <h2>Fotos do empreendimento</h2>
+          <p>
+            Cadastre URLs públicas das fotos aprovadas. A primeira foto pode ser usada como capa
+            quando não houver imagem principal.
+          </p>
+          <FloorPlanForm projectId={project.id} kind="IMAGE" />
+          {project.media
+            .filter((item) => item.kind === 'IMAGE')
+            .map((item) => (
+              <p key={item.id}>
+                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                  {item.caption || item.alt || 'Foto cadastrada'}
+                </a>
+              </p>
+            ))}
+        </section>
+        <section className="property-plans">
           <h2>Plantas do empreendimento</h2>
           <p>Cadastre o endereço público da planta aprovada para exibi-la na página do projeto.</p>
           <FloorPlanForm projectId={project.id} />
-          {project.media.map((item) => (
-            <p key={item.id}>
-              <a href={item.url} target="_blank" rel="noopener noreferrer">
-                {item.caption || item.alt || 'Planta cadastrada'}
-              </a>
-            </p>
-          ))}
+          {project.media
+            .filter((item) => item.kind === 'FLOOR_PLAN')
+            .map((item) => (
+              <p key={item.id}>
+                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                  {item.caption || item.alt || 'Planta cadastrada'}
+                </a>
+              </p>
+            ))}
         </section>
       </main>
     </div>

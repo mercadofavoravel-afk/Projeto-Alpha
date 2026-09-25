@@ -145,7 +145,9 @@ export default async function Page() {
               <Link href="/admin/discovery">Links para revisar</Link>
             </>
           )}
-          {user.role === 'ADMIN' && <Link href="/admin/usuarios">Usuários e acessos</Link>}
+          {hasPermission(user.role, 'users:manage') && (
+            <Link href="/admin/usuarios">Usuários e acessos</Link>
+          )}
         </div>
       </section>
 

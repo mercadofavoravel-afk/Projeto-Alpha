@@ -34,6 +34,7 @@ enum LeadObjective {
 
 enum UserRole {
   ADMIN
+  DIRECTOR
   MANAGER
   EDITOR
   CONSULTANT

@@ -8,8 +8,8 @@ import { z } from 'zod';
 
 import { requireRole } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { canManageEmployeeRole, employeeRoles } from '@/lib/team-roles';
 
-const employeeRoles = ['MANAGER', 'CONSULTANT', 'EDITOR', 'MARKETING', 'VIEWER'] as const;
 const createSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z
@@ -28,7 +28,7 @@ function done(result: string): never {
 }
 
 export async function createEmployee(formData: FormData) {
-  const admin = await requireRole(['ADMIN']);
+  const actor = await requireRole(['ADMIN', 'DIRECTOR']);
   const parsed = createSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -38,6 +38,7 @@ export async function createEmployee(formData: FormData) {
   if (!parsed.success) done('invalid');
 
   const { name, email, role, password } = parsed.data;
+  if (!canManageEmployeeRole(actor.role, role)) done('invalid');
   const passwordHash = await bcrypt.hash(password, 12);
 
   try {
@@ -48,7 +49,7 @@ export async function createEmployee(formData: FormData) {
           action: 'user.created',
           entityType: 'User',
           entityId: user.id,
-          userId: admin.id,
+          userId: actor.id,
           metadata: { role },
         },
       });
@@ -62,7 +63,7 @@ export async function createEmployee(formData: FormData) {
 }
 
 export async function updateEmployee(formData: FormData) {
-  const admin = await requireRole(['ADMIN']);
+  const actor = await requireRole(['ADMIN', 'DIRECTOR']);
   const id = formData.get('userId');
   const role = formData.get('role');
   const active = formData.get('isActive') === 'true';
@@ -72,10 +73,11 @@ export async function updateEmployee(formData: FormData) {
     !employeeRoles.includes(role as (typeof employeeRoles)[number])
   )
     done('invalid');
-  if (id === admin.id) done('self');
+  if (id === actor.id) done('self');
+  if (!canManageEmployeeRole(actor.role, role as UserRole)) done('invalid');
 
   const target = await db.user.findUnique({ where: { id }, select: { role: true } });
-  if (!target || target.role === 'ADMIN') done('invalid');
+  if (!target || !canManageEmployeeRole(actor.role, target.role)) done('invalid');
 
   await db.$transaction(async (transaction) => {
     await transaction.user.update({
@@ -85,7 +87,7 @@ export async function updateEmployee(formData: FormData) {
     if (!active || target.role !== role) {
       await transaction.session.deleteMany({ where: { userId: id } });
     }
-    if (!active || !['MANAGER', 'CONSULTANT'].includes(role)) {
+    if (!active || !['DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role)) {
       await transaction.lead.updateMany({
         where: { assignedToId: id },
         data: { assignedToId: null },
@@ -96,7 +98,7 @@ export async function updateEmployee(formData: FormData) {
         action: 'user.updated',
         entityType: 'User',
         entityId: id,
-        userId: admin.id,
+        userId: actor.id,
         metadata: { role, active },
       },
     });

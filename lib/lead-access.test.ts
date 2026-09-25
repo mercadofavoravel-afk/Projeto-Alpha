@@ -13,7 +13,7 @@ describe('acesso aos leads da equipe', () => {
   });
 
   it('permite à gestão visualizar inclusive leads ainda sem responsável', () => {
-    for (const role of ['ADMIN', 'MANAGER'] as const) {
+    for (const role of ['ADMIN', 'DIRECTOR', 'MANAGER'] as const) {
       expect(leadAccessWhere({ id: 'manager-1', role })).toEqual({});
       expect(canAccessLead({ id: 'manager-1', role }, null)).toBe(true);
     }
@@ -32,5 +32,8 @@ describe('acesso aos leads da equipe', () => {
     expect(leadAssignmentWhere(manager, 'assigned')).toEqual({ assignedToId: { not: null } });
     expect(leadAssignmentWhere(manager, 'invalid')).toEqual({});
     expect(leadAssignmentWhere(consultant, 'unassigned')).toEqual({});
+    expect(leadAssignmentWhere({ id: 'director-1', role: 'DIRECTOR' }, 'unassigned')).toEqual({
+      assignedToId: null,
+    });
   });
 });

@@ -3,7 +3,7 @@ import type { Prisma, UserRole } from '@prisma/client';
 type LeadViewer = { id: string; role: UserRole };
 
 export function canViewAllLeads(role: UserRole) {
-  return role === 'ADMIN' || role === 'MANAGER';
+  return role === 'ADMIN' || role === 'DIRECTOR' || role === 'MANAGER';
 }
 
 export function leadAccessWhere(user: LeadViewer): Prisma.LeadWhereInput {

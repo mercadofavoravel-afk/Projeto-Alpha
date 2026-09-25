@@ -5,6 +5,7 @@ import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
 import { normalizeLeadUtms } from '@/lib/utm';
 import { leadSchema } from '@/lib/validation';
 import { requireApiPermission } from '@/lib/auth';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 export async function GET() {
   const auth = await requireApiPermission('crm:read');
@@ -14,6 +15,7 @@ export async function GET() {
   }
 
   const leads = await db.lead.findMany({
+    where: leadAccessWhere(auth.user),
     orderBy: {
       createdAt: 'desc',
     },

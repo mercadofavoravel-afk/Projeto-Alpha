@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 const statusSchema = z.object({
   status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED', 'WON', 'LOST']),
@@ -37,9 +38,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const lead = await db.lead.findUnique({
+  const lead = await db.lead.findFirst({
     where: {
       id,
+      ...leadAccessWhere(auth.user),
     },
     select: {
       id: true,
@@ -53,15 +55,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const now = new Date();
   const shouldStopFollowUps = parsed.data.status !== 'NEW';
 
-  await db.$transaction(async (transaction) => {
-    await transaction.lead.update({
-      where: {
-        id,
-      },
-      data: {
-        status: parsed.data.status,
-      },
+  const updated = await db.$transaction(async (transaction) => {
+    const result = await transaction.lead.updateMany({
+      where: { id, ...leadAccessWhere(auth.user) },
+      data: { status: parsed.data.status },
     });
+    if (result.count === 0) return false;
 
     if (shouldStopFollowUps) {
       const completedFollowUps = await transaction.leadActivity.updateMany({
@@ -89,7 +88,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         });
       }
     }
+    return true;
   });
+
+  if (!updated) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
 
   return NextResponse.json({ ok: true });
 }

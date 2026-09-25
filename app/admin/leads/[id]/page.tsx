@@ -5,6 +5,9 @@ import { requirePermission } from '@/lib/auth';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { ActivityForm } from './ActivityForm';
 import { LeadStatusForm } from './LeadStatusForm';
+import { AssignmentForm } from './AssignmentForm';
+import { leadAccessWhere } from '@/lib/lead-access';
+import { hasPermission } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,15 +54,17 @@ function activityLabel(type: string) {
 }
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePermission('crm:read');
+  const user = await requirePermission('crm:read');
 
   const { id } = await params;
 
-  const lead = await db.lead.findUnique({
+  const lead = await db.lead.findFirst({
     where: {
       id,
+      ...leadAccessWhere(user),
     },
     include: {
+      assignedTo: { select: { id: true, name: true, email: true } },
       activities: {
         orderBy: {
           createdAt: 'desc',
@@ -71,6 +76,14 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   if (!lead) {
     notFound();
   }
+
+  const assignees = hasPermission(user.role, 'crm:assign')
+    ? await db.user.findMany({
+        where: { isActive: true, role: { in: ['CONSULTANT', 'MANAGER'] } },
+        select: { id: true, name: true, email: true },
+        orderBy: { name: 'asc' },
+      })
+    : [];
 
   return (
     <>
@@ -87,11 +100,22 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         </Link>
       </div>
 
+      {hasPermission(user.role, 'crm:assign') ? (
+        <section className="admin-card">
+          <h2>Distribuir lead</h2>
+          <AssignmentForm leadId={lead.id} assignedToId={lead.assignedToId} assignees={assignees} />
+        </section>
+      ) : (
+        <p>Responsável: {lead.assignedTo?.name || lead.assignedTo?.email || 'Sem responsável'}</p>
+      )}
+
       <section className="admin-card">
         <div className="eyebrow">Controle de sequência</div>
         <h2>Atualizar atendimento</h2>
 
-        <LeadStatusForm leadId={lead.id} initialStatus={lead.status} />
+        {hasPermission(user.role, 'crm:write') && (
+          <LeadStatusForm leadId={lead.id} initialStatus={lead.status} />
+        )}
       </section>
 
       <div className="editor-grid">
@@ -183,7 +207,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         <div className="eyebrow">Nova atividade</div>
         <h2>Registrar acompanhamento</h2>
 
-        <ActivityForm leadId={lead.id} />
+        {hasPermission(user.role, 'crm:write') && <ActivityForm leadId={lead.id} />}
       </section>
 
       <section className="admin-card">

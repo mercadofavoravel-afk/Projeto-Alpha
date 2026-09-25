@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 type RouteContext = {
   params: Promise<{
@@ -17,9 +18,10 @@ export async function PATCH(_: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const activity = await db.leadActivity.findUnique({
+  const activity = await db.leadActivity.findFirst({
     where: {
       id,
+      lead: leadAccessWhere(auth.user),
     },
     select: {
       id: true,
@@ -35,14 +37,15 @@ export async function PATCH(_: Request, { params }: RouteContext) {
     return NextResponse.json({ ok: true, alreadyCompleted: true });
   }
 
-  await db.leadActivity.update({
-    where: {
-      id,
-    },
+  const result = await db.leadActivity.updateMany({
+    where: { id, completedAt: null, lead: leadAccessWhere(auth.user) },
     data: {
       completedAt: new Date(),
     },
   });
+
+  if (result.count === 0)
+    return NextResponse.json({ error: 'Acompanhamento não encontrado.' }, { status: 404 });
 
   return NextResponse.json({ ok: true });
 }

@@ -34,6 +34,7 @@ enum LeadObjective {
 
 enum UserRole {
   ADMIN
+  MANAGER
   EDITOR
   CONSULTANT
   MARKETING
@@ -131,6 +132,7 @@ model User {
   passwordChangedAt   DateTime?
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
+  assignedLeads       Lead[]               @relation("AssignedLeads")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -353,11 +355,14 @@ model Lead {
   utmCampaign  String?
   consent      Boolean
   status       LeadStatus    @default(NEW)
+  assignedToId String?
+  assignedTo   User?         @relation("AssignedLeads", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   activities   LeadActivity[]
 
   @@index([status])
+  @@index([assignedToId])
   @@index([createdAt])
 }
 

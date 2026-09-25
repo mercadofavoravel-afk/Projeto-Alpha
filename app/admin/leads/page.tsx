@@ -6,6 +6,8 @@ import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/l
 import { organicContentFromSource } from '@/lib/lead-origin';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
+import { leadAccessWhere } from '@/lib/lead-access';
+import { canViewAllLeads } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +23,7 @@ type LeadItem = {
   activities: Array<{
     id: string;
   }>;
+  assignedTo: { name: string | null; email: string } | null;
 };
 
 function countBy(values: string[]) {
@@ -44,12 +47,12 @@ export default async function LeadsPage({
     status?: string;
   }>;
 }) {
-  await requirePermission('crm:read');
+  const user = await requirePermission('crm:read');
 
   const params = await searchParams;
   const filters = parseLeadFilters(params);
   const { channel, campaign, status } = filters;
-  const where = buildLeadWhere(filters);
+  const where = { ...buildLeadWhere(filters), ...leadAccessWhere(user) };
 
   const exportParams = new URLSearchParams();
   if (channel) exportParams.set('channel', channel);
@@ -61,6 +64,7 @@ export default async function LeadsPage({
   const leads = await db.lead.findMany({
     where,
     include: {
+      assignedTo: { select: { name: true, email: true } },
       activities: {
         select: {
           id: true,
@@ -90,6 +94,11 @@ export default async function LeadsPage({
     <>
       <div className="eyebrow">CRM</div>
       <h1>Leads</h1>
+      <p>
+        {canViewAllLeads(user.role)
+          ? 'Visão da equipe e leads sem responsável.'
+          : 'Seus leads atribuídos.'}
+      </p>
 
       <section className="admin-card">
         <div className="head">
@@ -209,6 +218,7 @@ export default async function LeadsPage({
               <th>Origem</th>
               <th>Região</th>
               <th>Status</th>
+              <th>Corretor</th>
               <th>Atividades</th>
             </tr>
           </thead>
@@ -216,7 +226,7 @@ export default async function LeadsPage({
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={8}>Nenhum lead encontrado para estes filtros.</td>
+                <td colSpan={9}>Nenhum lead encontrado para estes filtros.</td>
               </tr>
             ) : (
               leads.map((lead: LeadItem) => (
@@ -230,6 +240,7 @@ export default async function LeadsPage({
                   <td>{lead.source || 'Site'}</td>
                   <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
                   <td>{statusLabel(lead.status)}</td>
+                  <td>{lead.assignedTo?.name || lead.assignedTo?.email || 'Sem responsável'}</td>
                   <td>{lead.activities.length}</td>
                 </tr>
               ))

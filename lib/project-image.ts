@@ -16,3 +16,15 @@ export function projectImage(slug: string, ...candidates: Array<string | null | 
     }) ?? verifiedBookImages[slug]
   );
 }
+
+export function projectImageFromMedia(
+  slug: string,
+  heroImage: string | null | undefined,
+  media: Array<{ kind: string; url: string }>,
+) {
+  return projectImage(
+    slug,
+    heroImage,
+    ...media.filter((item) => item.kind === 'IMAGE').map((item) => item.url),
+  );
+}

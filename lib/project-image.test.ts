@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { projectImage } from './project-image';
+import { projectImage, projectImageFromMedia } from './project-image';
 
 describe('project photo attribution', () => {
   it('does not present a Parque Studios photo as a different property', () => {
@@ -17,5 +17,20 @@ describe('project photo attribution', () => {
     expect(projectImage('be-in-rio-nascimento-silva-387', '/images/parque-08.webp')).toBe(
       '/images/be-in-rio-nascimento-silva-387.jpg',
     );
+  });
+
+  it('does not use a floor plan or video as the project cover', () => {
+    expect(
+      projectImageFromMedia('green-park', null, [
+        { kind: 'FLOOR_PLAN', url: 'https://example.com/plantas/green-park.pdf' },
+        { kind: 'VIDEO', url: 'https://example.com/video.mp4' },
+        { kind: 'IMAGE', url: 'https://example.com/fachada.jpg' },
+      ]),
+    ).toBe('https://example.com/fachada.jpg');
+    expect(
+      projectImageFromMedia('green-park', null, [
+        { kind: 'FLOOR_PLAN', url: 'https://example.com/planta.jpg' },
+      ]),
+    ).toBeUndefined();
   });
 });

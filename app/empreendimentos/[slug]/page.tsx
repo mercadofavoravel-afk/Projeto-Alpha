@@ -14,7 +14,7 @@ import {
   projectRoomLabel,
   projectSuites,
 } from '@/lib/project-facts';
-import { projectImageFromMedia } from '@/lib/project-image';
+import { projectGalleryImages, projectImageFromMedia } from '@/lib/project-image';
 import { alphaAssetPath } from '@/lib/public-path';
 import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
 import { LeadCaptureForm } from './LeadCaptureForm';
@@ -195,6 +195,7 @@ export default async function Page({ params }: PageProps) {
     Boolean(plan.url && (/^https?:\/\//i.test(plan.url) || /^\/(?!\/)/.test(plan.url))),
   );
   const distinctFloorPlans = [...new Map(floorPlans.map((plan) => [plan.url, plan])).values()];
+  const galleryImages = projectGalleryImages(project.slug, dbProject.heroImage, dbProject.media);
 
   const schemas = [
     breadcrumbJsonLd([
@@ -369,6 +370,34 @@ export default async function Page({ params }: PageProps) {
                       )}
                       <strong>{plan.label}</strong>
                       <span>Ampliar planta ↗</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {galleryImages.length > 0 && (
+              <div className="property-plans">
+                <h3>Galeria do empreendimento</h3>
+                <div className="property-gallery-grid">
+                  {galleryImages.map((photo) => (
+                    <a
+                      className="property-gallery-link"
+                      href={alphaAssetPath(photo.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={photo.id}
+                    >
+                      {/* URLs cadastradas no CMS podem usar hosts externos. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={alphaAssetPath(photo.url)}
+                        alt={
+                          photo.alt || photo.caption || `${project.name}, ${project.neighborhood}`
+                        }
+                        loading="lazy"
+                      />
+                      {photo.caption && <span>{photo.caption}</span>}
                     </a>
                   ))}
                 </div>

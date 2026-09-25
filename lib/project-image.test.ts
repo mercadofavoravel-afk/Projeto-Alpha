@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { projectImage, projectImageFromMedia } from './project-image';
+import { projectGalleryImages, projectImage, projectImageFromMedia } from './project-image';
 
 describe('project photo attribution', () => {
   it('does not present a Parque Studios photo as a different property', () => {
@@ -32,5 +32,25 @@ describe('project photo attribution', () => {
         { kind: 'FLOOR_PLAN', url: 'https://example.com/planta.jpg' },
       ]),
     ).toBeUndefined();
+    expect(
+      projectImageFromMedia('green-park', null, [
+        { kind: 'IMAGE', url: 'https://example.com/planta.pdf' },
+      ]),
+    ).toBeUndefined();
+  });
+
+  it('shows only distinct photos of the same project in its gallery', () => {
+    expect(
+      projectGalleryImages('bruma-mozak', null, [
+        { kind: 'IMAGE', url: 'https://example.com/bruma-fachada.jpg' },
+        { kind: 'IMAGE', url: 'https://example.com/bruma-piscina.jpg', caption: 'Piscina' },
+        { kind: 'IMAGE', url: 'https://example.com/bruma-piscina.jpg' },
+        { kind: 'FLOOR_PLAN', url: 'https://example.com/bruma-planta.jpg' },
+        { kind: 'IMAGE', url: '/images/parque-03.webp' },
+        { kind: 'IMAGE', url: 'javascript:alert(1)' },
+      ]),
+    ).toEqual([
+      { kind: 'IMAGE', url: 'https://example.com/bruma-piscina.jpg', caption: 'Piscina' },
+    ]);
   });
 });

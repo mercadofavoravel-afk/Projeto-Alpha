@@ -5,7 +5,10 @@ import { requireApiPermission } from '@/lib/auth';
 const schema = z.object({
   projectId: z.string().cuid(),
   kind: z.enum(['IMAGE', 'VIDEO', 'FLOOR_PLAN', 'DOCUMENT']),
-  url: z.string().url(),
+  url: z
+    .string()
+    .url()
+    .refine((value) => /^https?:\/\//i.test(value), 'Use uma URL HTTP ou HTTPS.'),
   alt: z.string().trim().max(180).optional(),
   caption: z.string().trim().max(500).optional(),
   position: z.coerce.number().int().nonnegative().default(0),

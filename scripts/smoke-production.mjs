@@ -2,8 +2,12 @@ const origin = process.env.PRODUCTION_ORIGIN ?? 'https://imoveisdealtopadraorio.
 const canonicalOrigin = 'https://imoveisdealtopadraorio.com.br';
 
 const checks = [
-  { path: '/', status: 200 },
-  { path: '/zona-sul/', status: 200 },
+  ...(new URL(origin).hostname === new URL(canonicalOrigin).hostname
+    ? [
+        { path: '/', status: 200 },
+        { path: '/zona-sul/', status: 200 },
+      ]
+    : []),
   {
     path: '/alpha',
     status: 200,
@@ -17,16 +21,22 @@ const checks = [
   { path: '/alpha/robots.txt', status: 200, includes: `${canonicalOrigin}/alpha/sitemap.xml` },
   { path: '/alpha/sitemap.xml', status: 200, includes: `${canonicalOrigin}/alpha/` },
   { path: '/alpha/api/health', status: 200, health: true },
+  { path: '/alpha/admin', status: 307, redirectTo: '/alpha/login' },
+  { path: '/alpha/admin/usuarios', status: 307, redirectTo: '/alpha/login' },
+  { path: '/alpha/admin/leads', status: 307, redirectTo: '/alpha/login' },
+  { path: '/alpha/admin/agenda', status: 307, redirectTo: '/alpha/login' },
+  { path: '/alpha/admin/artigos', status: 307, redirectTo: '/alpha/login' },
+  { path: '/alpha/api/admin/leads/export', status: 401 },
 ];
 
 let failed = false;
 
-for (const { path, status, includes, health } of checks) {
+for (const { path, status, includes, health, redirectTo } of checks) {
   const url = new URL(path, origin);
 
   try {
     const response = await fetch(url, {
-      redirect: 'follow',
+      redirect: redirectTo ? 'manual' : 'follow',
       signal: AbortSignal.timeout(20_000),
     });
 
@@ -40,9 +50,14 @@ for (const { path, status, includes, health } of checks) {
         healthy = false;
       }
     }
-    const ok = response.status === status && (!includes || body.includes(includes)) && healthy;
+    const location = response.headers.get('location');
+    const ok =
+      response.status === status &&
+      (!includes || body.includes(includes)) &&
+      (!redirectTo || location?.startsWith(redirectTo)) &&
+      healthy;
     console.log(
-      `${ok ? 'PASS' : 'FAIL'} ${url} -> HTTP ${response.status}; conteúdo esperado: ${includes ? body.includes(includes) : 'n/a'}; banco: ${health ? healthy : 'n/a'}; final: ${response.url}`,
+      `${ok ? 'PASS' : 'FAIL'} ${url} -> HTTP ${response.status}; conteúdo esperado: ${includes ? body.includes(includes) : 'n/a'}; banco: ${health ? healthy : 'n/a'}; redirecionamento: ${redirectTo ? location : 'n/a'}; final: ${response.url}`,
     );
 
     if (!ok) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canAccessLead, leadAccessWhere } from './lead-access';
+import { canAccessLead, leadAccessWhere, leadAssignmentWhere } from './lead-access';
 
 describe('acesso aos leads da equipe', () => {
   const consultant = { id: 'broker-1', role: 'CONSULTANT' as const };
@@ -24,5 +24,13 @@ describe('acesso aos leads da equipe', () => {
       expect(leadAccessWhere({ id: 'other-1', role })).toEqual({ assignedToId: 'other-1' });
       expect(canAccessLead({ id: 'other-1', role }, 'broker-1')).toBe(false);
     }
+  });
+
+  it('filtra a fila de distribuição apenas para a gestão', () => {
+    const manager = { id: 'manager-1', role: 'MANAGER' as const };
+    expect(leadAssignmentWhere(manager, 'unassigned')).toEqual({ assignedToId: null });
+    expect(leadAssignmentWhere(manager, 'assigned')).toEqual({ assignedToId: { not: null } });
+    expect(leadAssignmentWhere(manager, 'invalid')).toEqual({});
+    expect(leadAssignmentWhere(consultant, 'unassigned')).toEqual({});
   });
 });

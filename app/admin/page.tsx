@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
-import { leadAccessWhere } from '@/lib/lead-access';
+import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,44 +60,54 @@ export default async function Page() {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const [projects, leadCount, books, recentLeads, overdueActivities, dueTodayActivities] =
-    await Promise.all([
-      db.project.count(),
-      db.lead.count({ where: leadScope }),
-      db.bookIngestion.count(),
-      db.lead.findMany({
-        where: leadScope,
-        select: {
-          source: true,
-          utmSource: true,
-          utmCampaign: true,
-          status: true,
+  const [
+    projects,
+    leadCount,
+    unassignedCount,
+    books,
+    recentLeads,
+    overdueActivities,
+    dueTodayActivities,
+  ] = await Promise.all([
+    db.project.count(),
+    db.lead.count({ where: leadScope }),
+    canViewAllLeads(user.role)
+      ? db.lead.count({ where: leadAssignmentWhere(user, 'unassigned') })
+      : Promise.resolve(0),
+    db.bookIngestion.count(),
+    db.lead.findMany({
+      where: leadScope,
+      select: {
+        source: true,
+        utmSource: true,
+        utmCampaign: true,
+        status: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 500,
+    }),
+    db.leadActivity.count({
+      where: {
+        lead: leadScope,
+        completedAt: null,
+        dueAt: {
+          lt: today,
         },
-        orderBy: {
-          createdAt: 'desc',
+      },
+    }),
+    db.leadActivity.count({
+      where: {
+        lead: leadScope,
+        completedAt: null,
+        dueAt: {
+          gte: today,
+          lt: tomorrow,
         },
-        take: 500,
-      }),
-      db.leadActivity.count({
-        where: {
-          lead: leadScope,
-          completedAt: null,
-          dueAt: {
-            lt: today,
-          },
-        },
-      }),
-      db.leadActivity.count({
-        where: {
-          lead: leadScope,
-          completedAt: null,
-          dueAt: {
-            gte: today,
-            lt: tomorrow,
-          },
-        },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   const organicLeads = recentLeads.filter((lead: LeadMetric) =>
     lead.source?.startsWith('Orgânico | artigo:'),
@@ -123,6 +133,9 @@ export default async function Page() {
             <>
               <Link href="/admin/leads">CRM e leads</Link>
               <Link href="/admin/agenda">Follow-up e agenda</Link>
+              {canViewAllLeads(user.role) && (
+                <Link href="/admin/leads?assignment=unassigned">Distribuir leads</Link>
+              )}
             </>
           )}
           {hasPermission(user.role, 'catalog:write') && (
@@ -141,8 +154,14 @@ export default async function Page() {
           <b>{projects}</b>Empreendimentos
         </div>
         <div className="kpi">
-          <b>{leadCount}</b>Leads
+          <b>{leadCount}</b>
+          {canViewAllLeads(user.role) ? 'Leads' : 'Meus leads'}
         </div>
+        {canViewAllLeads(user.role) && (
+          <div className="kpi">
+            <b>{unassignedCount}</b>Sem responsável
+          </div>
+        )}
         <div className="kpi">
           <b>{organicLeads}</b>Leads orgânicos
         </div>

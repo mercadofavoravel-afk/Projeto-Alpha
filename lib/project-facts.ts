@@ -16,7 +16,7 @@ const confirmedAreas: Record<string, [number, number]> = {
   'parque-studios': [35, 66],
   'be-in-rio-prudente-589': [38.07, 83.45],
   'be-in-rio-nascimento-silva-387': [36.5, 75.16],
-  'cronos-barra': [77, 301],
+  'kronos-barra': [77, 301],
   'be-in-rio-arpoador': [43.1, 92.11],
   'be-in-rio-copacabana': [37.12, 153.24],
   'soul-rio-gago-coutinho': [27.81, 82.65],
@@ -28,7 +28,7 @@ const confirmedAreas: Record<string, [number, number]> = {
 
 // Ranges transcribed from the existing catalog descriptions in data/projects.json.
 const confirmedBedrooms: Record<string, [number, number]> = {
-  'cronos-barra': [2, 4],
+  'kronos-barra': [2, 4],
   'bennett-flamengo': [2, 3],
   'green-park': [2, 3],
   'paradis-mozak': [2, 3],

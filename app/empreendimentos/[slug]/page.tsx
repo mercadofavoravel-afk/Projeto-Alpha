@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { JsonLd } from '@/components/JsonLd';
@@ -42,7 +42,7 @@ const productIntroductions: Record<string, string> = {
     'Na quadra da praia em Ipanema, reúne studios, gardens, up gardens, doubles e coberturas lineares. A área comum na cobertura tem piscina, lounge, fitness e sauna; o térreo inclui minimercado e espaço para entregas.',
   'be-in-rio-nascimento-silva-387':
     'Em Ipanema, reúne studios, gardens, up gardens, double suítes e coberturas lineares. Portaria com minimercado, espaço para entregas e coworking se somam ao fitness e lazer na cobertura.',
-  'cronos-barra':
+  'kronos-barra':
     'Na Barra da Tijuca, apresenta apartamentos de 2, 3 e 4 quartos e coberturas, com metragens de 77 a 301 m². A torre única reúne espaços de lazer e rooftop.',
   'be-in-rio-arpoador':
     'Na Rua Bulhões de Carvalho, no Arpoador, oferece apartamentos, double e triple suítes, além de cobertura duplex. O material da coleção apresenta plantas de 43,10 a 92,11 m².',
@@ -65,7 +65,8 @@ const productIntroductions: Record<string, string> = {
 async function getPublishedProject(slug: string) {
   return db.project.findFirst({
     where: {
-      slug,
+      // Keep the corrected URL available while the production record is being renamed.
+      slug: slug === 'kronos-barra' ? { in: ['kronos-barra', 'cronos-barra'] } : slug,
       publishStatus: 'PUBLISHED',
     },
     include: {
@@ -98,9 +99,12 @@ async function getPublishedProject(slug: string) {
   });
 }
 
-function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPublishedProject>>>) {
+function projectViewModel(
+  project: NonNullable<Awaited<ReturnType<typeof getPublishedProject>>>,
+  slug = project.slug,
+) {
   const display = projectDisplay({
-    slug: project.slug,
+    slug,
     name: project.name,
     description: project.description,
     types: project.typologies.map((item) => item.name),
@@ -110,10 +114,10 @@ function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPubl
 
   return {
     name: display.name,
-    slug: project.slug,
+    slug,
     description: display.description,
     neighborhood: project.neighborhood.name,
-    image: projectImageFromMedia(project.slug, project.heroImage, project.media) || '',
+    image: projectImageFromMedia(slug, project.heroImage, project.media) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),
@@ -125,6 +129,7 @@ function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPubl
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (slug === 'cronos-barra') permanentRedirect('/empreendimentos/kronos-barra');
   const project = await getPublishedProject(slug);
 
   if (!project) {
@@ -136,20 +141,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
 
-  const view = projectViewModel(project);
+  const view = projectViewModel(project, slug);
 
   const description =
     project.seoDescription ||
-    `${project.name}, em ${project.neighborhood.name}: ${view.description}. Consulte características, tipologias e disponibilidade.`;
+    `${view.name}, em ${project.neighborhood.name}: ${view.description}. Consulte características, tipologias e disponibilidade.`;
 
   return createMetadata({
-    title: project.seoTitle || `${project.name} em ${project.neighborhood.name}`,
+    title: project.seoTitle || `${view.name} em ${project.neighborhood.name}`,
     description,
-    path: `/empreendimentos/${project.slug}`,
+    path: `/empreendimentos/${view.slug}`,
     image: view.image || null,
-    imageAlt: `${project.name} — ${project.neighborhood.name}`,
+    imageAlt: `${view.name} — ${project.neighborhood.name}`,
     keywords: [
-      project.name,
+      view.name,
       project.neighborhood.name,
       ...(project.developer?.name ? [project.developer.name] : []),
       ...view.types,
@@ -160,13 +165,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
+  if (slug === 'cronos-barra') permanentRedirect('/empreendimentos/kronos-barra');
   const dbProject = await getPublishedProject(slug);
 
   if (!dbProject) {
     notFound();
   }
 
-  const project = projectViewModel(dbProject);
+  const project = projectViewModel(dbProject, slug);
   const area = projectAreaLabel(
     project.slug,
     dbProject.areaFrom?.toNumber(),

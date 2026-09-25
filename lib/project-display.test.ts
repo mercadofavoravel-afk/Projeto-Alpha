@@ -4,7 +4,7 @@ import { projectDisplay } from './project-display';
 describe('published catalog copy', () => {
   it('corrects the legacy Kronos name and keeps new book details visible with old database copy', () => {
     const result = projectDisplay({
-      slug: 'cronos-barra',
+      slug: 'kronos-barra',
       name: 'Cronos Barra',
       description: '2, 3 e 4 quartos · rooftop e lazer',
       types: ['2 quartos'],

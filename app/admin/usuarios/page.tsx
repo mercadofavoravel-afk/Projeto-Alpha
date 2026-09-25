@@ -19,6 +19,10 @@ export default async function Page() {
     <>
       <div className="eyebrow">Administração</div>
       <h1>Usuários e acessos</h1>
+      <p>
+        Aqui você consulta as contas existentes. O cadastro de corretores e gerentes, a edição de
+        perfis e a distribuição de leads ainda não estão disponíveis neste painel.
+      </p>
       <table className="table">
         <thead>
           <tr>

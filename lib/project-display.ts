@@ -4,7 +4,7 @@ import { getProject } from '@/lib/projects';
 // The legacy database was seeded before these corrections and may still have old copy.
 const verifiedCatalogSlugs = new Set([
   'parque-studios',
-  'cronos-barra',
+  'kronos-barra',
   'be-in-rio-prudente-589',
   'be-in-rio-nascimento-silva-387',
   'be-in-rio-arpoador',
@@ -25,7 +25,7 @@ export function projectDisplay(project: {
   const catalog = getProject(project.slug);
   const verified = verifiedCatalogSlugs.has(project.slug) && catalog;
   return {
-    name: ['cronos-barra', 'guilherm-mozak'].includes(project.slug)
+    name: ['kronos-barra', 'guilherm-mozak'].includes(project.slug)
       ? (catalog?.name ?? project.name)
       : project.name,
     description: verified ? catalog.description : project.description,

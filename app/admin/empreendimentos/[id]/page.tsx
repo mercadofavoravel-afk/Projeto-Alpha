@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { ProjectEditor } from './ProjectEditor';
 import { FloorPlanForm } from './FloorPlanForm';
+import { PhotoPrioritySelect } from './PhotoPrioritySelect';
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePermission('catalog:write');
@@ -34,8 +35,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         <section className="property-plans">
           <h2>Fotos do empreendimento</h2>
           <p>
-            Cadastre URLs públicas das fotos aprovadas. A primeira foto pode ser usada como capa
-            quando não houver imagem principal.
+            Cadastre URLs públicas das fotos aprovadas. Priorize fachada, fachada noturna e lazer. A
+            fachada pode ser usada como capa quando não houver imagem principal definida acima.
           </p>
           <FloorPlanForm projectId={project.id} kind="IMAGE" />
           {project.media
@@ -44,7 +45,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
               <p key={item.id}>
                 <a href={item.url} target="_blank" rel="noopener noreferrer">
                   {item.caption || item.alt || 'Foto cadastrada'}
-                </a>
+                </a>{' '}
+                <PhotoPrioritySelect id={item.id} position={item.position} />
               </p>
             ))}
         </section>

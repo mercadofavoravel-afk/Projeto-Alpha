@@ -11,7 +11,7 @@ const schema = z.object({
     .refine((value) => /^https?:\/\//i.test(value), 'Use uma URL HTTP ou HTTPS.'),
   alt: z.string().trim().max(180).optional(),
   caption: z.string().trim().max(500).optional(),
-  position: z.coerce.number().int().nonnegative().default(0),
+  position: z.coerce.number().int().min(-50).default(0),
 });
 export async function GET(request: Request) {
   const auth = await requireApiPermission('media:write');

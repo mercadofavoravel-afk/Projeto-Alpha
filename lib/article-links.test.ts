@@ -26,4 +26,16 @@ describe('article links', () => {
       { text: 'Pesquisa e análise antes da compra.' },
     ]);
   });
+
+  it('accepts an official WordPress link on the apex domain', () => {
+    expect(
+      articleContentSegments('Veja https://imoveisdealtopadraorio.com.br/green-park/'),
+    ).toEqual([
+      { text: 'Veja ' },
+      {
+        text: 'https://imoveisdealtopadraorio.com.br/green-park/',
+        href: 'https://imoveisdealtopadraorio.com.br/green-park/',
+      },
+    ]);
+  });
 });

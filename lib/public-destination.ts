@@ -6,7 +6,8 @@ export function isPublicSiteUrl(value: string) {
   try {
     const url = new URL(value);
     const site = new URL(SITE_CONFIG.url);
-    return url.protocol === site.protocol && url.hostname === site.hostname;
+    const officialHosts = [site.hostname, site.hostname.replace(/^www\./, '')];
+    return url.protocol === site.protocol && officialHosts.includes(url.hostname);
   } catch {
     return false;
   }

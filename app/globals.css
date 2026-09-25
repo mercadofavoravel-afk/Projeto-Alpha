@@ -175,6 +175,25 @@ a {
   display: block;
   padding: 9px 0;
 }
+.admin-mobile-links {
+  display: none;
+}
+.admin-mobile-links summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 12px 0;
+}
+.admin-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.admin-shortcuts a {
+  border: 1px solid var(--l);
+  padding: 12px 16px;
+  background: #fff;
+  color: var(--g);
+}
 .main {
   padding: 40px;
 }
@@ -232,7 +251,22 @@ a {
     grid-template-columns: 1fr;
   }
   .side {
+    display: block;
+    padding: 16px 22px;
+  }
+  .admin-desktop-links {
     display: none;
+  }
+  .admin-mobile-links {
+    display: block;
+  }
+  .admin-mobile-links nav {
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+  .main {
+    min-width: 0;
+    padding: 24px 20px;
   }
 }
 @media (max-width: 620px) {

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 import { db } from '@/lib/db';
+import { requireUser } from '@/lib/auth';
+import { hasPermission } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +53,7 @@ function statusLabel(status: string) {
 }
 
 export default async function Page() {
+  const user = await requireUser();
   const today = startOfDay(new Date());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -107,6 +110,26 @@ export default async function Page() {
     <>
       <div className="eyebrow">Painel operacional</div>
       <h1>Visão geral</h1>
+
+      <section className="admin-card">
+        <h2>Acessos rápidos</h2>
+        <div className="admin-shortcuts">
+          {hasPermission(user.role, 'crm:read') && (
+            <>
+              <Link href="/admin/leads">CRM e leads</Link>
+              <Link href="/admin/agenda">Follow-up e agenda</Link>
+            </>
+          )}
+          {hasPermission(user.role, 'catalog:write') && (
+            <>
+              <Link href="/admin/empreendimentos">Páginas de empreendimentos</Link>
+              <Link href="/admin/artigos">Artigos do blog</Link>
+              <Link href="/admin/discovery">Links para revisar</Link>
+            </>
+          )}
+          {user.role === 'ADMIN' && <Link href="/admin/usuarios">Usuários e acessos</Link>}
+        </div>
+      </section>
 
       <div className="kpis">
         <div className="kpi">

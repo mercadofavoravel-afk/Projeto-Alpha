@@ -387,8 +387,9 @@ export default function DiscoveryPage() {
       <h1>Fila de Discovery</h1>
 
       <p className="intro">
-        Revise as oportunidades encontradas automaticamente nas fontes monitoradas antes que
-        qualquer informação seja transformada em conteúdo, empreendimento ou ativo público do Alpha.
+        Revise os links encontrados nas fontes monitoradas. Importar um link nesta fila guarda a
+        fonte para análise; a página do empreendimento ainda precisa ser criada e publicada em
+        Empreendimentos.
       </p>
 
       {summary && (

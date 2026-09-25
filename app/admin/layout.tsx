@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import type { UserRole } from '@prisma/client';
 
 import { logoutAction } from '@/app/login/actions';
 import { requireUser } from '@/lib/auth';
@@ -14,6 +15,60 @@ export const metadata: Metadata = {
   },
 };
 
+function AdminLinks({ role }: { role: UserRole }) {
+  return (
+    <>
+      <Link href="/admin">Visão geral</Link>
+
+      {hasPermission(role, 'catalog:write') && (
+        <>
+          <Link href="/admin/empreendimentos">Empreendimentos</Link>
+
+          <Link href="/admin/bairros">Bairros</Link>
+
+          <Link href="/admin/incorporadoras">Incorporadoras</Link>
+
+          <Link href="/admin/fontes">Fontes</Link>
+
+          <Link href="/admin/discovery">Discovery</Link>
+
+          <Link href="/admin/artigos">Artigos</Link>
+        </>
+      )}
+
+      {hasPermission(role, 'crm:read') && (
+        <>
+          <Link href="/admin/leads">Leads</Link>
+
+          <Link href="/admin/leads/kanban">Quadro comercial</Link>
+
+          <Link href="/admin/agenda">Agenda</Link>
+        </>
+      )}
+
+      {hasPermission(role, 'media:write') && (
+        <>
+          <Link href="/admin/books">Books</Link>
+
+          <Link href="/admin/midia">Mídia</Link>
+        </>
+      )}
+
+      {hasPermission(role, 'analytics:read') && (
+        <>
+          <Link href="/admin/seo">SEO Mission Control</Link>
+
+          <Link href="/admin/analytics">Analytics</Link>
+
+          <Link href="/admin/recomendacoes">Recomendações</Link>
+        </>
+      )}
+
+      {role === 'ADMIN' && <Link href="/admin/usuarios">Usuários</Link>}
+    </>
+  );
+}
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
 
@@ -25,53 +80,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <small>{user.role}</small>
         </div>
 
-        <Link href="/admin">Visão geral</Link>
+        <nav className="admin-desktop-links" aria-label="Navegação administrativa">
+          <AdminLinks role={user.role} />
+        </nav>
 
-        {hasPermission(user.role, 'catalog:write') && (
-          <>
-            <Link href="/admin/empreendimentos">Empreendimentos</Link>
-
-            <Link href="/admin/bairros">Bairros</Link>
-
-            <Link href="/admin/incorporadoras">Incorporadoras</Link>
-
-            <Link href="/admin/fontes">Fontes</Link>
-
-            <Link href="/admin/discovery">Discovery</Link>
-
-            <Link href="/admin/artigos">Artigos</Link>
-          </>
-        )}
-
-        {hasPermission(user.role, 'crm:write') && (
-          <>
-            <Link href="/admin/leads">Leads</Link>
-
-            <Link href="/admin/leads/kanban">Quadro comercial</Link>
-
-            <Link href="/admin/agenda">Agenda</Link>
-          </>
-        )}
-
-        {hasPermission(user.role, 'media:write') && (
-          <>
-            <Link href="/admin/books">Books</Link>
-
-            <Link href="/admin/midia">Mídia</Link>
-          </>
-        )}
-
-        {hasPermission(user.role, 'analytics:read') && (
-          <>
-            <Link href="/admin/seo">SEO Mission Control</Link>
-
-            <Link href="/admin/analytics">Analytics</Link>
-
-            <Link href="/admin/recomendacoes">Recomendações</Link>
-          </>
-        )}
-
-        {user.role === 'ADMIN' && <Link href="/admin/usuarios">Usuários</Link>}
+        <details className="admin-mobile-links">
+          <summary>Menu do painel</summary>
+          <nav aria-label="Navegação administrativa no celular">
+            <AdminLinks role={user.role} />
+          </nav>
+        </details>
 
         <form action={logoutAction}>
           <button className="side-button">Sair</button>

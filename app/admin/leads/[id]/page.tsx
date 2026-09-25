@@ -79,7 +79,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
   const assignees = hasPermission(user.role, 'crm:assign')
     ? await db.user.findMany({
-        where: { isActive: true, role: { in: ['CONSULTANT', 'MANAGER'] } },
+        where: { isActive: true, role: { in: ['CONSULTANT', 'MANAGER', 'DIRECTOR'] } },
         select: { id: true, name: true, email: true },
         orderBy: { name: 'asc' },
       })

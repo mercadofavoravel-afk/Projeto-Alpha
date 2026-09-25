@@ -18,7 +18,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const targetId = parsed.data.assignedToId;
   if (targetId) {
     const target = await db.user.findFirst({
-      where: { id: targetId, isActive: true, role: { in: ['MANAGER', 'CONSULTANT'] } },
+      where: { id: targetId, isActive: true, role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
       select: { id: true },
     });
     if (!target) return NextResponse.json({ error: 'Profissional indisponível.' }, { status: 400 });

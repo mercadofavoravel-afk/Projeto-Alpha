@@ -18,6 +18,20 @@ export const permissions = {
     'media:write',
   ],
 
+  DIRECTOR: [
+    'admin:access',
+    'users:manage',
+    'catalog:write',
+    'catalog:publish',
+    'crm:read',
+    'crm:write',
+    'crm:manage',
+    'crm:assign',
+    'crm:reports',
+    'analytics:read',
+    'media:write',
+  ],
+
   MANAGER: ['admin:access', 'crm:read', 'crm:write', 'crm:assign', 'crm:reports', 'analytics:read'],
 
   EDITOR: ['admin:access', 'catalog:write', 'catalog:publish', 'analytics:read', 'media:write'],

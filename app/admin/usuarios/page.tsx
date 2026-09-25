@@ -1,22 +1,28 @@
 import { db } from '@/lib/db';
 import { requireRole } from '@/lib/auth';
+import type { UserRole } from '@prisma/client';
 import { createEmployee, updateEmployee } from './actions';
 export const dynamic = 'force-dynamic';
 const roleNames = {
+  DIRECTOR: 'Diretor',
   MANAGER: 'Gerente',
   CONSULTANT: 'Corretor',
   EDITOR: 'Editor',
   MARKETING: 'Marketing',
   VIEWER: 'Consulta',
 } as const;
+const salesRoleNames = { MANAGER: 'Gerente', CONSULTANT: 'Corretor' } as const;
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  await requireRole(['ADMIN']);
+  const actor = await requireRole(['ADMIN', 'DIRECTOR']);
+  const manageableRoles = actor.role === 'ADMIN' ? roleNames : salesRoleNames;
   const users = await db.user.findMany({
+    where:
+      actor.role === 'DIRECTOR' ? { role: { in: ['MANAGER', 'CONSULTANT'] as UserRole[] } } : {},
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -41,8 +47,8 @@ export default async function Page({
       <div className="eyebrow">Administração</div>
       <h1>Usuários e acessos</h1>
       <p>
-        Cadastre profissionais com senha individual. Gerentes veem a equipe e podem distribuir
-        leads. Corretores veem somente os leads atribuídos a eles.
+        Diretores gerenciam a equipe comercial, conteúdos e indicadores. Gerentes distribuem leads;
+        corretores veem somente os leads atribuídos a eles.
       </p>
       {result && <p role="status">{notices[result] || 'Não foi possível salvar.'}</p>}
       <form action={createEmployee} className="admin-card form-grid">
@@ -58,7 +64,7 @@ export default async function Page({
         <label>
           Função
           <select name="role" required>
-            {Object.entries(roleNames).map(([value, name]) => (
+            {Object.entries(manageableRoles).map(([value, name]) => (
               <option key={value} value={value}>
                 {name}
               </option>
@@ -102,7 +108,7 @@ export default async function Page({
                   <br />
                   <small>{u.email}</small>
                 </td>
-                <td>{u.role}</td>
+                <td>{u.role === 'ADMIN' ? 'Administrador' : roleNames[u.role]}</td>
                 <td>{u.isActive ? 'Ativo' : 'Bloqueado'}</td>
                 <td>{u._count.sessions}</td>
                 <td>
@@ -116,7 +122,7 @@ export default async function Page({
                         defaultValue={u.role}
                         aria-label={`Função de ${u.name || u.email}`}
                       >
-                        {Object.entries(roleNames).map(([value, name]) => (
+                        {Object.entries(manageableRoles).map(([value, name]) => (
                           <option key={value} value={value}>
                             {name}
                           </option>

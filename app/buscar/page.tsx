@@ -1,7 +1,7 @@
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
-import { projectImage } from '@/lib/project-image';
+import { projectImageFromMedia } from '@/lib/project-image';
 import { createMetadata } from '@/lib/seo';
 import { Search, type SearchProject } from './Search';
 
@@ -67,8 +67,7 @@ export default async function BuscarPage({
     name: project.name,
     description: project.description,
     neighborhood: project.neighborhood.name,
-    image:
-      projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
+    image: projectImageFromMedia(project.slug, project.heroImage, project.media) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),

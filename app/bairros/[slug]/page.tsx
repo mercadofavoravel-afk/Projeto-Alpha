@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { createOrganicLeadSource } from '@/lib/lead-origin';
-import { projectImage } from '@/lib/project-image';
+import { projectImageFromMedia } from '@/lib/project-image';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
 import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
@@ -188,9 +188,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     image:
       neighborhood.heroImage ||
       neighborhood.projects
-        .map((project) =>
-          projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)),
-        )
+        .map((project) => projectImageFromMedia(project.slug, project.heroImage, project.media))
         .find(Boolean),
     imageAlt: `${neighborhood.name} — Rio de Janeiro`,
     keywords: [
@@ -220,9 +218,7 @@ export default async function BairroPage({ params }: PageProps) {
   const heroImage =
     neighborhood.heroImage ||
     neighborhood.projects
-      .map((project) =>
-        projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)),
-      )
+      .map((project) => projectImageFromMedia(project.slug, project.heroImage, project.media))
       .find(Boolean);
 
   const videoEmbed = getVideoEmbed(neighborhood.videoUrl);
@@ -409,10 +405,10 @@ export default async function BairroPage({ params }: PageProps) {
             {neighborhood.projects.length > 0 ? (
               <div className="bairro-project-grid">
                 {neighborhood.projects.map((project, index) => {
-                  const image = projectImage(
+                  const image = projectImageFromMedia(
                     project.slug,
                     project.heroImage,
-                    ...project.media.map((item) => item.url),
+                    project.media,
                   );
 
                   const typologies = project.typologies

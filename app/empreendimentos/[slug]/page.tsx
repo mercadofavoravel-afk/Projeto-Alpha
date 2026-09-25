@@ -14,7 +14,7 @@ import {
   projectRoomLabel,
   projectSuites,
 } from '@/lib/project-facts';
-import { projectImage } from '@/lib/project-image';
+import { projectImageFromMedia } from '@/lib/project-image';
 import { alphaAssetPath } from '@/lib/public-path';
 import { breadcrumbJsonLd, createMetadata, projectJsonLd } from '@/lib/seo';
 import { LeadCaptureForm } from './LeadCaptureForm';
@@ -113,8 +113,7 @@ function projectViewModel(project: NonNullable<Awaited<ReturnType<typeof getPubl
     slug: project.slug,
     description: display.description,
     neighborhood: project.neighborhood.name,
-    image:
-      projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
+    image: projectImageFromMedia(project.slug, project.heroImage, project.media) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),

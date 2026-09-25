@@ -3,7 +3,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { projectDisplay } from '@/lib/project-display';
-import { projectImage } from '@/lib/project-image';
+import { projectImageFromMedia } from '@/lib/project-image';
 import { createMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -62,8 +62,7 @@ export default async function Page() {
     }),
     slug: project.slug,
     neighborhood: project.neighborhood.name,
-    image:
-      projectImage(project.slug, project.heroImage, ...project.media.map((item) => item.url)) || '',
+    image: projectImageFromMedia(project.slug, project.heroImage, project.media) || '',
     status:
       project.statusLabel ||
       (project.publishStatus === 'PUBLISHED' ? 'Disponível' : project.publishStatus),

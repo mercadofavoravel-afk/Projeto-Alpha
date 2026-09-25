@@ -10,6 +10,16 @@ export function leadAccessWhere(user: LeadViewer): Prisma.LeadWhereInput {
   return canViewAllLeads(user.role) ? {} : { assignedToId: user.id };
 }
 
+export function leadAssignmentWhere(
+  user: LeadViewer,
+  assignment: string | undefined,
+): Prisma.LeadWhereInput {
+  if (!canViewAllLeads(user.role)) return {};
+  if (assignment === 'unassigned') return { assignedToId: null };
+  if (assignment === 'assigned') return { assignedToId: { not: null } };
+  return {};
+}
+
 export function canAccessLead(user: LeadViewer, assignedToId: string | null) {
   return canViewAllLeads(user.role) || assignedToId === user.id;
 }

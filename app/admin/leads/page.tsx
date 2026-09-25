@@ -6,8 +6,7 @@ import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/l
 import { organicContentFromSource } from '@/lib/lead-origin';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
-import { leadAccessWhere } from '@/lib/lead-access';
-import { canViewAllLeads } from '@/lib/lead-access';
+import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +44,7 @@ export default async function LeadsPage({
     channel?: string;
     campaign?: string;
     status?: string;
+    assignment?: string;
   }>;
 }) {
   const user = await requirePermission('crm:read');
@@ -52,12 +52,19 @@ export default async function LeadsPage({
   const params = await searchParams;
   const filters = parseLeadFilters(params);
   const { channel, campaign, status } = filters;
-  const where = { ...buildLeadWhere(filters), ...leadAccessWhere(user) };
+  const assignment = canViewAllLeads(user.role) ? params.assignment : undefined;
+  const where = {
+    ...buildLeadWhere(filters),
+    ...leadAccessWhere(user),
+    ...leadAssignmentWhere(user, assignment),
+  };
 
   const exportParams = new URLSearchParams();
   if (channel) exportParams.set('channel', channel);
   if (campaign) exportParams.set('campaign', campaign);
   if (status) exportParams.set('status', status);
+  if (assignment === 'unassigned' || assignment === 'assigned')
+    exportParams.set('assignment', assignment);
 
   const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
 
@@ -88,7 +95,7 @@ export default async function LeadsPage({
   const organicByRegion = countBy(organicRegionLabels);
   const organicContentCount = new Set(organicContentLabels).size;
   const organicRegionCount = new Set(organicRegionLabels).size;
-  const hasFilters = Boolean(channel || campaign || status);
+  const hasFilters = Boolean(channel || campaign || status || assignment);
 
   return (
     <>
@@ -136,6 +143,17 @@ export default async function LeadsPage({
               ))}
             </select>
           </label>
+
+          {canViewAllLeads(user.role) && (
+            <label>
+              Distribuição
+              <select defaultValue={assignment || ''} name="assignment">
+                <option value="">Todos os leads</option>
+                <option value="unassigned">Sem responsável</option>
+                <option value="assigned">Já atribuídos</option>
+              </select>
+            </label>
+          )}
 
           <div>
             <button className="btn" type="submit">
@@ -219,6 +237,7 @@ export default async function LeadsPage({
               <th>Região</th>
               <th>Status</th>
               <th>Corretor</th>
+              {canViewAllLeads(user.role) && <th>Distribuição</th>}
               <th>Atividades</th>
             </tr>
           </thead>
@@ -226,7 +245,9 @@ export default async function LeadsPage({
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={9}>Nenhum lead encontrado para estes filtros.</td>
+                <td colSpan={canViewAllLeads(user.role) ? 10 : 9}>
+                  Nenhum lead encontrado para estes filtros.
+                </td>
               </tr>
             ) : (
               leads.map((lead: LeadItem) => (
@@ -241,6 +262,13 @@ export default async function LeadsPage({
                   <td>{lead.neighborhood || 'Rio de Janeiro'}</td>
                   <td>{statusLabel(lead.status)}</td>
                   <td>{lead.assignedTo?.name || lead.assignedTo?.email || 'Sem responsável'}</td>
+                  {canViewAllLeads(user.role) && (
+                    <td>
+                      <Link href={`/admin/leads/${lead.id}`}>
+                        {lead.assignedTo ? 'Transferir' : 'Atribuir corretor'}
+                      </Link>
+                    </td>
+                  )}
                   <td>{lead.activities.length}</td>
                 </tr>
               ))

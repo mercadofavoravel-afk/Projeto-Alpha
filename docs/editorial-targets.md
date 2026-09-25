@@ -8,36 +8,36 @@ concorrência entre textos sobre a mesma intenção de busca.
 
 ## Catálogo Alpha publicado
 
-| Região | Empreendimento | Link próprio |
-| --- | --- | --- |
-| Ipanema | VIE Ipanema | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/vie-ipanema |
-| Ipanema | Be.in.Rio Prudente 589 | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-prudente-589 |
-| Ipanema | Be.in.Rio Nascimento Silva 387 | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-nascimento-silva-387 |
-| Ipanema/Leblon | Parque Studios | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/parque-studios |
-| Leblon | Bruma Mozak | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/bruma-mozak |
-| Leblon | Guilherm Mozak | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/guilherm-mozak |
-| Leblon | Paradís Mozak | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/paradis-mozak |
-| Leblon | Stay 360 Leblon | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/stay-360-leblon |
-| Arpoador | Be.in.Rio Arpoador | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-arpoador |
-| Flamengo | Bennett Flamengo | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/bennett-flamengo |
-| Laranjeiras | Soul Rio Gago Coutinho | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/soul-rio-gago-coutinho |
-| Copacabana | Be.in.Rio Copacabana | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-copacabana |
-| Copacabana | Be.in.Rio Pompeu | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-pompeu |
-| Barra da Tijuca | Green Park | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/green-park |
-| Barra da Tijuca | Kronos Barra (com K) | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos-barra |
+| Região          | Empreendimento                 | Link próprio                                                                                   |
+| --------------- | ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Ipanema         | VIE Ipanema                    | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/vie-ipanema                    |
+| Ipanema         | Be.in.Rio Prudente 589         | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-prudente-589         |
+| Ipanema         | Be.in.Rio Nascimento Silva 387 | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-nascimento-silva-387 |
+| Ipanema/Leblon  | Parque Studios                 | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/parque-studios                 |
+| Leblon          | Bruma Mozak                    | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/bruma-mozak                    |
+| Leblon          | Guilherm Mozak                 | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/guilherm-mozak                 |
+| Leblon          | Paradís Mozak                  | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/paradis-mozak                  |
+| Leblon          | Stay 360 Leblon                | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/stay-360-leblon                |
+| Arpoador        | Be.in.Rio Arpoador             | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-arpoador             |
+| Flamengo        | Bennett Flamengo               | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/bennett-flamengo               |
+| Laranjeiras     | Soul Rio Gago Coutinho         | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/soul-rio-gago-coutinho         |
+| Copacabana      | Be.in.Rio Copacabana           | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-copacabana           |
+| Copacabana      | Be.in.Rio Pompeu               | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/be-in-rio-pompeu               |
+| Barra da Tijuca | Green Park                     | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/green-park                     |
+| Barra da Tijuca | Kronos Barra (com K)           | https://www.imoveisdealtopadraorio.com.br/alpha/empreendimentos/kronos-barra                   |
 
 ## Páginas próprias identificadas no WordPress
 
 Estas páginas foram localizadas por pesquisa pública. O índice não é o inventário
 completo do WordPress; conferir cada URL novamente antes de publicar conteúdo.
 
-| Região | Página | Link próprio |
-| --- | --- | --- |
-| Barra da Tijuca | Green Park | https://imoveisdealtopadraorio.com.br/green-park/ |
-| Ipanema | Coleção Ipanema | https://imoveisdealtopadraorio.com.br/colecao-ipanema/ |
-| Ipanema | Almar | https://imoveisdealtopadraorio.com.br/almar-ipanema/ |
-| Ipanema | Prudente 786 | https://imoveisdealtopadraorio.com.br/prudente-786-ipanema/ |
-| Zona Sul | Coleção Be.in.Rio | https://imoveisdealtopadraorio.com.br/colecao-be-in-rio/ |
+| Região          | Página            | Link próprio                                                |
+| --------------- | ----------------- | ----------------------------------------------------------- |
+| Barra da Tijuca | Green Park        | https://imoveisdealtopadraorio.com.br/green-park/           |
+| Ipanema         | Coleção Ipanema   | https://imoveisdealtopadraorio.com.br/colecao-ipanema/      |
+| Ipanema         | Almar             | https://imoveisdealtopadraorio.com.br/almar-ipanema/        |
+| Ipanema         | Prudente 786      | https://imoveisdealtopadraorio.com.br/prudente-786-ipanema/ |
+| Zona Sul        | Coleção Be.in.Rio | https://imoveisdealtopadraorio.com.br/colecao-be-in-rio/    |
 
 Também já há artigos antigos sobre Ipanema no WordPress, inclusive sobre morar no
 bairro, comércio e ruas específicas. Verificar a intenção de busca antes de criar

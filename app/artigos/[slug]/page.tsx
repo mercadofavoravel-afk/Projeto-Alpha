@@ -6,6 +6,7 @@ import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
+import { articleContentSegments } from '@/lib/article-links';
 import { createOrganicArticleSource, getArticleNeighborhood } from '@/lib/article-origin';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
@@ -158,7 +159,17 @@ export default async function ArticlePage({ params }: PageProps) {
 
             <div className="collection-card-content">
               {paragraphs.map((paragraph, index) => (
-                <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                <p key={`${index}-${paragraph.slice(0, 24)}`}>
+                  {articleContentSegments(paragraph).map((segment, segmentIndex) =>
+                    segment.href ? (
+                      <a key={segmentIndex} href={segment.href}>
+                        {segment.text}
+                      </a>
+                    ) : (
+                      <span key={segmentIndex}>{segment.text}</span>
+                    ),
+                  )}
+                </p>
               ))}
             </div>
           </div>

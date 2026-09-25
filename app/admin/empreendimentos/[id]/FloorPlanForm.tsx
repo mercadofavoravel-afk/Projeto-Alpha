@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { alphaPath } from '@/lib/public-path';
+import { photoPriorityOptions } from '@/lib/media-priority';
 
 export function FloorPlanForm({
   projectId,
@@ -14,6 +15,7 @@ export function FloorPlanForm({
   const router = useRouter();
   const [url, setUrl] = useState('');
   const [caption, setCaption] = useState('');
+  const [position, setPosition] = useState(-50);
   const [status, setStatus] = useState('');
   const isImage = kind === 'IMAGE';
   const label = isImage ? 'foto' : 'planta';
@@ -26,7 +28,7 @@ export function FloorPlanForm({
       const response = await fetch(alphaPath('/api/admin/media'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, kind, url, caption }),
+        body: JSON.stringify({ projectId, kind, url, caption, position: isImage ? position : 0 }),
       });
 
       if (!response.ok) throw new Error(`Não foi possível cadastrar a ${label}.`);
@@ -57,6 +59,18 @@ export function FloorPlanForm({
             }
           />
         </label>
+        {isImage && (
+          <label>
+            Tipo de foto
+            <select value={position} onChange={(event) => setPosition(Number(event.target.value))}>
+              {photoPriorityOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
       <button className="btn" type="submit">
         Cadastrar {label}

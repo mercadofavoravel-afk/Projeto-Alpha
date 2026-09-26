@@ -1,5 +1,6 @@
 'use client';
 
+import { getCampaignUtms } from '@/lib/campaign-attribution';
 import { alphaPath } from '@/lib/public-path';
 
 import { FormEvent, useState } from 'react';
@@ -84,7 +85,7 @@ export function LeadCaptureForm({
     setError('');
 
     try {
-      const params = new URLSearchParams(window.location.search);
+      const campaignUtms = getCampaignUtms();
       const sessionKey = getSessionKey();
 
       const response = await fetch(alphaPath('/api/leads'), {
@@ -102,9 +103,9 @@ export function LeadCaptureForm({
           message: message.trim() || undefined,
           typology: typology.trim(),
           source: (source || `empreendimento:${projectSlug}`).slice(0, 120),
-          utmSource: params.get('utm_source') || undefined,
-          utmMedium: params.get('utm_medium') || undefined,
-          utmCampaign: params.get('utm_campaign') || undefined,
+          utmSource: campaignUtms.utmSource,
+          utmMedium: campaignUtms.utmMedium,
+          utmCampaign: campaignUtms.utmCampaign,
           consent,
         }),
       });
@@ -120,9 +121,9 @@ export function LeadCaptureForm({
         neighborhood,
         objective,
         source,
-        utmSource: params.get('utm_source') || undefined,
-        utmMedium: params.get('utm_medium') || undefined,
-        utmCampaign: params.get('utm_campaign') || undefined,
+        utmSource: campaignUtms.utmSource,
+        utmMedium: campaignUtms.utmMedium,
+        utmCampaign: campaignUtms.utmCampaign,
       });
 
       void fetch(alphaPath('/api/analytics'), {
@@ -140,9 +141,9 @@ export function LeadCaptureForm({
             projectSlug,
             neighborhood,
             objective,
-            utmSource: params.get('utm_source') || undefined,
-            utmMedium: params.get('utm_medium') || undefined,
-            utmCampaign: params.get('utm_campaign') || undefined,
+            utmSource: campaignUtms.utmSource,
+            utmMedium: campaignUtms.utmMedium,
+            utmCampaign: campaignUtms.utmCampaign,
           },
         }),
       }).catch(() => undefined);

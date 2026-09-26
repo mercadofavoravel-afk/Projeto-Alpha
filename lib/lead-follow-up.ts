@@ -6,6 +6,7 @@ type FollowUpLead = {
 };
 
 const followUpDays = [3, 5] as const;
+export const firstContactNotePrefix = 'Primeiro atendimento pendente:';
 
 function addDays(date: Date, days: number) {
   const dueAt = new Date(date);
@@ -29,15 +30,23 @@ export function createOrganicFollowUpActivities(lead: FollowUpLead, createdAt = 
   const origin = originSummary(lead);
   const region = lead.neighborhood || 'Rio de Janeiro';
 
-  return followUpDays.map((days) => ({
-    leadId: lead.id,
-    type: 'WHATSAPP',
-    dueAt: addDays(createdAt, days),
-    note: [
-      `Follow-up programado: ${days}º dia.`,
-      `Origem: ${origin}.`,
-      'Mensagem sugerida (não enviada automaticamente):',
-      followUpMessage(lead, region, days),
-    ].join('\n'),
-  }));
+  return [
+    {
+      leadId: lead.id,
+      type: 'TASK',
+      dueAt: createdAt,
+      note: `${firstContactNotePrefix} confirmar interesse e registrar o resultado. Origem: ${origin}.`,
+    },
+    ...followUpDays.map((days) => ({
+      leadId: lead.id,
+      type: 'WHATSAPP',
+      dueAt: addDays(createdAt, days),
+      note: [
+        `Follow-up programado: ${days}º dia.`,
+        `Origem: ${origin}.`,
+        'Mensagem sugerida (não enviada automaticamente):',
+        followUpMessage(lead, region, days),
+      ].join('\n'),
+    })),
+  ];
 }

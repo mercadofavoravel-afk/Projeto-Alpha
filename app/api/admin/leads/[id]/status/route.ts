@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { leadAccessWhere } from '@/lib/lead-access';
+import { firstContactNotePrefix } from '@/lib/lead-follow-up';
 
 const statusSchema = z.object({
   status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED', 'WON', 'LOST']),
@@ -66,10 +67,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       const completedFollowUps = await transaction.leadActivity.updateMany({
         where: {
           leadId: id,
-          type: 'WHATSAPP',
-          dueAt: {
-            not: null,
-          },
+          OR: [
+            { type: 'WHATSAPP', dueAt: { not: null } },
+            { type: 'TASK', note: { startsWith: firstContactNotePrefix } },
+          ],
           completedAt: null,
         },
         data: {
@@ -83,7 +84,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
             leadId: id,
             type: 'NOTE',
             completedAt: now,
-            note: `Sequência de follow-ups interrompida: ${statusLabels[parsed.data.status]}.`,
+            note: `Pendências automáticas encerradas: ${statusLabels[parsed.data.status]}.`,
           },
         });
       }

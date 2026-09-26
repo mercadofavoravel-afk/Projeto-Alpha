@@ -2,11 +2,19 @@
 import { redirect } from 'next/navigation';
 import { createPasswordReset } from '@/lib/auth';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { createPasswordResetUrl, isPasswordResetEmailConfigured } from '@/lib/password-reset-url';
 
 export async function requestResetAction(formData: FormData) {
   const email = String(formData.get('email') ?? '')
     .trim()
     .toLowerCase();
+
+  // Check service readiness before looking up the account, so the response
+  // does not reveal whether this email belongs to an active user.
+  if (process.env.NODE_ENV === 'production' && !isPasswordResetEmailConfigured()) {
+    redirect('/recuperar-senha?error=unavailable');
+  }
+
   const token = await createPasswordReset(email);
 
   if (token) {
@@ -14,11 +22,10 @@ export async function requestResetAction(formData: FormData) {
       redirect(`/redefinir-senha?token=${encodeURIComponent(token)}`);
     }
 
-    const appUrl = process.env.APP_URL;
-    if (!appUrl) throw new Error('APP_URL não configurada');
-    const resetUrl = new URL('/redefinir-senha', appUrl);
-    resetUrl.searchParams.set('token', token);
-    await sendPasswordResetEmail({ to: email, resetUrl: resetUrl.toString() });
+    await sendPasswordResetEmail({
+      to: email,
+      resetUrl: createPasswordResetUrl(process.env.APP_URL!, token),
+    });
   }
 
   redirect('/recuperar-senha?sent=1');

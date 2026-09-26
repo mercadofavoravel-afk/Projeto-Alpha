@@ -98,10 +98,18 @@ export default async function OrigensPage() {
       </p>
 
       <div className="kpis">
-        <div className="kpi"><b>{leads.length}</b>Leads no período</div>
-        <div className="kpi"><b>{identified}</b>Com plataforma identificada</div>
-        <div className="kpi"><b>{leads.length - identified}</b>Sem plataforma identificada</div>
-        <div className="kpi"><b>{contentLeads}</b>De conteúdos identificados</div>
+        <div className="kpi">
+          <b>{leads.length}</b>Leads no período
+        </div>
+        <div className="kpi">
+          <b>{identified}</b>Com plataforma identificada
+        </div>
+        <div className="kpi">
+          <b>{leads.length - identified}</b>Sem plataforma identificada
+        </div>
+        <div className="kpi">
+          <b>{contentLeads}</b>De conteúdos identificados
+        </div>
       </div>
 
       {leads.length === 5000 && (

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { WhatsAppFollowUpActions } from './WhatsAppFollowUpActions';
+import { FollowUpActions } from './FollowUpActions';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { createWhatsAppHref, getFollowUpMessage } from '@/lib/whatsapp-follow-up';
@@ -51,35 +51,28 @@ export default async function AgendaPage() {
   windowEnd.setDate(windowEnd.getDate() + 7);
   windowEnd.setHours(23, 59, 59, 999);
 
-  const activities = await db.leadActivity.findMany({
-    where: {
-      lead: leadAccessWhere(user),
-      completedAt: null,
-      dueAt: {
-        lte: windowEnd,
-      },
-    },
-    include: {
-      lead: {
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          neighborhood: true,
-          source: true,
+  const scope = { lead: leadAccessWhere(user), completedAt: null };
+  const [activities, overdue, dueToday, windowCount] = await Promise.all([
+    db.leadActivity.findMany({
+      where: { ...scope, dueAt: { lte: windowEnd } },
+      include: {
+        lead: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            neighborhood: true,
+            source: true,
+          },
         },
       },
-    },
-    orderBy: {
-      dueAt: 'asc',
-    },
-    take: 100,
-  });
-
-  const overdue = activities.filter((activity) => activity.dueAt && activity.dueAt < today).length;
-  const dueToday = activities.filter(
-    (activity) => activity.dueAt && activity.dueAt >= today && activity.dueAt < tomorrow,
-  ).length;
+      orderBy: { dueAt: 'asc' },
+      take: 100,
+    }),
+    db.leadActivity.count({ where: { ...scope, dueAt: { lt: today } } }),
+    db.leadActivity.count({ where: { ...scope, dueAt: { gte: today, lt: tomorrow } } }),
+    db.leadActivity.count({ where: { ...scope, dueAt: { lte: windowEnd } } }),
+  ]);
 
   return (
     <>
@@ -94,7 +87,7 @@ export default async function AgendaPage() {
           <b>{dueToday}</b>Para hoje
         </div>
         <div className="kpi">
-          <b>{activities.length}</b>Até os próximos 7 dias
+          <b>{windowCount}</b>Em atraso e até os próximos 7 dias
         </div>
       </div>
 
@@ -105,7 +98,9 @@ export default async function AgendaPage() {
             <h2>Próximos contatos</h2>
           </div>
 
-          <span>Sem disparo automático</span>
+          <span>
+            Sem disparo automático · {activities.length} de {windowCount} exibidos
+          </span>
         </div>
 
         {activities.length === 0 ? (
@@ -135,16 +130,21 @@ export default async function AgendaPage() {
                     <td>{activity.lead.neighborhood || 'Rio de Janeiro'}</td>
                     <td>{activity.type === 'WHATSAPP' ? 'WhatsApp' : activity.type}</td>
                     <td>
-                      <WhatsAppFollowUpActions
+                      <FollowUpActions
                         activityId={activity.id}
-                        href={createWhatsAppHref(
-                          activity.lead.phone,
-                          getFollowUpMessage(
-                            activity.note,
-                            activity.lead.name,
-                            activity.lead.neighborhood,
-                          ),
-                        )}
+                        leadHref={`/admin/leads/${activity.lead.id}`}
+                        href={
+                          activity.type === 'WHATSAPP'
+                            ? createWhatsAppHref(
+                                activity.lead.phone,
+                                getFollowUpMessage(
+                                  activity.note,
+                                  activity.lead.name,
+                                  activity.lead.neighborhood,
+                                ),
+                              )
+                            : undefined
+                        }
                       />
                     </td>
                   </tr>

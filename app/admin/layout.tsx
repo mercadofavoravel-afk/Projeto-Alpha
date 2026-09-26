@@ -64,6 +64,8 @@ function AdminLinks({ role }: { role: UserRole }) {
         </>
       )}
 
+      {hasPermission(role, 'crm:reports') && <Link href="/admin/origens">Origens e conversões</Link>}
+
       {hasPermission(role, 'users:manage') && <Link href="/admin/usuarios">Usuários</Link>}
       <Link href="/admin/minha-conta">Minha conta</Link>
     </>

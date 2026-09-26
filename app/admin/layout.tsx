@@ -5,9 +5,20 @@ import type { UserRole } from '@prisma/client';
 import { logoutAction } from '@/app/login/actions';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
+import { alphaPath } from '@/lib/public-path';
 
 export const metadata: Metadata = {
   title: 'Administração',
+  manifest: alphaPath('/manifest.webmanifest'),
+  icons: {
+    icon: alphaPath('/icons/alpha-192.png'),
+    apple: alphaPath('/icons/alpha-192.png'),
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Alpha',
+    statusBarStyle: 'default',
+  },
   robots: {
     index: false,
     follow: false,

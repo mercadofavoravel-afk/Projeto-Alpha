@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CaptureCampaign } from '@/components/CaptureCampaign';
 import { JsonLd } from '@/components/JsonLd';
 import { getSiteUrl, organizationJsonLd, siteConfig } from '@/lib/seo';
 import './globals.css';
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={siteConfig.language}>
       <body>
+        <CaptureCampaign />
         <JsonLd data={organizationJsonLd()} />
         {children}
       </body>

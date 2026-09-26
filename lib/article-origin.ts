@@ -1,5 +1,4 @@
 const articleNeighborhoods = [
-  'Alto Leblon',
   'Barra da Tijuca',
   'Porto Maravilha',
   'Jardim Botânico',

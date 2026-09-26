@@ -11,6 +11,7 @@ describe('article origin', () => {
     expect(getArticleNeighborhood('Imóveis no Recreio')).toBe('Recreio dos Bandeirantes');
     expect(getArticleNeighborhood('A Praia do Pepê e a Barra')).toBe('Barra da Tijuca');
     expect(getArticleNeighborhood('Imóveis na Tijuca')).toBe('Tijuca');
+    expect(getArticleNeighborhood('Apartamento no Alto Leblon')).toBe('Leblon');
   });
 
   it('keeps a generic city origin when an article is not about one neighborhood', () => {

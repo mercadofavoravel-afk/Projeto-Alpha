@@ -86,7 +86,9 @@ export default async function OrigensPage() {
   const campaigns = topCounts(leads.map((lead) => lead.utmCampaign));
   const regions = topCounts(leads.map((lead) => lead.neighborhood));
   const identified = leads.filter((lead) => Boolean(lead.utmSource?.trim())).length;
-  const contentLeads = leads.filter((lead) => Boolean(organicContentFromSource(lead.source))).length;
+  const contentLeads = leads.filter((lead) =>
+    Boolean(organicContentFromSource(lead.source)),
+  ).length;
 
   return (
     <>

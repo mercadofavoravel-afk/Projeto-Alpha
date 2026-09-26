@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { requestResetAction } from './actions';
-export default async function Page({ searchParams }: { searchParams: Promise<{ sent?: string }> }) {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ sent?: string; error?: string }>;
+}) {
   const q = await searchParams;
   return (
     <main className="login-shell">
@@ -12,6 +16,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           não estiver cadastrado.
         </p>
         {q.sent && <div className="notice">Se a conta existir, as instruções serão enviadas.</div>}
+        {q.error === 'unavailable' && (
+          <div className="notice">
+            A recuperação por e-mail está indisponível no momento. Entre em contato com a
+            administração do Alpha.
+          </div>
+        )}
         <label>
           E-mail
           <input name="email" type="email" required autoComplete="email" />

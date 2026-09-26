@@ -118,7 +118,7 @@ export default async function OrigensPage() {
         <p>Este painel mostra os 5.000 cadastros mais recentes dos últimos 90 dias.</p>
       )}
 
-      <Summary title="Plataformas e meios informados por UTM" rows={platforms} />
+      <Summary title="Plataformas e meios identificados" rows={platforms} />
       <Summary title="Artigos que originaram cadastros" rows={articles} />
       <Summary title="Campanhas identificadas" rows={campaigns} />
       <Summary title="Regiões de interesse" rows={regions} />
@@ -126,10 +126,12 @@ export default async function OrigensPage() {
       <section className="admin-card">
         <h2>Como ler estes números</h2>
         <p>
-          A plataforma só aparece quando o cadastro recebe utm_source. Um artigo identificado sem
-          UTM não permite afirmar se o visitante veio do Google, de uma rede social ou de um link
-          direto. Para mostrar visitas, pesquisas, impressões e cliques, ainda é preciso integrar
-          dados do GA4 e do Google Search Console. Não atribuímos uma plataforma por suposição.
+          A origem vem primeiro dos parâmetros UTM do link; quando eles não existem, o navegador
+          pode informar o site referenciador. Algumas redes e aplicativos não enviam esse dado:
+          nesses casos, a origem permanece sem identificação. Google Imagens, Google Maps e Busca
+          podem compartilhar referências, então só distinguimos Maps quando o endereço de origem
+          identifica Maps. Para mostrar visitas, pesquisas, impressões e cliques, ainda é preciso
+          integrar dados do GA4 e do Google Search Console.
         </p>
         <Link href="/admin/leads">Abrir leads no CRM</Link>
       </section>

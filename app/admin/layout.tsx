@@ -58,6 +58,8 @@ function AdminLinks({ role }: { role: UserRole }) {
         <>
           <Link href="/admin/seo">SEO Mission Control</Link>
 
+          <Link href="/admin/canais">Canais orgânicos</Link>
+
           <Link href="/admin/analytics">Analytics</Link>
 
           <Link href="/admin/recomendacoes">Recomendações</Link>

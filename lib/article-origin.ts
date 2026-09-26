@@ -1,6 +1,6 @@
 const articleNeighborhoods = [
-  'Alto Leblon',
   'Barra da Tijuca',
+  'Porto Maravilha',
   'Jardim Botânico',
   'São Conrado',
   'Copacabana',
@@ -8,7 +8,8 @@ const articleNeighborhoods = [
   'Leblon',
   'Botafogo',
   'Flamengo',
-  'Recreio',
+  'Jacarepaguá',
+  'Tijuca',
   'Glória',
   'Catete',
   'Gávea',
@@ -24,6 +25,9 @@ function normalize(value: string) {
 
 export function getArticleNeighborhood(title: string) {
   const normalizedTitle = normalize(title);
+
+  if (normalizedTitle.includes('praia do pepe')) return 'Barra da Tijuca';
+  if (normalizedTitle.includes('recreio')) return 'Recreio dos Bandeirantes';
 
   return (
     articleNeighborhoods.find((neighborhood) =>

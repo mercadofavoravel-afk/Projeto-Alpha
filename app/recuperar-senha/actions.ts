@@ -22,10 +22,15 @@ export async function requestResetAction(formData: FormData) {
       redirect(`/redefinir-senha?token=${encodeURIComponent(token)}`);
     }
 
-    await sendPasswordResetEmail({
-      to: email,
-      resetUrl: createPasswordResetUrl(process.env.APP_URL!, token),
-    });
+    try {
+      await sendPasswordResetEmail({
+        to: email,
+        resetUrl: createPasswordResetUrl(token),
+      });
+    } catch (error) {
+      console.error('Falha ao enviar recuperação de senha:', error);
+      redirect('/recuperar-senha?error=unavailable');
+    }
   }
 
   redirect('/recuperar-senha?sent=1');

@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   basePath: getBasePath(),
   images: { unoptimized: true },
+  serverActions: {
+    // The public site proxies /alpha to Vercel, which may replace x-forwarded-host.
+    // Permit form actions only from the two official site hostnames.
+    allowedOrigins: ['imoveisdealtopadraorio.com.br', 'www.imoveisdealtopadraorio.com.br'],
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

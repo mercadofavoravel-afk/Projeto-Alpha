@@ -11,9 +11,7 @@ const cookieName = process.env.SESSION_COOKIE_NAME ?? 'alpha_session';
 const ttlDays = Number(process.env.SESSION_TTL_DAYS ?? 14);
 const maxAttempts = Number(process.env.LOGIN_MAX_ATTEMPTS ?? 8);
 const maxIpAttempts = Number(process.env.LOGIN_MAX_IP_ATTEMPTS ?? 30);
-const attemptWindowMinutes = Number(
-  process.env.LOGIN_ATTEMPT_WINDOW_MINUTES ?? 15,
-);
+const attemptWindowMinutes = Number(process.env.LOGIN_ATTEMPT_WINDOW_MINUTES ?? 15);
 
 function hash(value: string) {
   return crypto.createHash('sha256').update(value).digest('hex');
@@ -23,9 +21,7 @@ async function requestFingerprint() {
   const h = await headers();
   const trustProxyHeaders = process.env.TRUST_PROXY_HEADERS === 'true';
 
-  const forwarded = trustProxyHeaders
-    ? h.get('x-forwarded-for')?.split(',')[0]?.trim()
-    : null;
+  const forwarded = trustProxyHeaders ? h.get('x-forwarded-for')?.split(',')[0]?.trim() : null;
 
   const realIp = trustProxyHeaders ? h.get('x-real-ip') : null;
   const ip = forwarded ?? realIp ?? 'unavailable';
@@ -41,9 +37,7 @@ export async function login(emailInput: string, password: string) {
   const emailHash = hash(email);
   const { ipHash, userAgent } = await requestFingerprint();
 
-  const windowStart = new Date(
-    Date.now() - attemptWindowMinutes * 60_000,
-  );
+  const windowStart = new Date(Date.now() - attemptWindowMinutes * 60_000);
 
   const [failedForAccount, failedForIp] = await Promise.all([
     db.loginAttempt.count({
@@ -62,10 +56,7 @@ export async function login(emailInput: string, password: string) {
     }),
   ]);
 
-  if (
-    failedForAccount >= maxAttempts ||
-    failedForIp >= maxIpAttempts
-  ) {
+  if (failedForAccount >= maxAttempts || failedForIp >= maxIpAttempts) {
     return {
       ok: false as const,
       reason: 'RATE_LIMITED' as const,
@@ -76,10 +67,7 @@ export async function login(emailInput: string, password: string) {
     where: { email },
   });
 
-  const valid = Boolean(
-    user?.isActive &&
-      (await bcrypt.compare(password, user.passwordHash)),
-  );
+  const valid = Boolean(user?.isActive && (await bcrypt.compare(password, user.passwordHash)));
 
   await db.loginAttempt.create({
     data: {
@@ -98,9 +86,7 @@ export async function login(emailInput: string, password: string) {
 
   const token = crypto.randomBytes(32).toString('base64url');
 
-  const expiresAt = new Date(
-    Date.now() + ttlDays * 24 * 60 * 60 * 1000,
-  );
+  const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
 
   await db.session.create({
     data: {
@@ -160,11 +146,7 @@ export async function getCurrentUser() {
     },
   });
 
-  if (
-    !session ||
-    session.expiresAt <= new Date() ||
-    !session.user.isActive
-  ) {
+  if (!session || session.expiresAt <= new Date() || !session.user.isActive) {
     if (session) {
       await db.session
         .delete({
@@ -180,10 +162,7 @@ export async function getCurrentUser() {
     return null;
   }
 
-  if (
-    Date.now() - session.lastSeenAt.getTime() >
-    15 * 60_000
-  ) {
+  if (Date.now() - session.lastSeenAt.getTime() > 15 * 60_000) {
     await db.session.update({
       where: {
         id: session.id,
@@ -269,6 +248,19 @@ export async function createPasswordReset(emailInput: string) {
     return null;
   }
 
+  // Keep a recently sent link usable when someone submits the form again.
+  // This also prevents repeated emails to the same account.
+  const recentToken = await db.passwordResetToken.findFirst({
+    where: {
+      userId: user.id,
+      usedAt: null,
+      expiresAt: { gt: new Date() },
+      createdAt: { gte: new Date(Date.now() - 3 * 60_000) },
+    },
+    select: { id: true },
+  });
+  if (recentToken) return null;
+
   await db.passwordResetToken.deleteMany({
     where: {
       userId: user.id,
@@ -289,50 +281,50 @@ export async function createPasswordReset(emailInput: string) {
   return token;
 }
 
-export async function resetPassword(
-  token: string,
-  password: string,
-) {
+export async function revokePasswordReset(token: string) {
+  await db.passwordResetToken.deleteMany({
+    where: { tokenHash: hash(token), usedAt: null },
+  });
+}
+
+export async function resetPassword(token: string, password: string) {
   const record = await db.passwordResetToken.findUnique({
     where: {
       tokenHash: hash(token),
     },
   });
 
-  if (
-    !record ||
-    record.usedAt ||
-    record.expiresAt <= new Date()
-  ) {
+  if (!record || record.usedAt || record.expiresAt <= new Date()) {
     return false;
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await db.$transaction([
-    db.user.update({
-      where: {
-        id: record.userId,
-      },
-      data: {
-        passwordHash,
-        passwordChangedAt: new Date(),
-      },
-    }),
-    db.passwordResetToken.update({
-      where: {
-        id: record.id,
-      },
-      data: {
-        usedAt: new Date(),
-      },
-    }),
-    db.session.deleteMany({
-      where: {
-        userId: record.userId,
-      },
-    }),
-  ]);
+  class InvalidResetToken extends Error {}
 
-  return true;
+  try {
+    await db.$transaction(async (transaction) => {
+      // A conditional claim makes concurrent submissions of one token mutually exclusive.
+      const claimed = await transaction.passwordResetToken.updateMany({
+        where: { id: record.id, usedAt: null, expiresAt: { gt: new Date() } },
+        data: { usedAt: new Date() },
+      });
+      if (claimed.count !== 1) throw new InvalidResetToken();
+
+      const updated = await transaction.user.updateMany({
+        where: { id: record.userId, isActive: true },
+        data: { passwordHash, passwordChangedAt: new Date() },
+      });
+      if (updated.count !== 1) throw new InvalidResetToken();
+
+      await transaction.session.deleteMany({ where: { userId: record.userId } });
+      await transaction.passwordResetToken.deleteMany({
+        where: { userId: record.userId, id: { not: record.id } },
+      });
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof InvalidResetToken) return false;
+    throw error;
+  }
 }

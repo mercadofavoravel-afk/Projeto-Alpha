@@ -10,9 +10,12 @@ export async function changeOwnPassword(formData: FormData) {
   const user = await requireUser();
   const current = formData.get('currentPassword');
   const next = formData.get('newPassword');
+  const confirmation = formData.get('confirmPassword');
   if (
     typeof current !== 'string' ||
     typeof next !== 'string' ||
+    typeof confirmation !== 'string' ||
+    next !== confirmation ||
     next.length < 12 ||
     next.length > 128
   ) {
@@ -28,6 +31,7 @@ export async function changeOwnPassword(formData: FormData) {
       data: { passwordHash, passwordChangedAt: new Date() },
     }),
     db.session.deleteMany({ where: { userId: user.id } }),
+    db.passwordResetToken.deleteMany({ where: { userId: user.id } }),
   ]);
   redirect('/login');
 }

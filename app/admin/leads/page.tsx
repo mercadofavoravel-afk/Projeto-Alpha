@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { summarizeLeadOrigins } from '@/lib/lead-origin-summary';
+import { leadPageHref, leadsPerPage, resolveLeadPage } from '@/lib/lead-pagination';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
 import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
@@ -19,9 +20,7 @@ type LeadItem = {
   source: string | null;
   message: string | null;
   status: string;
-  activities: Array<{
-    id: string;
-  }>;
+  _count: { activities: number };
   assignedTo: { name: string | null; email: string } | null;
 };
 
@@ -33,6 +32,7 @@ export default async function LeadsPage({
     campaign?: string;
     status?: string;
     assignment?: string;
+    page?: string;
   }>;
 }) {
   const user = await requirePermission('crm:read');
@@ -56,28 +56,23 @@ export default async function LeadsPage({
 
   const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
 
-  const [leads, originGroups] = await Promise.all([
-    db.lead.findMany({
-      where,
-      include: {
-        assignedTo: { select: { name: true, email: true } },
-        activities: {
-          select: {
-            id: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    }),
-    db.lead.groupBy({
-      by: ['source', 'neighborhood'],
-      where,
-      _count: { _all: true },
-    }),
-  ]);
-
+  const originGroups = await db.lead.groupBy({
+    by: ['source', 'neighborhood'],
+    where,
+    _count: { _all: true },
+  });
   const originSummary = summarizeLeadOrigins(originGroups);
+  const { page, totalPages, skip } = resolveLeadPage(params.page, originSummary.total);
+  const leads = await db.lead.findMany({
+    where,
+    include: {
+      assignedTo: { select: { name: true, email: true } },
+      _count: { select: { activities: true } },
+    },
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    skip,
+    take: leadsPerPage,
+  });
   const hasFilters = Boolean(channel || campaign || status || assignment);
 
   return (
@@ -209,8 +204,10 @@ export default async function LeadsPage({
       </section>
 
       <p>
-        Exibindo os {leads.length} leads mais recentes de {originSummary.total} neste filtro. Os
-        indicadores acima consideram todos os registros visíveis para a sua conta.
+        {originSummary.total > 0
+          ? `Exibindo ${skip + 1}–${skip + leads.length} de ${originSummary.total} leads neste filtro.`
+          : 'Nenhum lead neste filtro.'}{' '}
+        Os indicadores acima consideram todos os registros visíveis para a sua conta.
       </p>
       <div className="table-wrap">
         <table className="table">
@@ -256,13 +253,30 @@ export default async function LeadsPage({
                       </Link>
                     </td>
                   )}
-                  <td>{lead.activities.length}</td>
+                  <td>{lead._count.activities}</td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <nav aria-label="Páginas de leads">
+          {page > 1 && (
+            <Link className="btn btn-ghost" href={leadPageHref(exportParams, page - 1)}>
+              Página anterior
+            </Link>
+          )}{' '}
+          <span>
+            Página {page} de {totalPages}
+          </span>{' '}
+          {page < totalPages && (
+            <Link className="btn btn-ghost" href={leadPageHref(exportParams, page + 1)}>
+              Próxima página
+            </Link>
+          )}
+        </nav>
+      )}
     </>
   );
 }

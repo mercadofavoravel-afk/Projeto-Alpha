@@ -54,7 +54,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   const now = new Date();
-  const shouldStopFollowUps = parsed.data.status !== 'NEW';
+  const isClosed = parsed.data.status === 'WON' || parsed.data.status === 'LOST';
+  const hasStartedContact = parsed.data.status !== 'NEW';
 
   const updated = await db.$transaction(async (transaction) => {
     const result = await transaction.lead.updateMany({
@@ -63,14 +64,18 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     });
     if (result.count === 0) return false;
 
-    if (shouldStopFollowUps) {
+    if (hasStartedContact) {
       const completedFollowUps = await transaction.leadActivity.updateMany({
         where: {
           leadId: id,
-          OR: [
-            { type: 'WHATSAPP', dueAt: { not: null } },
-            { type: 'TASK', note: { startsWith: firstContactNotePrefix } },
-          ],
+          ...(isClosed
+            ? {
+                OR: [
+                  { type: 'WHATSAPP' as const, dueAt: { not: null } },
+                  { type: 'TASK' as const, note: { startsWith: firstContactNotePrefix } },
+                ],
+              }
+            : { type: 'TASK' as const, note: { startsWith: firstContactNotePrefix } }),
           completedAt: null,
         },
         data: {
@@ -84,7 +89,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
             leadId: id,
             type: 'NOTE',
             completedAt: now,
-            note: `Pendências automáticas encerradas: ${statusLabels[parsed.data.status]}.`,
+            note: isClosed
+              ? `Pendências automáticas encerradas: ${statusLabels[parsed.data.status]}.`
+              : `Primeiro atendimento registrado: ${statusLabels[parsed.data.status]}. Acompanhamentos futuros mantidos.`,
           },
         });
       }

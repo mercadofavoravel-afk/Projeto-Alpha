@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
-import { organicContentFromSource } from '@/lib/lead-origin';
+import { summarizeLeadOrigins } from '@/lib/lead-origin-summary';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
 import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
@@ -24,18 +24,6 @@ type LeadItem = {
   }>;
   assignedTo: { name: string | null; email: string } | null;
 };
-
-function countBy(values: string[]) {
-  return Array.from(
-    values.reduce((counts, value) => {
-      counts.set(value, (counts.get(value) || 0) + 1);
-      return counts;
-    }, new Map<string, number>()),
-  )
-    .map(([label, count]) => ({ label, count }))
-    .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
-    .slice(0, 5);
-}
 
 export default async function LeadsPage({
   searchParams,
@@ -68,33 +56,28 @@ export default async function LeadsPage({
 
   const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
 
-  const leads = await db.lead.findMany({
-    where,
-    include: {
-      assignedTo: { select: { name: true, email: true } },
-      activities: {
-        select: {
-          id: true,
+  const [leads, originGroups] = await Promise.all([
+    db.lead.findMany({
+      where,
+      include: {
+        assignedTo: { select: { name: true, email: true } },
+        activities: {
+          select: {
+            id: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 100,
-  });
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    }),
+    db.lead.groupBy({
+      by: ['source', 'neighborhood'],
+      where,
+      _count: { _all: true },
+    }),
+  ]);
 
-  const organicLeads = leads.filter((lead: LeadItem) => organicContentFromSource(lead.source));
-  const organicContentLabels = organicLeads.map(
-    (lead: LeadItem) => organicContentFromSource(lead.source) || '',
-  );
-  const organicRegionLabels = organicLeads.map(
-    (lead: LeadItem) => lead.neighborhood || 'Rio de Janeiro',
-  );
-  const organicByContent = countBy(organicContentLabels);
-  const organicByRegion = countBy(organicRegionLabels);
-  const organicContentCount = new Set(organicContentLabels).size;
-  const organicRegionCount = new Set(organicRegionLabels).size;
+  const originSummary = summarizeLeadOrigins(originGroups);
   const hasFilters = Boolean(channel || campaign || status || assignment);
 
   return (
@@ -178,31 +161,31 @@ export default async function LeadsPage({
             <h2>Conteúdos e regiões que geram leads</h2>
           </div>
           <span>
-            {hasFilters ? 'Leads filtrados' : 'Últimos leads'}: {leads.length}
+            {hasFilters ? 'Leads filtrados' : 'Todos os leads'}: {originSummary.total}
           </span>
         </div>
 
         <div className="kpis">
           <div className="kpi">
-            <b>{organicLeads.length}</b>
+            <b>{originSummary.organicLeads}</b>
             Leads orgânicos
           </div>
           <div className="kpi">
-            <b>{organicContentCount}</b>
+            <b>{originSummary.contentCount}</b>
             Conteúdos com conversão
           </div>
           <div className="kpi">
-            <b>{organicRegionCount}</b>
+            <b>{originSummary.regionCount}</b>
             Regiões com conversão
           </div>
         </div>
 
-        {organicLeads.length > 0 ? (
+        {originSummary.organicLeads > 0 ? (
           <div className="editor-grid">
             <div>
               <div className="eyebrow">Conteúdos</div>
               <ul>
-                {organicByContent.map((item) => (
+                {originSummary.byContent.map((item) => (
                   <li key={item.label}>
                     {item.label}: {item.count} lead{item.count === 1 ? '' : 's'}
                   </li>
@@ -212,7 +195,7 @@ export default async function LeadsPage({
             <div>
               <div className="eyebrow">Regiões</div>
               <ul>
-                {organicByRegion.map((item) => (
+                {originSummary.byRegion.map((item) => (
                   <li key={item.label}>
                     {item.label}: {item.count} lead{item.count === 1 ? '' : 's'}
                   </li>
@@ -225,6 +208,10 @@ export default async function LeadsPage({
         )}
       </section>
 
+      <p>
+        Exibindo os {leads.length} leads mais recentes de {originSummary.total} neste filtro. Os
+        indicadores acima consideram todos os registros visíveis para a sua conta.
+      </p>
       <div className="table-wrap">
         <table className="table">
           <thead>

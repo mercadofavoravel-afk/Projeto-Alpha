@@ -82,7 +82,7 @@ function AdminLinks({ role }: { role: UserRole }) {
       )}
 
       {hasPermission(role, 'users:manage') && <Link href="/admin/usuarios">Usuários</Link>}
-      <Link href="/admin/minha-conta">Minha conta</Link>
+      <Link href="/admin/minha-conta">Senha e segurança</Link>
     </>
   );
 }
@@ -94,7 +94,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="admin">
       <aside className="side">
         <div className="brand">
-          ALPHA ADMIN
+          PROJETO ALPHA
           <small>{user.role}</small>
         </div>
 

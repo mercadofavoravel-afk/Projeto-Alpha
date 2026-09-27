@@ -1,6 +1,6 @@
 'use server';
 import { redirect } from 'next/navigation';
-import { createPasswordReset } from '@/lib/auth';
+import { createPasswordReset, revokePasswordReset } from '@/lib/auth';
 import { sendPasswordResetEmail } from '@/lib/email';
 import { createPasswordResetUrl, isPasswordResetEmailConfigured } from '@/lib/password-reset-url';
 
@@ -29,6 +29,7 @@ export async function requestResetAction(formData: FormData) {
       });
     } catch (error) {
       console.error('Falha ao enviar recuperação de senha:', error);
+      await revokePasswordReset(token);
       redirect('/recuperar-senha?error=unavailable');
     }
   }

@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { resetPasswordAction } from './actions';
+
 export default async function Page({
   searchParams,
 }: {
@@ -13,7 +15,11 @@ export default async function Page({
         {q.error && (
           <div className="notice">Use ao menos 12 caracteres e repita a mesma senha.</div>
         )}
-        {q.expired && <div className="notice">O link expirou ou já foi usado.</div>}
+        {q.expired && (
+          <div className="notice">
+            O link expirou ou já foi usado. <Link href="/recuperar-senha">Pedir outro link</Link>.
+          </div>
+        )}
         <input type="hidden" name="token" value={q.token ?? ''} />
         <label>
           Nova senha

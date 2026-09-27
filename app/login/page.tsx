@@ -19,7 +19,7 @@ export default async function LoginPage({
     <main className="login-shell">
       <form className="login-card" action={loginAction}>
         <div className="eyebrow">Área restrita</div>
-        <h1>ALPHA Admin</h1>
+        <h1>Projeto ALPHA</h1>
         <p>Entre com uma conta autorizada.</p>
         {message && <div className="notice">{message}</div>}
         <label>

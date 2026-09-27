@@ -129,6 +129,7 @@ export default async function Page() {
       <section className="admin-card">
         <h2>Acessos rápidos</h2>
         <div className="admin-shortcuts">
+          <Link href="/admin/minha-conta">Trocar senha ou recuperar acesso</Link>
           {hasPermission(user.role, 'crm:read') && (
             <>
               <Link href="/admin/leads">CRM e leads</Link>

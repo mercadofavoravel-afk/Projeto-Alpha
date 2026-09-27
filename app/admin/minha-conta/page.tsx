@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { changeOwnPassword } from './actions';
 
@@ -10,12 +11,15 @@ export default async function AccountPage({
   const { result } = await searchParams;
   return (
     <>
-      <h1>Minha conta</h1>
+      <h1>Senha e segurança</h1>
       <p>
         {user.name || user.email} · {user.email}
       </p>
+      <p>
+        Troque a senha quando quiser. Se não lembrar da senha atual, peça um link no seu e-mail.
+      </p>
       <form action={changeOwnPassword} className="admin-card form-grid">
-        <h2>Alterar senha</h2>
+        <h2>Trocar senha</h2>
         <label>
           Senha atual
           <input type="password" name="currentPassword" autoComplete="current-password" required />
@@ -31,15 +35,35 @@ export default async function AccountPage({
             required
           />
         </label>
+        <label>
+          Confirmar nova senha
+          <input
+            type="password"
+            name="confirmPassword"
+            minLength={12}
+            maxLength={128}
+            autoComplete="new-password"
+            required
+          />
+        </label>
         <p>Após a troca, entre novamente com a nova senha.</p>
         {result === 'invalid' && (
-          <p role="alert">A nova senha precisa ter de 12 a 128 caracteres.</p>
+          <p role="alert">
+            A nova senha precisa ter de 12 a 128 caracteres e a confirmação deve ser igual.
+          </p>
         )}
         {result === 'current' && <p role="alert">A senha atual está incorreta.</p>}
         <button type="submit" className="btn">
           Salvar nova senha
         </button>
       </form>
+      <section className="admin-card">
+        <h2>Esqueceu a senha atual?</h2>
+        <p>Receba por e-mail um link de uso único para definir outra senha.</p>
+        <Link className="btn" href="/recuperar-senha">
+          Recuperar senha por e-mail
+        </Link>
+      </section>
     </>
   );
 }

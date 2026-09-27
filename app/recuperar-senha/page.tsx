@@ -15,11 +15,16 @@ export default async function Page({
           Informe o e-mail da conta. Por segurança, a resposta será igual mesmo quando o endereço
           não estiver cadastrado.
         </p>
-        {q.sent && <div className="notice">Se a conta existir, as instruções serão enviadas.</div>}
+        {q.sent && (
+          <div className="notice">
+            Se a conta estiver ativa, confira o e-mail e o spam. Se já pediu há poucos minutos, use
+            o link anterior.
+          </div>
+        )}
         {q.error === 'unavailable' && (
           <div className="notice">
-            A recuperação por e-mail está indisponível no momento. Entre em contato com a
-            administração do Alpha.
+            A recuperação por e-mail está indisponível no momento. Tente novamente mais tarde ou
+            procure o responsável pelo seu acesso.
           </div>
         )}
         <label>

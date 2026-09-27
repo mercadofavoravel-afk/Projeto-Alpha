@@ -32,11 +32,35 @@ describe('CRM status update', () => {
     mocks.createActivity.mockResolvedValue({ id: 'nota-1' });
   });
 
-  it('closes first-contact and scheduled follow-up tasks after the lead is contacted', async () => {
+  it('closes the first-contact task without removing scheduled follow-ups after contact', async () => {
     const response = await PATCH(
       new Request('http://localhost/api/admin/leads/lead-1/status', {
         method: 'PATCH',
         body: JSON.stringify({ status: 'CONTACTED' }),
+      }),
+      { params: Promise.resolve({ id: 'lead-1' }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.completeActivities).toHaveBeenCalledWith({
+      where: {
+        leadId: 'lead-1',
+        completedAt: null,
+        type: 'TASK',
+        note: { startsWith: 'Primeiro atendimento pendente:' },
+      },
+      data: { completedAt: expect.any(Date) },
+    });
+    expect(mocks.createActivity).toHaveBeenCalledWith({
+      data: expect.objectContaining({ leadId: 'lead-1', type: 'NOTE' }),
+    });
+  });
+
+  it('closes the remaining automatic follow-ups when the lead is lost', async () => {
+    const response = await PATCH(
+      new Request('http://localhost/api/admin/leads/lead-1/status', {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'LOST' }),
       }),
       { params: Promise.resolve({ id: 'lead-1' }) },
     );
@@ -52,9 +76,6 @@ describe('CRM status update', () => {
         ],
       },
       data: { completedAt: expect.any(Date) },
-    });
-    expect(mocks.createActivity).toHaveBeenCalledWith({
-      data: expect.objectContaining({ leadId: 'lead-1', type: 'NOTE' }),
     });
   });
 });

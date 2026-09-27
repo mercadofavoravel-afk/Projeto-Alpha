@@ -1,11 +1,12 @@
 import { alphaPath } from '@/lib/public-path';
+import { getSiteUrl } from '@/lib/seo/canonical';
 
-export function createPasswordResetUrl(appUrl: string, token: string) {
-  const url = new URL(alphaPath('/redefinir-senha'), appUrl);
+export function createPasswordResetUrl(token: string) {
+  const url = new URL(alphaPath('/redefinir-senha'), process.env.APP_URL || getSiteUrl());
   url.searchParams.set('token', token);
   return url.toString();
 }
 
 export function isPasswordResetEmailConfigured() {
-  return Boolean(process.env.APP_URL && process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+  return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }

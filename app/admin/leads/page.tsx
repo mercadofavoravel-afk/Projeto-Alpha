@@ -100,9 +100,13 @@ export default async function LeadsPage({
             <div>
               <div className="eyebrow">Fila comercial</div>
               <h2>Distribuição assistida</h2>
-              <p>Distribui até 25 leads sem responsável por disponibilidade, capacidade e região.</p>
+              <p>
+                Distribui até 25 leads sem responsável por disponibilidade, capacidade e região.
+              </p>
             </div>
-            <button className="btn" type="submit">Distribuir fila</button>
+            <button className="btn" type="submit">
+              Distribuir fila
+            </button>
           </div>
         </form>
       )}

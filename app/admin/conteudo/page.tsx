@@ -78,10 +78,12 @@ export default async function ContentPlanningPage({
     }),
   ]);
 
-  const todayPlans = plans.filter((plan) => plan.scheduledAt < new Date(today.getTime() + 86_400_000));
-  const pendingChannels = plans.flatMap((plan) => plan.publications).filter(
-    (publication) => !['PUBLISHED', 'CANCELED'].includes(publication.status),
-  ).length;
+  const todayPlans = plans.filter(
+    (plan) => plan.scheduledAt < new Date(today.getTime() + 86_400_000),
+  );
+  const pendingChannels = plans
+    .flatMap((plan) => plan.publications)
+    .filter((publication) => !['PUBLISHED', 'CANCELED'].includes(publication.status)).length;
   const completedPlans = plans.filter((plan) => plan.status === 'COMPLETED').length;
 
   return (
@@ -93,7 +95,9 @@ export default async function ContentPlanningPage({
         os destinos dentro do domínio da Imóveis de Alto Padrão.
       </p>
 
-      {params.criado === '1' && <div className="notice notice-success">Pauta adicionada ao calendário.</div>}
+      {params.criado === '1' && (
+        <div className="notice notice-success">Pauta adicionada ao calendário.</div>
+      )}
       {params.erro && (
         <div className="notice">
           Não foi possível concluir. Revise os campos, o destino oficial e a confirmação individual
@@ -102,10 +106,18 @@ export default async function ContentPlanningPage({
       )}
 
       <div className="kpis">
-        <div className="kpi"><b>{todayPlans.length}</b>Postagens de hoje</div>
-        <div className="kpi"><b>{plans.length}</b>Próximos 14 dias</div>
-        <div className="kpi"><b>{pendingChannels}</b>Canais pendentes</div>
-        <div className="kpi"><b>{completedPlans}</b>Pautas concluídas</div>
+        <div className="kpi">
+          <b>{todayPlans.length}</b>Postagens de hoje
+        </div>
+        <div className="kpi">
+          <b>{plans.length}</b>Próximos 14 dias
+        </div>
+        <div className="kpi">
+          <b>{pendingChannels}</b>Canais pendentes
+        </div>
+        <div className="kpi">
+          <b>{completedPlans}</b>Pautas concluídas
+        </div>
       </div>
 
       <section className="admin-card">
@@ -120,7 +132,12 @@ export default async function ContentPlanningPage({
         <form action={createContentPlanAction} className="editor-grid">
           <label>
             Título da pauta
-            <input name="title" required minLength={5} placeholder="Ex.: Kronos — morar perto da praia" />
+            <input
+              name="title"
+              required
+              minLength={5}
+              placeholder="Ex.: Kronos — morar perto da praia"
+            />
           </label>
           <label>
             Formato
@@ -152,11 +169,17 @@ export default async function ContentPlanningPage({
           </label>
           <label>
             Público
-            <input name="targetAudience" placeholder="Investidor, moradia final, segunda residência..." />
+            <input
+              name="targetAudience"
+              placeholder="Investidor, moradia final, segunda residência..."
+            />
           </label>
           <label className="editor-wide">
             Tema / gancho
-            <input name="topic" placeholder="Benefício principal e intenção comercial da publicação" />
+            <input
+              name="topic"
+              placeholder="Benefício principal e intenção comercial da publicação"
+            />
           </label>
           <label className="editor-wide">
             Legenda
@@ -199,7 +222,9 @@ export default async function ContentPlanningPage({
             ))}
           </fieldset>
           <div className="editor-wide">
-            <button className="btn" type="submit">Adicionar ao calendário</button>
+            <button className="btn" type="submit">
+              Adicionar ao calendário
+            </button>
           </div>
         </form>
       </section>
@@ -210,7 +235,9 @@ export default async function ContentPlanningPage({
             <div className="eyebrow">Visão operacional</div>
             <h2>Próximos 14 dias</h2>
           </div>
-          <span>{plans.length} pauta{plans.length === 1 ? '' : 's'}</span>
+          <span>
+            {plans.length} pauta{plans.length === 1 ? '' : 's'}
+          </span>
         </div>
 
         {plans.length === 0 ? (
@@ -218,18 +245,28 @@ export default async function ContentPlanningPage({
         ) : (
           <div className="content-plan-list">
             {plans.map((plan) => {
-              const completion = completionFromAttempts(plan.publications.map((item) => item.status));
+              const completion = completionFromAttempts(
+                plan.publications.map((item) => item.status),
+              );
               return (
                 <article className="content-plan-card" key={plan.id}>
                   <div className="head">
                     <div>
-                      <div className="eyebrow">{formatDate(plan.scheduledAt)} · {plan.contentType}</div>
+                      <div className="eyebrow">
+                        {formatDate(plan.scheduledAt)} · {plan.contentType}
+                      </div>
                       <h3>{plan.title}</h3>
-                      <p>{[plan.projectName, plan.region, plan.targetAudience].filter(Boolean).join(' · ')}</p>
+                      <p>
+                        {[plan.projectName, plan.region, plan.targetAudience]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
                     </div>
                     <strong>{completion}% publicado</strong>
                   </div>
-                  <p><b>Destino:</b> {plan.destinationUrl}</p>
+                  <p>
+                    <b>Destino:</b> {plan.destinationUrl}
+                  </p>
                   {plan.article && (
                     <p>
                       <b>Artigo:</b> {plan.article.title} ({plan.article.publishStatus})
@@ -239,19 +276,29 @@ export default async function ContentPlanningPage({
                     <input type="hidden" name="id" value={plan.id} />
                     <select name="status" defaultValue={plan.status}>
                       {contentPlanStatuses.map((status) => (
-                        <option key={status} value={status}>{contentPlanStatusLabels[status]}</option>
+                        <option key={status} value={status}>
+                          {contentPlanStatusLabels[status]}
+                        </option>
                       ))}
                     </select>
-                    <button className="btn btn-ghost" type="submit">Atualizar pauta</button>
+                    <button className="btn btn-ghost" type="submit">
+                      Atualizar pauta
+                    </button>
                   </form>
                   <div className="publication-grid">
                     {plan.publications.map((publication) => (
-                      <form action={updatePublicationAction} className="publication-card" key={publication.id}>
+                      <form
+                        action={updatePublicationAction}
+                        className="publication-card"
+                        key={publication.id}
+                      >
                         <input type="hidden" name="id" value={publication.id} />
                         <b>{publicationChannelLabels[publication.channel]}</b>
                         <select name="status" defaultValue={publication.status}>
                           {publicationStatuses.map((status) => (
-                            <option key={status} value={status}>{publicationStatusLabels[status]}</option>
+                            <option key={status} value={status}>
+                              {publicationStatusLabels[status]}
+                            </option>
                           ))}
                         </select>
                         <input
@@ -264,7 +311,9 @@ export default async function ContentPlanningPage({
                           defaultValue={publication.errorMessage || ''}
                           placeholder="Falha encontrada, se houver"
                         />
-                        <button className="btn btn-ghost" type="submit">Salvar canal</button>
+                        <button className="btn btn-ghost" type="submit">
+                          Salvar canal
+                        </button>
                       </form>
                     ))}
                   </div>

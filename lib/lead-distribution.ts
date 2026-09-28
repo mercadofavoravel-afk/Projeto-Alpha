@@ -22,15 +22,16 @@ export function candidateCanReceive(candidate: DistributionCandidate, region?: s
 }
 
 export function chooseAssignee(candidates: DistributionCandidate[], region?: string | null) {
-  return candidates
-    .filter((candidate) => candidateCanReceive(candidate, region))
-    .sort((first, second) => {
-      const firstLoad = first.activeLeadCount / Math.max(1, first.leadCapacity);
-      const secondLoad = second.activeLeadCount / Math.max(1, second.leadCapacity);
-      if (firstLoad !== secondLoad) return firstLoad - secondLoad;
-      return (
-        (first.lastLeadAssignedAt?.getTime() || 0) -
-        (second.lastLeadAssignedAt?.getTime() || 0)
-      );
-    })[0] ?? null;
+  return (
+    candidates
+      .filter((candidate) => candidateCanReceive(candidate, region))
+      .sort((first, second) => {
+        const firstLoad = first.activeLeadCount / Math.max(1, first.leadCapacity);
+        const secondLoad = second.activeLeadCount / Math.max(1, second.leadCapacity);
+        if (firstLoad !== secondLoad) return firstLoad - secondLoad;
+        return (
+          (first.lastLeadAssignedAt?.getTime() || 0) - (second.lastLeadAssignedAt?.getTime() || 0)
+        );
+      })[0] ?? null
+  );
 }

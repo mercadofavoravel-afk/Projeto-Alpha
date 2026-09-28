@@ -100,13 +100,17 @@ export async function updateEmployee(formData: FormData) {
   await db.$transaction(async (transaction) => {
     await transaction.user.update({
       where: { id },
-    data: {
-      role: role as UserRole,
-      isActive: active,
-      acceptsLeads: active && acceptsLeads && ['DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role),
-      leadCapacity: Number.isInteger(leadCapacity) && leadCapacity > 0 && leadCapacity <= 500 ? leadCapacity : 30,
-      serviceRegions,
-    },
+      data: {
+        role: role as UserRole,
+        isActive: active,
+        acceptsLeads:
+          active && acceptsLeads && ['DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role),
+        leadCapacity:
+          Number.isInteger(leadCapacity) && leadCapacity > 0 && leadCapacity <= 500
+            ? leadCapacity
+            : 30,
+        serviceRegions,
+      },
     });
     if (!active || target.role !== role) {
       await transaction.session.deleteMany({ where: { userId: id } });

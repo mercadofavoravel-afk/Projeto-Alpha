@@ -5,7 +5,9 @@ import { completionFromAttempts, isOfficialDestination } from './content-calenda
 describe('content calendar', () => {
   it('accepts only internal or official destinations', () => {
     expect(isOfficialDestination('/artigos/ipanema')).toBe(true);
-    expect(isOfficialDestination('https://imoveisdealtopadraorio.com.br/kronos-by-sigma/')).toBe(true);
+    expect(isOfficialDestination('https://imoveisdealtopadraorio.com.br/kronos-by-sigma/')).toBe(
+      true,
+    );
     expect(isOfficialDestination('https://blog.imoveisdealtopadraorio.com.br/artigo')).toBe(true);
     expect(isOfficialDestination('https://incorporadora.example/projeto')).toBe(false);
   });

@@ -1,8 +1,4 @@
-import type {
-  ContentPlanStatus,
-  PublicationChannel,
-  PublicationStatus,
-} from '@prisma/client';
+import type { ContentPlanStatus, PublicationChannel, PublicationStatus } from '@prisma/client';
 
 export const contentPlanStatuses: readonly ContentPlanStatus[] = [
   'DRAFT',
@@ -76,5 +72,7 @@ export function isOfficialDestination(value: string) {
 export function completionFromAttempts(statuses: PublicationStatus[]) {
   const active = statuses.filter((status) => status !== 'CANCELED');
   if (active.length === 0) return 0;
-  return Math.round((active.filter((status) => status === 'PUBLISHED').length / active.length) * 100);
+  return Math.round(
+    (active.filter((status) => status === 'PUBLISHED').length / active.length) * 100,
+  );
 }

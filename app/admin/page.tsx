@@ -184,8 +184,12 @@ export default async function Page() {
         </div>
         {hasPermission(user.role, 'catalog:write') && (
           <>
-            <div className="kpi"><b>{todayContent}</b>Postagens de hoje</div>
-            <div className="kpi"><b>{pendingPublications}</b>Canais pendentes</div>
+            <div className="kpi">
+              <b>{todayContent}</b>Postagens de hoje
+            </div>
+            <div className="kpi">
+              <b>{pendingPublications}</b>Canais pendentes
+            </div>
           </>
         )}
       </div>

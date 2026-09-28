@@ -23,7 +23,9 @@ describe('lead distribution', () => {
   it('respects capacity and service region', () => {
     expect(candidateCanReceive(candidates[0], 'Barra da Tijuca')).toBe(true);
     expect(candidateCanReceive(candidates[0], 'Ipanema')).toBe(false);
-    expect(candidateCanReceive({ ...candidates[0], activeLeadCount: 10 }, 'Barra da Tijuca')).toBe(false);
+    expect(candidateCanReceive({ ...candidates[0], activeLeadCount: 10 }, 'Barra da Tijuca')).toBe(
+      false,
+    );
   });
 
   it('chooses the least loaded eligible professional', () => {

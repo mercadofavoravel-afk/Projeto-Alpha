@@ -1,10 +1,6 @@
 'use server';
 
-import type {
-  ContentPlanStatus,
-  PublicationChannel,
-  PublicationStatus,
-} from '@prisma/client';
+import type { ContentPlanStatus, PublicationChannel, PublicationStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 

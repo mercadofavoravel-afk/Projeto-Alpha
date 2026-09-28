@@ -229,6 +229,62 @@ a {
   border-left: 4px solid #a88b52;
   margin: 18px 0;
 }
+.notice-success {
+  background: #e7f4eb;
+  border-left-color: #2f7650;
+}
+.channel-picker {
+  border: 1px solid var(--l);
+  padding: 16px;
+}
+.channel-picker label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 18px 8px 0;
+}
+.channel-picker input {
+  width: auto;
+  margin: 0;
+}
+.content-plan-list {
+  display: grid;
+  gap: 18px;
+}
+.content-plan-card {
+  border: 1px solid var(--l);
+  background: #fff;
+  padding: 22px;
+}
+.content-plan-card h3 {
+  font: 500 1.8rem Georgia;
+  margin: 6px 0;
+}
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.inline-form select,
+.publication-card input,
+.publication-card select {
+  border: 1px solid var(--l);
+  padding: 10px;
+  background: #fff;
+}
+.publication-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.publication-card {
+  border: 1px solid var(--l);
+  padding: 14px;
+  display: grid;
+  gap: 9px;
+}
 .footer {
   background: #10251e;
   color: #fff;
@@ -446,7 +502,8 @@ a {
 }
 @media (max-width: 760px) {
   .editor-grid,
-  .media-grid {
+  .media-grid,
+  .publication-grid {
     grid-template-columns: 1fr;
   }
   .editor-wide {

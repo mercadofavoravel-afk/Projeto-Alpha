@@ -8,6 +8,7 @@ import { leadPageHref, leadsPerPage, resolveLeadPage } from '@/lib/lead-paginati
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
 import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
+import { distributeUnassignedLeadsAction } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,7 @@ export default async function LeadsPage({
     status?: string;
     assignment?: string;
     page?: string;
+    distribuidos?: string;
   }>;
 }) {
   const user = await requirePermission('crm:read');
@@ -84,6 +86,26 @@ export default async function LeadsPage({
           ? 'Visão da equipe e leads sem responsável.'
           : 'Seus leads atribuídos.'}
       </p>
+      {params.distribuidos !== undefined && (
+        <div className="notice notice-success">
+          {Number(params.distribuidos) > 0
+            ? `${params.distribuidos} lead(s) distribuído(s) pela fila assistida.`
+            : 'Nenhum lead foi distribuído. Confira disponibilidade, capacidade e regiões da equipe.'}
+        </div>
+      )}
+
+      {canViewAllLeads(user.role) && originSummary.total > 0 && (
+        <form action={distributeUnassignedLeadsAction} className="admin-card">
+          <div className="head">
+            <div>
+              <div className="eyebrow">Fila comercial</div>
+              <h2>Distribuição assistida</h2>
+              <p>Distribui até 25 leads sem responsável por disponibilidade, capacidade e região.</p>
+            </div>
+            <button className="btn" type="submit">Distribuir fila</button>
+          </div>
+        </form>
+      )}
 
       <section className="admin-card">
         <div className="head">

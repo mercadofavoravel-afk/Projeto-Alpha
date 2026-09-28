@@ -32,6 +32,13 @@ export default async function Page({
       isActive: true,
       createdAt: true,
       _count: { select: { sessions: true } },
+      acceptsLeads: true,
+      leadCapacity: true,
+      serviceRegions: true,
+      assignedLeads: {
+        where: { status: { notIn: ['WON', 'LOST'] } },
+        select: { id: true },
+      },
     },
   });
   const { result } = await searchParams;
@@ -81,6 +88,21 @@ export default async function Page({
             required
           />
         </label>
+        <label>
+          Recebimento de leads
+          <select name="acceptsLeads" defaultValue="false">
+            <option value="false">Indisponível</option>
+            <option value="true">Disponível</option>
+          </select>
+        </label>
+        <label>
+          Capacidade de leads ativos
+          <input name="leadCapacity" type="number" min={1} max={500} defaultValue={30} required />
+        </label>
+        <label className="full">
+          Regiões de atendimento
+          <input name="serviceRegions" placeholder="Barra da Tijuca, Ipanema, Centro" />
+        </label>
         <p>
           Compartilhe a senha com o profissional por um canal seguro; ele poderá trocá-la após
           entrar.
@@ -97,6 +119,7 @@ export default async function Page({
               <th>Função</th>
               <th>Status</th>
               <th>Sessões</th>
+              <th>Distribuição</th>
               <th>Gerenciar</th>
             </tr>
           </thead>
@@ -111,6 +134,12 @@ export default async function Page({
                 <td>{u.role === 'ADMIN' ? 'Administrador' : roleNames[u.role]}</td>
                 <td>{u.isActive ? 'Ativo' : 'Bloqueado'}</td>
                 <td>{u._count.sessions}</td>
+                <td>
+                  {u.acceptsLeads ? 'Disponível' : 'Indisponível'} · {u.assignedLeads.length}/
+                  {u.leadCapacity} ativos
+                  <br />
+                  <small>{u.serviceRegions.join(', ') || 'Todas as regiões'}</small>
+                </td>
                 <td>
                   {u.role === 'ADMIN' ? (
                     'Administrador'
@@ -128,6 +157,24 @@ export default async function Page({
                           </option>
                         ))}
                       </select>
+                      <select name="acceptsLeads" defaultValue={u.acceptsLeads ? 'true' : 'false'}>
+                        <option value="false">Não receber</option>
+                        <option value="true">Disponível</option>
+                      </select>
+                      <input
+                        name="leadCapacity"
+                        type="number"
+                        min={1}
+                        max={500}
+                        defaultValue={u.leadCapacity}
+                        aria-label={`Capacidade de ${u.name || u.email}`}
+                      />
+                      <input
+                        name="serviceRegions"
+                        defaultValue={u.serviceRegions.join(', ')}
+                        placeholder="Regiões separadas por vírgula"
+                        aria-label={`Regiões de ${u.name || u.email}`}
+                      />
                       <select
                         name="isActive"
                         defaultValue={u.isActive ? 'true' : 'false'}

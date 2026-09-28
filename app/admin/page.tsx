@@ -68,6 +68,8 @@ export default async function Page() {
     recentLeads,
     overdueActivities,
     dueTodayActivities,
+    todayContent,
+    pendingPublications,
   ] = await Promise.all([
     db.project.count(),
     db.lead.count({ where: leadScope }),
@@ -107,6 +109,14 @@ export default async function Page() {
         },
       },
     }),
+    hasPermission(user.role, 'catalog:write')
+      ? db.contentPlan.count({ where: { scheduledAt: { gte: today, lt: tomorrow } } })
+      : Promise.resolve(0),
+    hasPermission(user.role, 'catalog:write')
+      ? db.publicationAttempt.count({
+          where: { status: { notIn: ['PUBLISHED', 'CANCELED'] } },
+        })
+      : Promise.resolve(0),
   ]);
 
   const organicLeads = recentLeads.filter((lead: LeadMetric) =>
@@ -143,6 +153,7 @@ export default async function Page() {
             <>
               <Link href="/admin/empreendimentos">Páginas de empreendimentos</Link>
               <Link href="/admin/artigos">Artigos do blog</Link>
+              <Link href="/admin/conteudo">Calendário e postagens</Link>
               <Link href="/admin/discovery">Links para revisar</Link>
             </>
           )}
@@ -171,6 +182,12 @@ export default async function Page() {
         <div className="kpi">
           <b>{books}</b>Books
         </div>
+        {hasPermission(user.role, 'catalog:write') && (
+          <>
+            <div className="kpi"><b>{todayContent}</b>Postagens de hoje</div>
+            <div className="kpi"><b>{pendingPublications}</b>Canais pendentes</div>
+          </>
+        )}
       </div>
 
       <section className="admin-card">

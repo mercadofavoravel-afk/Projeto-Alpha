@@ -44,6 +44,8 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/discovery">Discovery</Link>
 
           <Link href="/admin/artigos">Artigos</Link>
+
+          <Link href="/admin/conteudo">Calendário e postagens</Link>
         </>
       )}
 

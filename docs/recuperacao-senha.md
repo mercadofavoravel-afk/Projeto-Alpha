@@ -12,6 +12,10 @@ A recuperação por e-mail exige, no ambiente **Production** do projeto Vercel q
 
 - `RESEND_API_KEY`: credencial de envio mantida exclusivamente no gerenciador de segredos, nunca no repositório ou em mensagens.
 - `EMAIL_FROM`: remetente pertencente a domínio verificado no serviço de e-mail.
+- `PASSWORD_RESET_EMAIL_ENABLED=true`: habilite somente depois de confirmar a
+  verificação do domínio de envio e o recebimento de um e-mail real. Enquanto a
+  verificação DNS estiver pendente, a tela informa indisponibilidade em vez de
+  sugerir que enviou um link que o provedor recusará.
 
 O endereço do link usa `NEXT_PUBLIC_SITE_URL` já configurado; `APP_URL` pode substituir esse endereço se necessário. Depois de definir as variáveis, é preciso fazer novo deploy de produção. Até que um e-mail real seja recebido e seu link seja usado com sucesso, o fluxo por e-mail **não está operacional**.
 

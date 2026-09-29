@@ -44,9 +44,13 @@ export default async function ArticlesAdminPage({
       updatedAt: 'desc',
     },
   });
-  const regions = articles.map((article) =>
-    getArticleNeighborhood(`${article.title} ${article.category || ''}`),
-  );
+  const regions = articles.map((article) => {
+    const exactCategory = trackedRegions.find((region) => region === article.category);
+    if (exactCategory) return exactCategory;
+    if (article.category === 'Centro do Rio') return 'Centro';
+    return getArticleNeighborhood(`${article.title} ${article.category || ''}`);
+  });
+  const regionByArticleId = new Map(articles.map((article, index) => [article.id, regions[index]]));
   const availableRegions: string[] = [
     ...trackedRegions,
     ...[...new Set(regions)]
@@ -235,7 +239,7 @@ export default async function ArticlesAdminPage({
                           : 'Página pública indisponível até a publicação'}
                       </small>
                     </td>
-                    <td>{getArticleNeighborhood(`${article.title} ${article.category || ''}`)}</td>
+                    <td>{regionByArticleId.get(article.id)}</td>
                     <td>{statusLabels[article.publishStatus]}</td>
                     <td>{article.updatedAt.toLocaleDateString('pt-BR')}</td>
                     <td>

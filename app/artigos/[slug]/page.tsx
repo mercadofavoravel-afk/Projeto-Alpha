@@ -6,7 +6,7 @@ import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
-import { articleContentSegments } from '@/lib/article-links';
+import { articleContentBlocks, articleContentSegments } from '@/lib/article-links';
 import { createOrganicArticleSource, getArticleNeighborhood } from '@/lib/article-origin';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
@@ -121,10 +121,17 @@ export default async function ArticlePage({ params }: PageProps) {
     [article.title, article.excerpt, article.content].filter(Boolean).join(' '),
   );
 
-  const paragraphs = article.content
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+  const blocks = articleContentBlocks(article.content);
+  const renderInline = (value: string) =>
+    articleContentSegments(value).map((segment, index) =>
+      segment.href ? (
+        <a key={index} href={segment.href}>
+          {segment.text}
+        </a>
+      ) : (
+        <span key={index}>{segment.text}</span>
+      ),
+    );
 
   return (
     <>
@@ -157,20 +164,29 @@ export default async function ArticlePage({ params }: PageProps) {
               <img src={alphaAssetPath(article.heroImage)} alt={article.title} />
             )}
 
-            <div className="collection-card-content">
-              {paragraphs.map((paragraph, index) => (
-                <p key={`${index}-${paragraph.slice(0, 24)}`}>
-                  {articleContentSegments(paragraph).map((segment, segmentIndex) =>
-                    segment.href ? (
-                      <a key={segmentIndex} href={segment.href}>
-                        {segment.text}
-                      </a>
-                    ) : (
-                      <span key={segmentIndex}>{segment.text}</span>
-                    ),
-                  )}
-                </p>
-              ))}
+            <div className="collection-card-content article-body">
+              {blocks.map((block, index) => {
+                const key = `${index}-${block.lines[0]?.slice(0, 24)}`;
+                if (block.kind === 'heading')
+                  return <h2 key={key}>{renderInline(block.lines[0])}</h2>;
+                if (block.kind === 'subheading')
+                  return <h3 key={key}>{renderInline(block.lines[0])}</h3>;
+                if (block.kind === 'list' || block.kind === 'ordered-list') {
+                  const items = block.lines.map((line, itemIndex) => (
+                    <li key={`${itemIndex}-${line.slice(0, 24)}`}>{renderInline(line)}</li>
+                  ));
+                  return block.kind === 'list' ? (
+                    <ul key={key}>{items}</ul>
+                  ) : (
+                    <ol key={key}>{items}</ol>
+                  );
+                }
+                return <p key={key}>{renderInline(block.lines[0])}</p>;
+              })}
+              <a className="btn article-cta" href="#atendimento">
+                Fale agora com um especialista da Imóveis de Alto Padrão Rio e receba todo o
+                material em primeira mão
+              </a>
             </div>
           </div>
         </article>
@@ -274,8 +290,8 @@ export default async function ArticlePage({ params }: PageProps) {
               <h2>Receba oportunidades alinhadas ao que você procura.</h2>
 
               <p>
-                Fale agora com um especialista da Imóveis de Alto Padrão e receba todo o material em
-                primeira mão.
+                Fale agora com um especialista da Imóveis de Alto Padrão Rio e receba todo o
+                material em primeira mão.
               </p>
             </div>
 

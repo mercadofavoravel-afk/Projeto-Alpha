@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
 import { articleContentBlocks, articleContentSegments } from '@/lib/article-links';
-import { createOrganicArticleSource, getArticleNeighborhood } from '@/lib/article-origin';
+import { createOrganicArticleSource, resolveArticleNeighborhood } from '@/lib/article-origin';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
 
@@ -117,7 +117,8 @@ export default async function ArticlePage({ params }: PageProps) {
     ).values(),
   ).slice(0, 3);
 
-  const neighborhood = getArticleNeighborhood(
+  const neighborhood = resolveArticleNeighborhood(
+    article.category,
     [article.title, article.excerpt, article.content].filter(Boolean).join(' '),
   );
 

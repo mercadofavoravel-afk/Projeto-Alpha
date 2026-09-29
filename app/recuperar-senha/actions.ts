@@ -29,8 +29,12 @@ export async function requestResetAction(formData: FormData) {
       });
     } catch (error) {
       console.error('Falha ao enviar recuperação de senha:', error);
-      await revokePasswordReset(token);
-      redirect('/recuperar-senha?error=unavailable');
+      try {
+        await revokePasswordReset(token);
+      } catch (revokeError) {
+        console.error('Falha ao revogar link de recuperação não enviado:', revokeError);
+      }
+      // The public response must be the same for existing and unknown accounts.
     }
   }
 

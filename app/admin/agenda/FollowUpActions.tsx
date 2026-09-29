@@ -47,7 +47,7 @@ export function FollowUpActions({ activityId, href, leadHref }: FollowUpActionsP
           Preparar mensagem
         </a>
       ) : (
-        <a className="btn" href={leadHref}>
+        <a className="btn" href={alphaPath(leadHref)}>
           Abrir lead
         </a>
       )}{' '}

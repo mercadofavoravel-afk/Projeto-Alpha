@@ -8,5 +8,9 @@ export function createPasswordResetUrl(token: string) {
 }
 
 export function isPasswordResetEmailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+  return Boolean(
+    process.env.RESEND_API_KEY &&
+      process.env.EMAIL_FROM &&
+      process.env.PASSWORD_RESET_EMAIL_ENABLED === 'true',
+  );
 }

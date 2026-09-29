@@ -25,8 +25,11 @@ describe('password recovery', () => {
     vi.stubEnv('APP_URL', '');
     vi.stubEnv('RESEND_API_KEY', '');
     vi.stubEnv('EMAIL_FROM', 'contato@imoveisdealtopadraorio.com.br');
+    vi.stubEnv('PASSWORD_RESET_EMAIL_ENABLED', '');
     expect(isPasswordResetEmailConfigured()).toBe(false);
     vi.stubEnv('RESEND_API_KEY', 'configured');
+    expect(isPasswordResetEmailConfigured()).toBe(false);
+    vi.stubEnv('PASSWORD_RESET_EMAIL_ENABLED', 'true');
     expect(isPasswordResetEmailConfigured()).toBe(true);
   });
 });

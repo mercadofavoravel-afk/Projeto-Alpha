@@ -36,6 +36,11 @@ export function getArticleNeighborhood(title: string) {
   );
 }
 
+export function resolveArticleNeighborhood(category: string | null, articleText: string) {
+  const categoryRegion = getArticleNeighborhood(category ?? '');
+  return categoryRegion === 'Rio de Janeiro' ? getArticleNeighborhood(articleText) : categoryRegion;
+}
+
 export function createOrganicArticleSource(title: string, neighborhood: string) {
   const prefix = 'Orgânico | artigo: ';
   const suffix = ` | região: ${neighborhood}`;

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { createOrganicArticleSource, getArticleNeighborhood } from './article-origin';
+import {
+  createOrganicArticleSource,
+  getArticleNeighborhood,
+  resolveArticleNeighborhood,
+} from './article-origin';
 
 describe('article origin', () => {
   it('identifies the neighborhood from an article title', () => {
@@ -18,6 +22,16 @@ describe('article origin', () => {
     expect(getArticleNeighborhood('Imóvel novo ou pronto: qual opção escolher')).toBe(
       'Rio de Janeiro',
     );
+  });
+
+  it('uses the editorial category before incidental neighborhood references in the article', () => {
+    expect(
+      resolveArticleNeighborhood('Barra da Tijuca', 'Kronos Barra: apartamentos e coberturas'),
+    ).toBe('Barra da Tijuca');
+    expect(
+      resolveArticleNeighborhood('Ipanema', 'Compare também o Leblon e a Barra da Tijuca'),
+    ).toBe('Ipanema');
+    expect(resolveArticleNeighborhood(null, 'Studio no Porto Maravilha')).toBe('Porto Maravilha');
   });
 
   it('creates a compact CRM source label', () => {

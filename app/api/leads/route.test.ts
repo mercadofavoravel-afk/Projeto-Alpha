@@ -59,6 +59,7 @@ describe('POST /api/leads', () => {
           objective: 'INVEST',
           neighborhood: 'Ipanema',
           source: 'Orgânico | artigo: investir em Ipanema | região: Ipanema',
+          articleSlug: 'investir-em-ipanema',
           utmSource: ' Google ',
           utmMedium: 'Paid Social',
           utmCampaign: 'Leads Ipanema Setembro',
@@ -76,6 +77,7 @@ describe('POST /api/leads', () => {
     expect(database.createLead).toHaveBeenCalledWith({
       data: expect.objectContaining({
         email: 'cliente@example.com',
+        articleSlug: 'investir-em-ipanema',
         message: 'Tipologia desejada: Studio',
         utmSource: 'google',
         utmMedium: 'paid_social',

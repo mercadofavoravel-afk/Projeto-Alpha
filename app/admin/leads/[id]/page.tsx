@@ -172,6 +172,14 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               <dt>Fonte</dt>
               <dd>{lead.source || 'Não informado'}</dd>
             </div>
+            {lead.articleSlug && (
+              <div>
+                <dt>Artigo de origem</dt>
+                <dd>
+                  <Link href={`/artigos/${lead.articleSlug}`}>{lead.articleSlug}</Link>
+                </dd>
+              </div>
+            )}
 
             <div>
               <dt>UTM Source</dt>

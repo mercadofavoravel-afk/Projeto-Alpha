@@ -11,6 +11,7 @@ type LeadCaptureFormProps = {
   neighborhood: string;
   typologies?: string[];
   source?: string;
+  articleSlug?: string;
 };
 
 function getSessionKey() {
@@ -64,6 +65,7 @@ export function LeadCaptureForm({
   neighborhood,
   typologies = [],
   source,
+  articleSlug,
 }: LeadCaptureFormProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -103,6 +105,7 @@ export function LeadCaptureForm({
           message: message.trim() || undefined,
           typology: typology.trim(),
           source: (source || `empreendimento:${projectSlug}`).slice(0, 120),
+          articleSlug,
           utmSource: campaignUtms.utmSource,
           utmMedium: campaignUtms.utmMedium,
           utmCampaign: campaignUtms.utmCampaign,

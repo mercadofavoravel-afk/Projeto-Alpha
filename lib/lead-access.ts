@@ -7,19 +7,37 @@ export function canViewAllLeads(role: UserRole) {
 }
 
 export function leadAccessWhere(user: LeadViewer): Prisma.LeadWhereInput {
-  return canViewAllLeads(user.role) ? {} : { assignedToId: user.id };
+  if (user.role === 'ADMIN' || user.role === 'DIRECTOR') return {};
+  if (user.role === 'MANAGER') {
+    return {
+      OR: [{ assignedToId: user.id }, { assignedTo: { managerId: user.id } }],
+    };
+  }
+  return { assignedToId: user.id };
+}
+
+export function canViewUnassignedLeads(role: UserRole) {
+  return role === 'ADMIN' || role === 'DIRECTOR';
 }
 
 export function leadAssignmentWhere(
   user: LeadViewer,
   assignment: string | undefined,
 ): Prisma.LeadWhereInput {
-  if (!canViewAllLeads(user.role)) return {};
+  if (!canViewUnassignedLeads(user.role)) return {};
   if (assignment === 'unassigned') return { assignedToId: null };
   if (assignment === 'assigned') return { assignedToId: { not: null } };
   return {};
 }
 
-export function canAccessLead(user: LeadViewer, assignedToId: string | null) {
-  return canViewAllLeads(user.role) || assignedToId === user.id;
+export function canAccessLead(
+  user: LeadViewer,
+  assignedToId: string | null,
+  assignedToManagerId: string | null = null,
+) {
+  return (
+    canViewUnassignedLeads(user.role) ||
+    assignedToId === user.id ||
+    (user.role === 'MANAGER' && assignedToManagerId === user.id)
+  );
 }

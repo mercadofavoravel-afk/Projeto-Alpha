@@ -79,7 +79,16 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
   const assignees = hasPermission(user.role, 'crm:assign')
     ? await db.user.findMany({
-        where: { isActive: true, role: { in: ['CONSULTANT', 'MANAGER', 'DIRECTOR'] } },
+        where:
+          user.role === 'MANAGER'
+            ? {
+                isActive: true,
+                OR: [
+                  { id: user.id, role: 'MANAGER' },
+                  { role: 'CONSULTANT', managerId: user.id },
+                ],
+              }
+            : { isActive: true, role: { in: ['CONSULTANT', 'MANAGER', 'DIRECTOR'] } },
         select: { id: true, name: true, email: true },
         orderBy: { name: 'asc' },
       })
@@ -103,7 +112,12 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       {hasPermission(user.role, 'crm:assign') ? (
         <section className="admin-card">
           <h2>Distribuir lead</h2>
-          <AssignmentForm leadId={lead.id} assignedToId={lead.assignedToId} assignees={assignees} />
+          <AssignmentForm
+            leadId={lead.id}
+            assignedToId={lead.assignedToId}
+            assignees={assignees}
+            allowUnassigned={user.role !== 'MANAGER'}
+          />
         </section>
       ) : (
         <p>Responsável: {lead.assignedTo?.name || lead.assignedTo?.email || 'Sem responsável'}</p>

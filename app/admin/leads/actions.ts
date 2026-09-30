@@ -3,12 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { requirePermission } from '@/lib/auth';
+import { requireRole } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 
 export async function distributeUnassignedLeadsAction() {
-  const actor = await requirePermission('crm:assign');
+  const actor = await requireRole(['ADMIN', 'DIRECTOR']);
 
   const [unassignedLeads, users] = await Promise.all([
     db.lead.findMany({

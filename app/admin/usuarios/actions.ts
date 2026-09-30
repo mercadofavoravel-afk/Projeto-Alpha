@@ -23,6 +23,7 @@ const createSchema = z.object({
   acceptsLeads: z.boolean(),
   leadCapacity: z.number().int().min(1).max(500),
   serviceRegions: z.array(z.string().trim().min(2).max(80)).max(30),
+  managerId: z.string().cuid().nullable(),
 });
 
 function parseRegions(value: FormDataEntryValue | null) {
@@ -30,6 +31,20 @@ function parseRegions(value: FormDataEntryValue | null) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function parseManagerId(value: FormDataEntryValue | null) {
+  return String(value ?? '').trim() || null;
+}
+
+async function validManager(id: string | null) {
+  if (!id) return true;
+  return Boolean(
+    await db.user.findFirst({
+      where: { id, role: 'MANAGER', isActive: true },
+      select: { id: true },
+    }),
+  );
 }
 
 function done(result: string): never {
@@ -47,17 +62,29 @@ export async function createEmployee(formData: FormData) {
     acceptsLeads: formData.get('acceptsLeads') === 'true',
     leadCapacity: Number(formData.get('leadCapacity') || 30),
     serviceRegions: parseRegions(formData.get('serviceRegions')),
+    managerId: parseManagerId(formData.get('managerId')),
   });
   if (!parsed.success) done('invalid');
 
-  const { name, email, role, password, acceptsLeads, leadCapacity, serviceRegions } = parsed.data;
+  const { name, email, role, password, acceptsLeads, leadCapacity, serviceRegions, managerId } =
+    parsed.data;
   if (!canManageEmployeeRole(actor.role, role)) done('invalid');
+  if (role === 'CONSULTANT' && !(await validManager(managerId))) done('invalid');
   const passwordHash = await bcrypt.hash(password, 12);
 
   try {
     await db.$transaction(async (transaction) => {
       const user = await transaction.user.create({
-        data: { name, email, role, passwordHash, acceptsLeads, leadCapacity, serviceRegions },
+        data: {
+          name,
+          email,
+          role,
+          passwordHash,
+          acceptsLeads,
+          leadCapacity,
+          serviceRegions,
+          managerId: role === 'CONSULTANT' ? managerId : null,
+        },
       });
       await transaction.auditLog.create({
         data: {
@@ -85,6 +112,7 @@ export async function updateEmployee(formData: FormData) {
   const acceptsLeads = formData.get('acceptsLeads') === 'true';
   const leadCapacity = Number(formData.get('leadCapacity') || 30);
   const serviceRegions = parseRegions(formData.get('serviceRegions'));
+  const managerId = parseManagerId(formData.get('managerId'));
   if (
     typeof id !== 'string' ||
     typeof role !== 'string' ||
@@ -96,6 +124,9 @@ export async function updateEmployee(formData: FormData) {
 
   const target = await db.user.findUnique({ where: { id }, select: { role: true } });
   if (!target || !canManageEmployeeRole(actor.role, target.role)) done('invalid');
+  if (managerId && !z.string().cuid().safeParse(managerId).success) done('invalid');
+  if (managerId === id) done('invalid');
+  if (role === 'CONSULTANT' && !(await validManager(managerId))) done('invalid');
 
   await db.$transaction(async (transaction) => {
     await transaction.user.update({
@@ -110,8 +141,15 @@ export async function updateEmployee(formData: FormData) {
             ? leadCapacity
             : 30,
         serviceRegions,
+        managerId: role === 'CONSULTANT' ? managerId : null,
       },
     });
+    if (target.role === 'MANAGER' && (!active || role !== 'MANAGER')) {
+      await transaction.user.updateMany({
+        where: { managerId: id },
+        data: { managerId: null },
+      });
+    }
     if (!active || target.role !== role) {
       await transaction.session.deleteMany({ where: { userId: id } });
     }
@@ -127,7 +165,7 @@ export async function updateEmployee(formData: FormData) {
         entityType: 'User',
         entityId: id,
         userId: actor.id,
-        metadata: { role, active, acceptsLeads, leadCapacity, serviceRegions },
+        metadata: { role, active, acceptsLeads, leadCapacity, serviceRegions, managerId },
       },
     });
   });

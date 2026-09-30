@@ -162,6 +162,9 @@ model User {
   leadCapacity        Int                  @default(30)
   serviceRegions      String[]
   lastLeadAssignedAt  DateTime?
+  managerId           String?
+  manager             User?                @relation("ManagedConsultants", fields: [managerId], references: [id], onDelete: SetNull)
+  teamMembers         User[]               @relation("ManagedConsultants")
   passwordChangedAt   DateTime?
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
@@ -173,6 +176,7 @@ model User {
   @@index([role])
   @@index([isActive])
   @@index([acceptsLeads, isActive])
+  @@index([managerId])
 }
 
 model Neighborhood {

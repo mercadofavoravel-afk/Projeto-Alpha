@@ -300,6 +300,7 @@ export default async function ArticlePage({ params }: PageProps) {
               neighborhood={neighborhood}
               projectName={`Conteúdo: ${article.title}`}
               projectSlug={`artigo-${article.slug}`}
+              articleSlug={article.slug}
               source={createOrganicArticleSource(article.title, neighborhood)}
             />
           </div>

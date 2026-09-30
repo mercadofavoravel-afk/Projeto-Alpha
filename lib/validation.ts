@@ -11,6 +11,13 @@ export const leadSchema = z.object({
   message: z.string().trim().max(2000).optional(),
   typology: z.string().trim().min(2).max(120).optional(),
   source: z.string().trim().max(120).optional(),
+  articleSlug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(180)
+    .regex(/^[a-z0-9-]+$/)
+    .optional(),
   utmSource: z.string().trim().max(200).optional(),
   utmMedium: z.string().trim().max(200).optional(),
   utmCampaign: z.string().trim().max(200).optional(),

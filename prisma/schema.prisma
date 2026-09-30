@@ -385,6 +385,7 @@ model Lead {
   budgetMax    Decimal?      @db.Decimal(14, 2)
   message      String?
   source       String?
+  articleSlug  String?
   utmSource    String?
   utmMedium    String?
   utmCampaign  String?

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
-import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
+import { canViewUnassignedLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +73,7 @@ export default async function Page() {
   ] = await Promise.all([
     db.project.count(),
     db.lead.count({ where: leadScope }),
-    canViewAllLeads(user.role)
+    canViewUnassignedLeads(user.role)
       ? db.lead.count({ where: leadAssignmentWhere(user, 'unassigned') })
       : Promise.resolve(0),
     db.bookIngestion.count(),
@@ -144,7 +144,7 @@ export default async function Page() {
             <>
               <Link href="/admin/leads">CRM e leads</Link>
               <Link href="/admin/agenda">Follow-up e agenda</Link>
-              {canViewAllLeads(user.role) && (
+              {canViewUnassignedLeads(user.role) && (
                 <Link href="/admin/leads?assignment=unassigned">Distribuir leads</Link>
               )}
             </>
@@ -169,9 +169,13 @@ export default async function Page() {
         </div>
         <div className="kpi">
           <b>{leadCount}</b>
-          {canViewAllLeads(user.role) ? 'Leads' : 'Meus leads'}
+          {canViewUnassignedLeads(user.role)
+            ? 'Leads'
+            : user.role === 'MANAGER'
+              ? 'Leads da equipe'
+              : 'Meus leads'}
         </div>
-        {canViewAllLeads(user.role) && (
+        {canViewUnassignedLeads(user.role) && (
           <div className="kpi">
             <b>{unassignedCount}</b>Sem responsável
           </div>

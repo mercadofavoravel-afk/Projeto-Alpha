@@ -11,10 +11,12 @@ export function AssignmentForm({
   leadId,
   assignedToId,
   assignees,
+  allowUnassigned = true,
 }: {
   leadId: string;
   assignedToId: string | null;
   assignees: Assignee[];
+  allowUnassigned?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState(assignedToId ?? '');
@@ -48,7 +50,7 @@ export function AssignmentForm({
         value={selected}
         onChange={(event) => setSelected(event.target.value)}
       >
-        <option value="">Sem responsável: disponível para distribuição</option>
+        {allowUnassigned && <option value="">Sem responsável: disponível para distribuição</option>}
         {assignees.map((assignee) => (
           <option key={assignee.id} value={assignee.id}>
             {assignee.name || assignee.email} ({assignee.email})

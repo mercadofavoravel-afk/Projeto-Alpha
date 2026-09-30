@@ -7,7 +7,12 @@ import { summarizeLeadOrigins } from '@/lib/lead-origin-summary';
 import { leadPageHref, leadsPerPage, resolveLeadPage } from '@/lib/lead-pagination';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
-import { canViewAllLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
+import {
+  canViewAllLeads,
+  canViewUnassignedLeads,
+  leadAccessWhere,
+  leadAssignmentWhere,
+} from '@/lib/lead-access';
 import { distributeUnassignedLeadsAction } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +47,7 @@ export default async function LeadsPage({
   const params = await searchParams;
   const filters = parseLeadFilters(params);
   const { channel, campaign, status } = filters;
-  const assignment = canViewAllLeads(user.role) ? params.assignment : undefined;
+  const assignment = canViewUnassignedLeads(user.role) ? params.assignment : undefined;
   const where = {
     ...buildLeadWhere(filters),
     ...leadAccessWhere(user),
@@ -82,9 +87,11 @@ export default async function LeadsPage({
       <div className="eyebrow">CRM</div>
       <h1>Leads</h1>
       <p>
-        {canViewAllLeads(user.role)
+        {canViewUnassignedLeads(user.role)
           ? 'Visão da equipe e leads sem responsável.'
-          : 'Seus leads atribuídos.'}
+          : user.role === 'MANAGER'
+            ? 'Leads atribuídos a você e aos corretores vinculados à sua equipe.'
+            : 'Seus leads atribuídos.'}
       </p>
       {params.distribuidos !== undefined && (
         <div className="notice notice-success">
@@ -94,7 +101,7 @@ export default async function LeadsPage({
         </div>
       )}
 
-      {canViewAllLeads(user.role) && originSummary.total > 0 && (
+      {canViewUnassignedLeads(user.role) && originSummary.total > 0 && (
         <form action={distributeUnassignedLeadsAction} className="admin-card">
           <div className="head">
             <div>
@@ -148,7 +155,7 @@ export default async function LeadsPage({
             </select>
           </label>
 
-          {canViewAllLeads(user.role) && (
+          {canViewUnassignedLeads(user.role) && (
             <label>
               Distribuição
               <select defaultValue={assignment || ''} name="assignment">

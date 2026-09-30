@@ -20,27 +20,35 @@ export default async function Page({
 }) {
   const actor = await requireRole(['ADMIN', 'DIRECTOR']);
   const manageableRoles = actor.role === 'ADMIN' ? roleNames : salesRoleNames;
-  const users = await db.user.findMany({
-    where:
-      actor.role === 'DIRECTOR' ? { role: { in: ['MANAGER', 'CONSULTANT'] as UserRole[] } } : {},
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      _count: { select: { sessions: true } },
-      acceptsLeads: true,
-      leadCapacity: true,
-      serviceRegions: true,
-      assignedLeads: {
-        where: { status: { notIn: ['WON', 'LOST'] } },
-        select: { id: true },
+  const [users, managers] = await Promise.all([
+    db.user.findMany({
+      where:
+        actor.role === 'DIRECTOR' ? { role: { in: ['MANAGER', 'CONSULTANT'] as UserRole[] } } : {},
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        _count: { select: { sessions: true } },
+        acceptsLeads: true,
+        leadCapacity: true,
+        serviceRegions: true,
+        managerId: true,
+        assignedLeads: {
+          where: { status: { notIn: ['WON', 'LOST'] } },
+          select: { id: true },
+        },
       },
-    },
-  });
+    }),
+    db.user.findMany({
+      where: { role: 'MANAGER', isActive: true },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: 'asc' },
+    }),
+  ]);
   const { result } = await searchParams;
   const notices: Record<string, string> = {
     created: 'Profissional cadastrado.',
@@ -55,7 +63,8 @@ export default async function Page({
       <h1>Usuários e acessos</h1>
       <p>
         Diretores gerenciam a equipe comercial, conteúdos e indicadores. Gerentes distribuem leads;
-        corretores veem somente os leads atribuídos a eles.
+        gerentes veem os próprios leads e os de seus corretores; corretores veem somente os leads
+        atribuídos a eles.
       </p>
       {result && <p role="status">{notices[result] || 'Não foi possível salvar.'}</p>}
       <form action={createEmployee} className="admin-card form-grid">
@@ -102,6 +111,17 @@ export default async function Page({
         <label className="full">
           Regiões de atendimento
           <input name="serviceRegions" placeholder="Barra da Tijuca, Ipanema, Centro" />
+        </label>
+        <label>
+          Gerente responsável pelo corretor
+          <select name="managerId" defaultValue="">
+            <option value="">Sem gerente vinculado</option>
+            {managers.map((manager) => (
+              <option key={manager.id} value={manager.id}>
+                {manager.name || manager.email}
+              </option>
+            ))}
+          </select>
         </label>
         <p>
           Compartilhe a senha com o profissional por um canal seguro; ele poderá trocá-la após
@@ -175,6 +195,18 @@ export default async function Page({
                         placeholder="Regiões separadas por vírgula"
                         aria-label={`Regiões de ${u.name || u.email}`}
                       />
+                      <select
+                        name="managerId"
+                        defaultValue={u.managerId || ''}
+                        aria-label={`Gerente responsável por ${u.name || u.email}`}
+                      >
+                        <option value="">Sem gerente vinculado</option>
+                        {managers.map((manager) => (
+                          <option key={manager.id} value={manager.id}>
+                            {manager.name || manager.email}
+                          </option>
+                        ))}
+                      </select>
                       <select
                         name="isActive"
                         defaultValue={u.isActive ? 'true' : 'false'}

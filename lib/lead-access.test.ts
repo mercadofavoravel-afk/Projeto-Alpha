@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { canAccessLead, leadAccessWhere, leadAssignmentWhere } from './lead-access';
+import {
+  canAccessLead,
+  canViewUnassignedLeads,
+  leadAccessWhere,
+  leadAssignmentWhere,
+} from './lead-access';
 
 describe('acesso aos leads da equipe', () => {
   const consultant = { id: 'broker-1', role: 'CONSULTANT' as const };
@@ -12,11 +17,23 @@ describe('acesso aos leads da equipe', () => {
     expect(canAccessLead(consultant, null)).toBe(false);
   });
 
-  it('permite à gestão visualizar inclusive leads ainda sem responsável', () => {
-    for (const role of ['ADMIN', 'DIRECTOR', 'MANAGER'] as const) {
+  it('permite à administração e direção visualizar inclusive leads sem responsável', () => {
+    for (const role of ['ADMIN', 'DIRECTOR'] as const) {
       expect(leadAccessWhere({ id: 'manager-1', role })).toEqual({});
       expect(canAccessLead({ id: 'manager-1', role }, null)).toBe(true);
+      expect(canViewUnassignedLeads(role)).toBe(true);
     }
+  });
+
+  it('limita o gerente aos próprios leads e aos corretores vinculados a ele', () => {
+    const manager = { id: 'manager-1', role: 'MANAGER' as const };
+    expect(leadAccessWhere(manager)).toEqual({
+      OR: [{ assignedToId: manager.id }, { assignedTo: { managerId: manager.id } }],
+    });
+    expect(canAccessLead(manager, null)).toBe(false);
+    expect(canAccessLead(manager, 'broker-1', manager.id)).toBe(true);
+    expect(canAccessLead(manager, 'broker-2', 'manager-2')).toBe(false);
+    expect(canViewUnassignedLeads(manager.role)).toBe(false);
   });
 
   it('não amplia a visão de perfis editoriais ou somente leitura', () => {
@@ -28,8 +45,8 @@ describe('acesso aos leads da equipe', () => {
 
   it('filtra a fila de distribuição apenas para a gestão', () => {
     const manager = { id: 'manager-1', role: 'MANAGER' as const };
-    expect(leadAssignmentWhere(manager, 'unassigned')).toEqual({ assignedToId: null });
-    expect(leadAssignmentWhere(manager, 'assigned')).toEqual({ assignedToId: { not: null } });
+    expect(leadAssignmentWhere(manager, 'unassigned')).toEqual({});
+    expect(leadAssignmentWhere(manager, 'assigned')).toEqual({});
     expect(leadAssignmentWhere(manager, 'invalid')).toEqual({});
     expect(leadAssignmentWhere(consultant, 'unassigned')).toEqual({});
     expect(leadAssignmentWhere({ id: 'director-1', role: 'DIRECTOR' }, 'unassigned')).toEqual({

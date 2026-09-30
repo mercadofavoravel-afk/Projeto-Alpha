@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { leadAccessWhere } from '@/lib/lead-access';
 
 const assignmentSchema = z.object({ assignedToId: z.string().cuid().nullable() });
 
@@ -16,17 +17,32 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   const { id } = await context.params;
   const targetId = parsed.data.assignedToId;
+  if (auth.user.role === 'MANAGER' && !targetId)
+    return NextResponse.json(
+      { error: 'A gestão central controla a fila sem responsável.' },
+      { status: 403 },
+    );
   if (targetId) {
     const target = await db.user.findFirst({
-      where: { id: targetId, isActive: true, role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+      where:
+        auth.user.role === 'MANAGER'
+          ? {
+              id: targetId,
+              isActive: true,
+              OR: [
+                { id: auth.user.id, role: 'MANAGER' },
+                { role: 'CONSULTANT', managerId: auth.user.id },
+              ],
+            }
+          : { id: targetId, isActive: true, role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
       select: { id: true },
     });
     if (!target) return NextResponse.json({ error: 'Profissional indisponível.' }, { status: 400 });
   }
 
   const result = await db.$transaction(async (transaction) => {
-    const lead = await transaction.lead.findUnique({
-      where: { id },
+    const lead = await transaction.lead.findFirst({
+      where: { id, ...leadAccessWhere(auth.user) },
       select: { id: true, assignedToId: true },
     });
     if (!lead) return null;

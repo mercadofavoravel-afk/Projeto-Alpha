@@ -13,6 +13,8 @@ describe('RBAC', () => {
   });
   it('permite CRM ao consultor', () => {
     expect(hasPermission('CONSULTANT', 'crm:write')).toBe(true);
+    expect(hasPermission('CONSULTANT', 'analytics:read')).toBe(false);
+    expect(hasPermission('MANAGER', 'analytics:read')).toBe(false);
   });
   it('mantém viewer somente leitura', () => {
     expect(hasPermission('VIEWER', 'catalog:write')).toBe(false);

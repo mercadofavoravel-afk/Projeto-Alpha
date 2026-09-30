@@ -32,11 +32,11 @@ export const permissions = {
     'media:write',
   ],
 
-  MANAGER: ['admin:access', 'crm:read', 'crm:write', 'crm:assign', 'crm:reports', 'analytics:read'],
+  MANAGER: ['admin:access', 'crm:read', 'crm:write', 'crm:assign', 'crm:reports'],
 
   EDITOR: ['admin:access', 'catalog:write', 'catalog:publish', 'analytics:read', 'media:write'],
 
-  CONSULTANT: ['admin:access', 'crm:read', 'crm:write', 'analytics:read'],
+  CONSULTANT: ['admin:access', 'crm:read', 'crm:write'],
 
   MARKETING: [
     'admin:access',

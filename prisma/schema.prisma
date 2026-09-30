@@ -107,6 +107,34 @@ enum RecommendationStatus {
   EXPIRED
 }
 
+enum ContentPlanStatus {
+  DRAFT
+  READY
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum PublicationChannel {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  TIKTOK
+  KWAI
+  BLOG
+}
+
+enum PublicationStatus {
+  PENDING
+  READY
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  CANCELED
+}
+
 model AuditLog {
   id         String   @id @default(cuid())
   action     String
@@ -130,15 +158,21 @@ model User {
   passwordHash        String
   role                UserRole             @default(EDITOR)
   isActive            Boolean              @default(true)
+  acceptsLeads        Boolean              @default(false)
+  leadCapacity        Int                  @default(30)
+  serviceRegions      String[]
+  lastLeadAssignedAt  DateTime?
   passwordChangedAt   DateTime?
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
   assignedLeads       Lead[]               @relation("AssignedLeads")
+  contentPlans        ContentPlan[]         @relation("ContentPlanCreator")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
   @@index([role])
   @@index([isActive])
+  @@index([acceptsLeads, isActive])
 }
 
 model Neighborhood {
@@ -381,6 +415,52 @@ model Article {
   publishedAt    DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  contentPlans   ContentPlan[]
+}
+
+model ContentPlan {
+  id             String            @id @default(cuid())
+  title          String
+  contentType    String
+  topic          String?
+  targetAudience String?
+  region         String?
+  projectName    String?
+  caption        String?
+  cta            String
+  destinationUrl String
+  assetUrl       String?
+  scheduledAt    DateTime
+  status         ContentPlanStatus @default(DRAFT)
+  articleId      String?
+  article        Article?          @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdById    String
+  createdBy      User              @relation("ContentPlanCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  publications   PublicationAttempt[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([articleId])
+  @@index([createdById])
+}
+
+model PublicationAttempt {
+  id           String            @id @default(cuid())
+  contentPlanId String
+  contentPlan  ContentPlan       @relation(fields: [contentPlanId], references: [id], onDelete: Cascade)
+  channel      PublicationChannel
+  status       PublicationStatus @default(PENDING)
+  externalUrl  String?
+  errorMessage String?
+  publishedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([contentPlanId, channel])
+  @@index([channel, status])
+  @@index([publishedAt])
 }
 
 model RecommendationProfile {

@@ -20,7 +20,17 @@ const createSchema = z.object({
     .transform((email) => email.toLowerCase()),
   role: z.enum(employeeRoles),
   password: z.string().min(12).max(128),
+  acceptsLeads: z.boolean(),
+  leadCapacity: z.number().int().min(1).max(500),
+  serviceRegions: z.array(z.string().trim().min(2).max(80)).max(30),
 });
+
+function parseRegions(value: FormDataEntryValue | null) {
+  return String(value ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 function done(result: string): never {
   revalidatePath('/admin/usuarios');
@@ -34,16 +44,21 @@ export async function createEmployee(formData: FormData) {
     email: formData.get('email'),
     role: formData.get('role'),
     password: formData.get('password'),
+    acceptsLeads: formData.get('acceptsLeads') === 'true',
+    leadCapacity: Number(formData.get('leadCapacity') || 30),
+    serviceRegions: parseRegions(formData.get('serviceRegions')),
   });
   if (!parsed.success) done('invalid');
 
-  const { name, email, role, password } = parsed.data;
+  const { name, email, role, password, acceptsLeads, leadCapacity, serviceRegions } = parsed.data;
   if (!canManageEmployeeRole(actor.role, role)) done('invalid');
   const passwordHash = await bcrypt.hash(password, 12);
 
   try {
     await db.$transaction(async (transaction) => {
-      const user = await transaction.user.create({ data: { name, email, role, passwordHash } });
+      const user = await transaction.user.create({
+        data: { name, email, role, passwordHash, acceptsLeads, leadCapacity, serviceRegions },
+      });
       await transaction.auditLog.create({
         data: {
           action: 'user.created',
@@ -67,6 +82,9 @@ export async function updateEmployee(formData: FormData) {
   const id = formData.get('userId');
   const role = formData.get('role');
   const active = formData.get('isActive') === 'true';
+  const acceptsLeads = formData.get('acceptsLeads') === 'true';
+  const leadCapacity = Number(formData.get('leadCapacity') || 30);
+  const serviceRegions = parseRegions(formData.get('serviceRegions'));
   if (
     typeof id !== 'string' ||
     typeof role !== 'string' ||
@@ -82,7 +100,17 @@ export async function updateEmployee(formData: FormData) {
   await db.$transaction(async (transaction) => {
     await transaction.user.update({
       where: { id },
-      data: { role: role as UserRole, isActive: active },
+      data: {
+        role: role as UserRole,
+        isActive: active,
+        acceptsLeads:
+          active && acceptsLeads && ['DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role),
+        leadCapacity:
+          Number.isInteger(leadCapacity) && leadCapacity > 0 && leadCapacity <= 500
+            ? leadCapacity
+            : 30,
+        serviceRegions,
+      },
     });
     if (!active || target.role !== role) {
       await transaction.session.deleteMany({ where: { userId: id } });
@@ -99,7 +127,7 @@ export async function updateEmployee(formData: FormData) {
         entityType: 'User',
         entityId: id,
         userId: actor.id,
-        metadata: { role, active },
+        metadata: { role, active, acceptsLeads, leadCapacity, serviceRegions },
       },
     });
   });

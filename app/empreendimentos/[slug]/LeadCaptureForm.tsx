@@ -15,14 +15,17 @@ type LeadCaptureFormProps = {
 };
 
 function getSessionKey() {
-  let key = localStorage.getItem('alpha_session_key');
-
-  if (!key) {
-    key = crypto.randomUUID();
-    localStorage.setItem('alpha_session_key', key);
+  try {
+    let key = localStorage.getItem('alpha_session_key');
+    if (!key) {
+      key = crypto.randomUUID();
+      localStorage.setItem('alpha_session_key', key);
+    }
+    return key;
+  } catch {
+    // Analytics storage is optional; a private browser must still be able to send a lead.
+    return undefined;
   }
-
-  return key;
 }
 
 function pushLeadSubmittedEvent({

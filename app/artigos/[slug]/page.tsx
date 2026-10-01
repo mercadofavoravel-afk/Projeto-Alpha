@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
+import { TrackArticleView } from '@/components/TrackArticleView';
 import { db } from '@/lib/db';
 import { articleContentBlocks, articleContentSegments } from '@/lib/article-links';
 import { createOrganicArticleSource, resolveArticleNeighborhood } from '@/lib/article-origin';
@@ -137,6 +138,7 @@ export default async function ArticlePage({ params }: PageProps) {
   return (
     <>
       <Header />
+      <TrackArticleView articleSlug={article.slug} />
 
       <main>
         <section className="collections-hero">

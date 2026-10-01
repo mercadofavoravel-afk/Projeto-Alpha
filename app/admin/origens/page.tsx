@@ -3,11 +3,13 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { leadAccessWhere } from '@/lib/lead-access';
+import { summarizeArticleLeads } from '@/lib/article-lead-summary';
 import { organicContentFromSource } from '@/lib/lead-origin';
 
 export const dynamic = 'force-dynamic';
 
 type LeadOrigin = {
+  articleSlug: string | null;
   source: string | null;
   utmSource: string | null;
   utmMedium: string | null;
@@ -65,6 +67,7 @@ export default async function OrigensPage() {
   const leads: LeadOrigin[] = await db.lead.findMany({
     where: { ...leadAccessWhere(user), createdAt: { gte: since } },
     select: {
+      articleSlug: true,
       source: true,
       utmSource: true,
       utmMedium: true,
@@ -82,12 +85,22 @@ export default async function OrigensPage() {
       return platform ? `${platform} / ${medium || 'meio não informado'}` : null;
     }),
   );
-  const articles = topCounts(leads.map((lead) => organicContentFromSource(lead.source)));
+  const articleLeads = summarizeArticleLeads(leads);
+  const publishedArticles = await db.article.findMany({
+    where: {
+      slug: { in: articleLeads.flatMap((row) => (row.slug ? [row.slug] : [])) },
+      publishStatus: 'PUBLISHED',
+    },
+    select: { slug: true, title: true },
+  });
+  const publishedBySlug = new Map(
+    publishedArticles.map((article) => [article.slug, article.title]),
+  );
   const campaigns = topCounts(leads.map((lead) => lead.utmCampaign));
   const regions = topCounts(leads.map((lead) => lead.neighborhood));
   const identified = leads.filter((lead) => Boolean(lead.utmSource?.trim())).length;
-  const contentLeads = leads.filter((lead) =>
-    Boolean(organicContentFromSource(lead.source)),
+  const contentLeads = leads.filter(
+    (lead) => Boolean(lead.articleSlug) || Boolean(organicContentFromSource(lead.source)),
   ).length;
 
   return (
@@ -119,7 +132,38 @@ export default async function OrigensPage() {
       )}
 
       <Summary title="Plataformas e meios identificados" rows={platforms} />
-      <Summary title="Artigos que originaram cadastros" rows={articles} />
+      <section className="admin-card">
+        <h2>Artigos que originaram cadastros</h2>
+        {articleLeads.length === 0 ? (
+          <p>Ainda não há cadastros atribuídos a artigos neste período.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Leads</th>
+                </tr>
+              </thead>
+              <tbody>
+                {articleLeads.map((row) => (
+                  <tr key={row.slug ? `slug:${row.slug}` : `legacy:${row.label}`}>
+                    <td>
+                      {row.slug && publishedBySlug.has(row.slug) ? (
+                        <Link href={`/artigos/${row.slug}`}>{publishedBySlug.get(row.slug)}</Link>
+                      ) : (
+                        row.label
+                      )}
+                      {!row.slug && ' (registro antigo sem URL do artigo)'}
+                    </td>
+                    <td>{row.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
       <Summary title="Campanhas identificadas" rows={campaigns} />
       <Summary title="Regiões de interesse" rows={regions} />
 
@@ -131,7 +175,10 @@ export default async function OrigensPage() {
           nesses casos, a origem permanece sem identificação. Google Imagens, Google Maps e Busca
           podem compartilhar referências, então só distinguimos Maps quando o endereço de origem
           identifica Maps. Para mostrar visitas, pesquisas, impressões e cliques, ainda é preciso
-          integrar dados do GA4 e do Google Search Console.
+          integrar dados do GA4 e do Google Search Console. O artigo é identificado pelo slug
+          gravado com o lead; cadastros antigos usam o título disponível na origem e podem não ter
+          link. As tabelas exibem até 10 itens e consideram os 5.000 cadastros mais recentes dos
+          últimos 90 dias.
         </p>
         <Link href="/admin/leads">Abrir leads no CRM</Link>
       </section>

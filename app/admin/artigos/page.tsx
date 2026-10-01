@@ -30,6 +30,16 @@ const trackedRegions = [
   'Centro',
   'Porto Maravilha',
 ] as const;
+const dailyTargetPerRegion = 10;
+
+function saoPauloDate(date: Date) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
 
 export default async function ArticlesAdminPage({
   searchParams,
@@ -66,6 +76,7 @@ export default async function ArticlesAdminPage({
       (!selectedStatus || article.publishStatus === selectedStatus) &&
       (!selectedRegion || regions[index] === selectedRegion),
   );
+  const today = saoPauloDate(new Date());
   const regionCounts = availableRegions.map((region) => ({
     region,
     count: regions.filter((value) => value === region).length,
@@ -77,6 +88,9 @@ export default async function ArticlesAdminPage({
     ).length,
     published: articles.filter(
       (article, index) => regions[index] === region && article.publishStatus === 'PUBLISHED',
+    ).length,
+    createdToday: articles.filter(
+      (article, index) => regions[index] === region && saoPauloDate(article.createdAt) === today,
     ).length,
   }));
 
@@ -111,12 +125,18 @@ export default async function ArticlesAdminPage({
 
       <section className="panel">
         <h2>Artigos por região</h2>
-        <p>Região inferida do título e da categoria; confira o conteúdo antes de publicar.</p>
+        <p>
+          Meta solicitada: {dailyTargetPerRegion} artigos completos por região por dia (
+          {trackedRegions.length * dailyTargetPerRegion} no total). A coluna de hoje conta registros
+          criados na data de São Paulo, inclusive os já publicados; não comprova revisão editorial.
+          Região inferida do título e da categoria; confira o conteúdo antes de publicar.
+        </p>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Região</th>
+                <th>Criados hoje / meta</th>
                 <th>Rascunhos</th>
                 <th>Em revisão</th>
                 <th>Publicados</th>
@@ -124,9 +144,12 @@ export default async function ArticlesAdminPage({
               </tr>
             </thead>
             <tbody>
-              {regionCounts.map(({ region, count, draft, review, published }) => (
+              {regionCounts.map(({ region, count, draft, review, published, createdToday }) => (
                 <tr key={region}>
                   <td>{region}</td>
+                  <td>
+                    {createdToday} / {dailyTargetPerRegion}
+                  </td>
                   <td>{draft}</td>
                   <td>{review}</td>
                   <td>{published}</td>

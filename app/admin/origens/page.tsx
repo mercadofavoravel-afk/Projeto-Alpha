@@ -165,23 +165,36 @@ export default async function OrigensPage() {
               <tr>
                 <th>Artigo publicado</th>
                 <th>Visualizações</th>
-                <th>Origem mais frequente</th>
+                <th>Origem das visualizações</th>
                 <th>Leads</th>
               </tr>
             </thead>
             <tbody>
               {articleRows.map((article) => {
                 const result = viewsBySlug.get(article.slug);
-                const topSource = [...(result?.sources || new Map<string, number>())].sort(
-                  (a, b) => b[1] - a[1],
-                )[0];
+                const sources = [...(result?.sources || new Map<string, number>())].sort(
+                  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'),
+                );
                 return (
                   <tr key={article.slug}>
                     <td>
                       <Link href={`/artigos/${article.slug}`}>{article.title}</Link>
                     </td>
                     <td>{result?.views || 0}</td>
-                    <td>{topSource ? `${topSource[0]} (${topSource[1]})` : 'Sem dados'}</td>
+                    <td>
+                      {sources.length === 0 ? (
+                        'Sem dados'
+                      ) : (
+                        <details>
+                          <summary>{`${sources[0][0]} (${sources[0][1]})`}</summary>
+                          <ul>
+                            {sources.map(([source, count]) => (
+                              <li key={source}>{`${source}: ${count}`}</li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                    </td>
                     <td>{leadsBySlug.get(article.slug) || 0}</td>
                   </tr>
                 );

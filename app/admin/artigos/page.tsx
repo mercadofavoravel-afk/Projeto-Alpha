@@ -92,6 +92,13 @@ export default async function ArticlesAdminPage({
     createdToday: articles.filter(
       (article, index) => regions[index] === region && saoPauloDate(article.createdAt) === today,
     ).length,
+    publishedToday: articles.filter(
+      (article, index) =>
+        regions[index] === region &&
+        article.publishStatus === 'PUBLISHED' &&
+        article.publishedAt &&
+        saoPauloDate(article.publishedAt) === today,
+    ).length,
   }));
 
   const suggestedTopics = [
@@ -127,16 +134,18 @@ export default async function ArticlesAdminPage({
         <h2>Artigos por região</h2>
         <p>
           Meta solicitada: {dailyTargetPerRegion} artigos completos por região por dia (
-          {trackedRegions.length * dailyTargetPerRegion} no total). A coluna de hoje conta registros
-          criados na data de São Paulo, inclusive os já publicados; não comprova revisão editorial.
-          Região inferida do título e da categoria; confira o conteúdo antes de publicar.
+          {trackedRegions.length * dailyTargetPerRegion} no total). As colunas de hoje usam a data
+          de São Paulo. Artigos criados podem continuar em rascunho; só a coluna de publicações
+          mostra o volume colocado no ar, sem atestar a revisão editorial. Região inferida do título
+          e da categoria; confira o conteúdo antes de publicar.
         </p>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Região</th>
-                <th>Criados hoje / meta</th>
+                <th>Criados hoje</th>
+                <th>Publicados hoje / meta</th>
                 <th>Rascunhos</th>
                 <th>Em revisão</th>
                 <th>Publicados</th>
@@ -144,18 +153,21 @@ export default async function ArticlesAdminPage({
               </tr>
             </thead>
             <tbody>
-              {regionCounts.map(({ region, count, draft, review, published, createdToday }) => (
-                <tr key={region}>
-                  <td>{region}</td>
-                  <td>
-                    {createdToday} / {dailyTargetPerRegion}
-                  </td>
-                  <td>{draft}</td>
-                  <td>{review}</td>
-                  <td>{published}</td>
-                  <td>{count}</td>
-                </tr>
-              ))}
+              {regionCounts.map(
+                ({ region, count, draft, review, published, createdToday, publishedToday }) => (
+                  <tr key={region}>
+                    <td>{region}</td>
+                    <td>{createdToday}</td>
+                    <td>
+                      {publishedToday} / {dailyTargetPerRegion}
+                    </td>
+                    <td>{draft}</td>
+                    <td>{review}</td>
+                    <td>{published}</td>
+                    <td>{count}</td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

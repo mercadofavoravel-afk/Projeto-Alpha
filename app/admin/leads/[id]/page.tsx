@@ -217,7 +217,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
             {previousPath && (
               <div>
-                <dt>Página anterior neste domínio</dt>
+                <dt>Página de referência no domínio</dt>
                 <dd>{previousPath}</dd>
               </div>
             )}

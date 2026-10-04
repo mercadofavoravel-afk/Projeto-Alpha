@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { db } from '@/lib/db';
-import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { createContentLeadSource } from '@/lib/lead-origin';
 import { projectImageFromMedia } from '@/lib/project-image';
 import { alphaAssetPath } from '@/lib/public-path';
 import { createMetadata } from '@/lib/seo';
@@ -497,7 +497,7 @@ export default async function BairroPage({ params }: PageProps) {
                 projectName={`Curadoria em ${neighborhood.name}`}
                 projectSlug={`bairro-${neighborhood.slug}`}
                 neighborhood={neighborhood.name}
-                source={createOrganicLeadSource({
+                source={createContentLeadSource({
                   content: `Guia de bairro: ${neighborhood.name}`,
                   region: neighborhood.name,
                 })}

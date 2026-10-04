@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { leadAccessWhere } from '@/lib/lead-access';
 import { summarizeArticleLeads } from '@/lib/article-lead-summary';
-import { organicContentFromSource } from '@/lib/lead-origin';
+import { contentFromSource } from '@/lib/lead-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,7 +119,7 @@ export default async function OrigensPage() {
   const regions = topCounts(leads.map((lead) => lead.neighborhood));
   const identified = leads.filter((lead) => Boolean(lead.utmSource?.trim())).length;
   const contentLeads = leads.filter(
-    (lead) => Boolean(lead.articleSlug) || Boolean(organicContentFromSource(lead.source)),
+    (lead) => Boolean(lead.articleSlug) || Boolean(contentFromSource(lead.source)),
   ).length;
 
   return (

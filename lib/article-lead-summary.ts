@@ -1,4 +1,4 @@
-import { organicContentFromSource } from './lead-origin';
+import { contentFromSource } from './lead-origin';
 
 type LeadArticleOrigin = { articleSlug: string | null; source: string | null };
 
@@ -8,7 +8,7 @@ export function summarizeArticleLeads(leads: LeadArticleOrigin[]) {
 
   for (const lead of leads) {
     const slug = lead.articleSlug?.trim() || null;
-    const label = slug || organicContentFromSource(lead.source);
+    const label = slug || contentFromSource(lead.source);
     if (!label) continue;
     const key = slug ? `slug:${slug}` : `legacy:${label}`;
     const current = counts.get(key);

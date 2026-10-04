@@ -186,8 +186,9 @@ export function LeadCaptureForm({
       <div className="concierge-form-intro">
         <span>Solicitação de atendimento</span>
         <p>
-          Preencha seus dados para receber informações comerciais e disponibilidade deste
-          empreendimento.
+          {articleSlug
+            ? 'Preencha seus dados para falar sobre este conteúdo e receber opções relacionadas ao seu interesse.'
+            : 'Preencha seus dados para receber informações comerciais e disponibilidade deste empreendimento.'}
         </p>
       </div>
 

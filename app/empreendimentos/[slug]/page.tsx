@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { JsonLd } from '@/components/JsonLd';
 import { TrackProjectView } from '@/components/TrackProjectView';
 import { db } from '@/lib/db';
-import { createOrganicLeadSource } from '@/lib/lead-origin';
+import { createContentLeadSource } from '@/lib/lead-origin';
 import { projectDisplay } from '@/lib/project-display';
 import {
   projectAreaLabel,
@@ -447,7 +447,7 @@ export default async function Page({ params }: PageProps) {
                 projectSlug={project.slug}
                 neighborhood={project.neighborhood}
                 typologies={project.types}
-                source={createOrganicLeadSource({
+                source={createContentLeadSource({
                   content: `Empreendimento: ${project.name}`,
                   region: project.neighborhood,
                 })}

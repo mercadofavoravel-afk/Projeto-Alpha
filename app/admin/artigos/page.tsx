@@ -30,7 +30,7 @@ const trackedRegions = [
   'Centro',
   'Porto Maravilha',
 ] as const;
-const dailyTargetPerRegion = 10;
+const editorialReferencePerRegion = 10;
 
 function saoPauloDate(date: Date) {
   return new Intl.DateTimeFormat('en-CA', {
@@ -133,11 +133,11 @@ export default async function ArticlesAdminPage({
       <section className="panel">
         <h2>Artigos por região</h2>
         <p>
-          Meta solicitada: {dailyTargetPerRegion} artigos completos por região por dia (
-          {trackedRegions.length * dailyTargetPerRegion} no total). As colunas de hoje usam a data
-          de São Paulo. Artigos criados podem continuar em rascunho; só a coluna de publicações
-          mostra o volume colocado no ar, sem atestar a revisão editorial. Região inferida do título
-          e da categoria; confira o conteúdo antes de publicar.
+          Referência para o acervo: até {editorialReferencePerRegion} pautas distintas por região. A
+          publicação depende de pesquisa, revisão e links verificados, sem quota diária. As colunas
+          de hoje usam a data de São Paulo. Artigos criados podem continuar em rascunho; publicação
+          não comprova revisão editorial. Região inferida do título e da categoria; confira o
+          conteúdo antes de publicar.
         </p>
         <div className="table-wrap">
           <table>
@@ -145,7 +145,7 @@ export default async function ArticlesAdminPage({
               <tr>
                 <th>Região</th>
                 <th>Criados hoje</th>
-                <th>Publicados hoje / meta</th>
+                <th>Publicados hoje</th>
                 <th>Rascunhos</th>
                 <th>Em revisão</th>
                 <th>Publicados</th>
@@ -158,9 +158,7 @@ export default async function ArticlesAdminPage({
                   <tr key={region}>
                     <td>{region}</td>
                     <td>{createdToday}</td>
-                    <td>
-                      {publishedToday} / {dailyTargetPerRegion}
-                    </td>
+                    <td>{publishedToday}</td>
                     <td>{draft}</td>
                     <td>{review}</td>
                     <td>{published}</td>

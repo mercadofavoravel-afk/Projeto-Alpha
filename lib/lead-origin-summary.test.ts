@@ -23,7 +23,7 @@ describe('CRM origin summary', () => {
 
     expect(summary).toEqual({
       total: 140,
-      organicLeads: 115,
+      contentLeads: 115,
       contentCount: 1,
       regionCount: 2,
       byContent: [{ label: 'Comprar em Ipanema', count: 115 }],

@@ -23,6 +23,20 @@ function matchesHost(hostname: string, domain: string) {
   return hostname === domain || hostname.endsWith(`.${domain}`);
 }
 
+// Preserve the page on our own site that sent a reader to Alpha, without
+// retaining query strings (which may contain personal or campaign data).
+export function sameSiteReferrerPath(referrer: string, siteOrigin: string) {
+  try {
+    const url = new URL(referrer);
+    const ownHost = new URL(siteOrigin).hostname.toLowerCase().replace(/^www\./, '');
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    if (!['https:', 'http:'].includes(url.protocol) || host !== ownHost) return undefined;
+    return url.pathname.slice(0, 300);
+  } catch {
+    return undefined;
+  }
+}
+
 // A referrer identifies a platform, never the visitor's search query or an ad campaign.
 export function sourceFromReferrer(referrer: string, siteOrigin: string): CampaignUtms {
   try {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { sourceFromReferrer } from './campaign-attribution';
+import { sameSiteReferrerPath, sourceFromReferrer } from './campaign-attribution';
 
 const site = 'https://imoveisdealtopadraorio.com.br';
 
@@ -35,5 +35,24 @@ describe('sourceFromReferrer', () => {
     expect(sourceFromReferrer('https://imoveisdealtopadraorio.com.br/alpha/', site)).toEqual({});
     expect(sourceFromReferrer('https://google.com.example.com/search', site)).toEqual({});
     expect(sourceFromReferrer('', site)).toEqual({});
+  });
+});
+
+describe('sameSiteReferrerPath', () => {
+  it('records a page on the official site without its query or fragment', () => {
+    expect(
+      sameSiteReferrerPath(
+        'https://www.imoveisdealtopadraorio.com.br/guia-ipanema/?email=x#cta',
+        site,
+      ),
+    ).toBe('/guia-ipanema/');
+  });
+
+  it('does not mistake an outside host for an official page', () => {
+    expect(
+      sameSiteReferrerPath('https://imoveisdealtopadraorio.com.br.evil.com/post', site),
+    ).toBeUndefined();
+    expect(sameSiteReferrerPath('https://www.google.com/search?q=alpha', site)).toBeUndefined();
+    expect(sameSiteReferrerPath('', site)).toBeUndefined();
   });
 });

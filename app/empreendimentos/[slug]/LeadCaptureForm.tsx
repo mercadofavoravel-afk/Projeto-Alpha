@@ -30,6 +30,7 @@ function getSessionKey() {
 
 function pushLeadSubmittedEvent({
   projectSlug,
+  articleSlug,
   neighborhood,
   objective,
   source,
@@ -38,6 +39,7 @@ function pushLeadSubmittedEvent({
   utmCampaign,
 }: {
   projectSlug: string;
+  articleSlug?: string;
   neighborhood: string;
   objective: string;
   source?: string;
@@ -54,6 +56,7 @@ function pushLeadSubmittedEvent({
     event: 'lead_submit',
     lead_source: source || `empreendimento:${projectSlug}`,
     project_slug: projectSlug,
+    article_slug: articleSlug,
     neighborhood,
     lead_objective: objective,
     utm_source: utmSource,
@@ -124,6 +127,7 @@ export function LeadCaptureForm({
 
       pushLeadSubmittedEvent({
         projectSlug,
+        articleSlug,
         neighborhood,
         objective,
         source,
@@ -145,6 +149,7 @@ export function LeadCaptureForm({
           metadata: {
             leadId: data.leadId,
             projectSlug,
+            articleSlug,
             neighborhood,
             objective,
             utmSource: campaignUtms.utmSource,

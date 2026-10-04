@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { getCampaignUtms } from '@/lib/campaign-attribution';
+import { getCampaignUtms, sameSiteReferrerPath } from '@/lib/campaign-attribution';
 import { alphaPath } from '@/lib/public-path';
 
 export function TrackArticleView({ articleSlug }: { articleSlug: string }) {
@@ -28,7 +28,11 @@ export function TrackArticleView({ articleSlug }: { articleSlug: string }) {
         name: 'article_view',
         path: location.pathname,
         sessionKey,
-        metadata: { articleSlug, ...campaign },
+        metadata: {
+          articleSlug,
+          ...campaign,
+          referrerPath: sameSiteReferrerPath(document.referrer, location.origin),
+        },
       }),
     }).catch(() => undefined);
   }, [articleSlug]);

@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 type ArticleViewCount = {
   path: string;
   source: string;
+  referrerPath: string | null;
   views: number;
 };
 
@@ -82,10 +83,11 @@ export default async function OrigensPage() {
     }),
     db.$queryRaw<ArticleViewCount[]>(Prisma.sql`
       SELECT "path", COALESCE(NULLIF(LOWER(TRIM(metadata->>'utmSource')), ''), 'não identificada') AS source,
+        NULLIF(metadata->>'referrerPath', '') AS "referrerPath",
         COUNT(*)::int AS views
       FROM "AnalyticsEvent"
       WHERE name = 'article_view' AND "createdAt" >= ${since} AND "path" IS NOT NULL
-      GROUP BY "path", source
+      GROUP BY "path", source, "referrerPath"
     `),
   ]);
 
@@ -101,13 +103,26 @@ export default async function OrigensPage() {
   const leadsBySlug = new Map<string, number>(
     articleLeads.flatMap((row) => (row.slug ? [[row.slug, row.count] as const] : [])),
   );
-  const viewsBySlug = new Map<string, { views: number; sources: Map<string, number> }>();
+  const viewsBySlug = new Map<
+    string,
+    { views: number; sources: Map<string, number>; previousPages: Map<string, number> }
+  >();
   for (const row of articleViews) {
     const slug = /^\/(?:alpha\/)?artigos\/([a-z0-9-]+)\/?$/.exec(row.path)?.[1];
     if (!slug || !publishedBySlug.has(slug)) continue;
-    const current = viewsBySlug.get(slug) || { views: 0, sources: new Map<string, number>() };
+    const current = viewsBySlug.get(slug) || {
+      views: 0,
+      sources: new Map<string, number>(),
+      previousPages: new Map<string, number>(),
+    };
     current.views += row.views;
     current.sources.set(row.source, (current.sources.get(row.source) || 0) + row.views);
+    if (row.referrerPath?.startsWith('/') && !row.referrerPath.startsWith('//')) {
+      current.previousPages.set(
+        row.referrerPath,
+        (current.previousPages.get(row.referrerPath) || 0) + row.views,
+      );
+    }
     viewsBySlug.set(slug, current);
   }
   const articleRows = articles.sort(
@@ -156,8 +171,10 @@ export default async function OrigensPage() {
         <p>
           A partir da ativação do rastreamento, contamos carregamentos de cada página de artigo.
           Reaberturas da mesma página contam novamente; estes números não representam pessoas
-          únicas. A origem é identificada por UTM ou site referenciador quando o navegador os
-          informa.
+          únicas. A plataforma vem de UTM ou site referenciador quando o navegador os informa. A
+          página de referência registra apenas o caminho informado pelo navegador neste domínio. Ela
+          pode continuar a mesma durante a navegação entre artigos e não comprova a plataforma de
+          busca que trouxe o visitante.
         </p>
         <div className="table-wrap">
           <table className="table">
@@ -165,7 +182,8 @@ export default async function OrigensPage() {
               <tr>
                 <th>Artigo publicado</th>
                 <th>Visualizações</th>
-                <th>Origem das visualizações</th>
+                <th>Plataforma das visualizações</th>
+                <th>Página de referência no domínio</th>
                 <th>Leads</th>
               </tr>
             </thead>
@@ -175,6 +193,9 @@ export default async function OrigensPage() {
                 const sources = [...(result?.sources || new Map<string, number>())].sort(
                   (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'),
                 );
+                const previousPages = [
+                  ...(result?.previousPages || new Map<string, number>()),
+                ].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'));
                 return (
                   <tr key={article.slug}>
                     <td>
@@ -190,6 +211,20 @@ export default async function OrigensPage() {
                           <ul>
                             {sources.map(([source, count]) => (
                               <li key={source}>{`${source}: ${count}`}</li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                    </td>
+                    <td>
+                      {previousPages.length === 0 ? (
+                        'Não informada'
+                      ) : (
+                        <details>
+                          <summary>{`${previousPages[0][0]} (${previousPages[0][1]})`}</summary>
+                          <ul>
+                            {previousPages.map(([path, count]) => (
+                              <li key={path}>{`${path}: ${count}`}</li>
                             ))}
                           </ul>
                         </details>

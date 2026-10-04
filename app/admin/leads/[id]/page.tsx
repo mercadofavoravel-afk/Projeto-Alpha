@@ -77,6 +77,26 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     notFound();
   }
 
+  const submission = await db.analyticsEvent.findFirst({
+    where: {
+      name: 'lead_submitted',
+      metadata: { path: ['leadId'], equals: lead.id },
+    },
+    select: { metadata: true },
+    orderBy: { createdAt: 'desc' },
+  });
+  const metadata = submission?.metadata;
+  const previousPage =
+    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+      ? metadata.referrerPath
+      : null;
+  const previousPath =
+    typeof previousPage === 'string' &&
+    previousPage.startsWith('/') &&
+    !previousPage.startsWith('//')
+      ? previousPage
+      : null;
+
   const assignees = hasPermission(user.role, 'crm:assign')
     ? await db.user.findMany({
         where:
@@ -192,6 +212,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                 <dd>
                   <Link href={`/artigos/${lead.articleSlug}`}>{lead.articleSlug}</Link>
                 </dd>
+              </div>
+            )}
+
+            {previousPath && (
+              <div>
+                <dt>Página de referência no domínio</dt>
+                <dd>{previousPath}</dd>
               </div>
             )}
 

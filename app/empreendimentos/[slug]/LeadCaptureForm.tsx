@@ -1,6 +1,6 @@
 'use client';
 
-import { getCampaignUtms } from '@/lib/campaign-attribution';
+import { getCampaignUtms, sameSiteReferrerPath } from '@/lib/campaign-attribution';
 import { alphaPath } from '@/lib/public-path';
 
 import { FormEvent, useState } from 'react';
@@ -152,6 +152,7 @@ export function LeadCaptureForm({
             articleSlug,
             neighborhood,
             objective,
+            referrerPath: sameSiteReferrerPath(document.referrer, window.location.origin),
             utmSource: campaignUtms.utmSource,
             utmMedium: campaignUtms.utmMedium,
             utmCampaign: campaignUtms.utmCampaign,

@@ -19,7 +19,7 @@ describe('lead filters', () => {
     expect(parseLeadFilters({ channel: 'unknown', status: 'INVALID' })).toEqual({});
   });
 
-  it('builds a safe CRM query for organic leads', () => {
+  it('uses measured UTM medium for the organic filter', () => {
     expect(
       buildLeadWhere({
         channel: 'organic',
@@ -27,14 +27,18 @@ describe('lead filters', () => {
         status: 'QUALIFIED',
       }),
     ).toEqual({
-      source: {
-        startsWith: 'Orgânico | ',
-      },
+      utmMedium: 'organic',
       status: 'QUALIFIED',
       utmCampaign: {
         contains: 'ipanema',
         mode: 'insensitive',
       },
+    });
+  });
+
+  it('keeps a campaign term when the campaign channel is selected', () => {
+    expect(buildLeadWhere({ channel: 'campaign', campaign: 'ipanema' })).toEqual({
+      utmCampaign: { contains: 'ipanema', mode: 'insensitive' },
     });
   });
 

@@ -41,8 +41,8 @@ export function resolveArticleNeighborhood(category: string | null, articleText:
   return categoryRegion === 'Rio de Janeiro' ? getArticleNeighborhood(articleText) : categoryRegion;
 }
 
-export function createOrganicArticleSource(title: string, neighborhood: string) {
-  const prefix = 'Orgânico | artigo: ';
+export function createArticleLeadSource(title: string, neighborhood: string) {
+  const prefix = 'Conteúdo | artigo: ';
   const suffix = ` | região: ${neighborhood}`;
   const titleLimit = Math.max(0, 120 - prefix.length - suffix.length);
 

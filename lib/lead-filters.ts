@@ -51,21 +51,18 @@ export function buildLeadWhere(filters: LeadFilters): Prisma.LeadWhereInput {
       : {}),
     ...(filters.channel === 'organic'
       ? {
-          source: {
-            startsWith: 'Orgânico | ',
-          },
+          utmMedium: 'organic',
         }
       : {}),
-    ...(filters.channel === 'campaign'
+    ...(filters.channel === 'campaign' && !filters.campaign
       ? {
-          utmSource: {
+          utmCampaign: {
             not: null,
           },
         }
       : {}),
     ...(filters.channel === 'direct'
       ? {
-          source: null,
           utmSource: null,
         }
       : {}),

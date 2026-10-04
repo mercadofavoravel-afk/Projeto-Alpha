@@ -4,12 +4,16 @@ import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
 import { canViewUnassignedLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
+import { channelFromLead } from '@/lib/lead-channel';
+import { isArticleSource } from '@/lib/lead-origin';
 
 export const dynamic = 'force-dynamic';
 
 type LeadMetric = {
+  articleSlug: string | null;
   source: string | null;
   utmSource: string | null;
+  utmMedium: string | null;
   utmCampaign: string | null;
   status: string;
 };
@@ -30,14 +34,6 @@ function countBy(values: string[]) {
     .map(([label, count]) => ({ label, count }))
     .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
     .slice(0, 5);
-}
-
-function channelFromLead(lead: LeadMetric) {
-  if (lead.source?.startsWith('Orgânico | artigo:')) {
-    return 'Orgânico (artigos)';
-  }
-
-  return lead.utmSource || lead.source || 'Direto';
 }
 
 function statusLabel(status: string) {
@@ -80,8 +76,10 @@ export default async function Page() {
     db.lead.findMany({
       where: leadScope,
       select: {
+        articleSlug: true,
         source: true,
         utmSource: true,
+        utmMedium: true,
         utmCampaign: true,
         status: true,
       },
@@ -119,8 +117,8 @@ export default async function Page() {
       : Promise.resolve(0),
   ]);
 
-  const organicLeads = recentLeads.filter((lead: LeadMetric) =>
-    lead.source?.startsWith('Orgânico | artigo:'),
+  const articleLeads = recentLeads.filter(
+    (lead: LeadMetric) => Boolean(lead.articleSlug) || isArticleSource(lead.source),
   ).length;
   const channels = countBy(recentLeads.map((lead: LeadMetric) => channelFromLead(lead)));
   const campaigns = countBy(
@@ -181,7 +179,7 @@ export default async function Page() {
           </div>
         )}
         <div className="kpi">
-          <b>{organicLeads}</b>Leads orgânicos
+          <b>{articleLeads}</b>Leads de artigos
         </div>
         <div className="kpi">
           <b>{books}</b>Books

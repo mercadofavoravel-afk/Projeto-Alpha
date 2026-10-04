@@ -8,8 +8,9 @@ import { Header } from '@/components/Header';
 import { TrackArticleView } from '@/components/TrackArticleView';
 import { db } from '@/lib/db';
 import { articleContentBlocks, articleContentSegments } from '@/lib/article-links';
-import { createOrganicArticleSource, resolveArticleNeighborhood } from '@/lib/article-origin';
+import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
 import { alphaAssetPath } from '@/lib/public-path';
+import { relatedProjectsForArticle } from '@/lib/related-projects';
 import { createMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -75,7 +76,12 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const [relatedArticles, featuredProjects] = await Promise.all([
+  const neighborhood = resolveArticleNeighborhood(
+    article.category,
+    [article.title, article.excerpt, article.content].filter(Boolean).join(' '),
+  );
+
+  const [relatedArticles, publishedProjects] = await Promise.all([
     db.article.findMany({
       where: {
         publishStatus: 'PUBLISHED',
@@ -97,8 +103,11 @@ export default async function ArticlePage({ params }: PageProps) {
       where: {
         publishStatus: 'PUBLISHED',
       },
-      include: {
-        neighborhood: true,
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        neighborhood: { select: { name: true, slug: true } },
       },
       orderBy: [
         {
@@ -108,20 +117,20 @@ export default async function ArticlePage({ params }: PageProps) {
           updatedAt: 'desc',
         },
       ],
-      take: 3,
     }),
   ]);
+
+  const featuredProjects = relatedProjectsForArticle(
+    article.title,
+    neighborhood,
+    publishedProjects,
+  );
 
   const neighborhoods = Array.from(
     new Map(
       featuredProjects.map((project) => [project.neighborhood.slug, project.neighborhood]),
     ).values(),
   ).slice(0, 3);
-
-  const neighborhood = resolveArticleNeighborhood(
-    article.category,
-    [article.title, article.excerpt, article.content].filter(Boolean).join(' '),
-  );
 
   const blocks = articleContentBlocks(article.content);
   const renderInline = (value: string) =>
@@ -303,7 +312,7 @@ export default async function ArticlePage({ params }: PageProps) {
               projectName={`Conteúdo: ${article.title}`}
               projectSlug={`artigo-${article.slug}`}
               articleSlug={article.slug}
-              source={createOrganicArticleSource(article.title, neighborhood)}
+              source={createArticleLeadSource(article.title, neighborhood)}
             />
           </div>
         </section>

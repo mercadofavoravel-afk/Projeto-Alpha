@@ -132,9 +132,9 @@ export default async function LeadsPage({
             Canal de captação
             <select defaultValue={channel || ''} name="channel">
               <option value="">Todos os canais</option>
-              <option value="organic">Orgânico de conteúdos</option>
+              <option value="organic">Busca orgânica identificada</option>
               <option value="campaign">Campanhas com UTM</option>
-              <option value="direct">Direto / sem origem</option>
+              <option value="direct">Sem plataforma identificada</option>
             </select>
           </label>
 
@@ -185,7 +185,7 @@ export default async function LeadsPage({
       <section className="admin-card">
         <div className="head">
           <div>
-            <div className="eyebrow">Origem orgânica</div>
+            <div className="eyebrow">Conteúdo de origem</div>
             <h2>Conteúdos e regiões que geram leads</h2>
           </div>
           <span>
@@ -195,8 +195,8 @@ export default async function LeadsPage({
 
         <div className="kpis">
           <div className="kpi">
-            <b>{originSummary.organicLeads}</b>
-            Leads orgânicos
+            <b>{originSummary.contentLeads}</b>
+            Leads de conteúdo
           </div>
           <div className="kpi">
             <b>{originSummary.contentCount}</b>
@@ -208,7 +208,7 @@ export default async function LeadsPage({
           </div>
         </div>
 
-        {originSummary.organicLeads > 0 ? (
+        {originSummary.contentLeads > 0 ? (
           <div className="editor-grid">
             <div>
               <div className="eyebrow">Conteúdos</div>
@@ -232,7 +232,7 @@ export default async function LeadsPage({
             </div>
           </div>
         ) : (
-          <p>Os primeiros leads orgânicos aparecerão aqui com conteúdo e região.</p>
+          <p>Os primeiros leads de conteúdo aparecerão aqui com conteúdo e região.</p>
         )}
       </section>
 

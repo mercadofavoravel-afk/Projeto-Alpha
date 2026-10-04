@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  createOrganicArticleSource,
+  createArticleLeadSource,
   getArticleNeighborhood,
   resolveArticleNeighborhood,
 } from './article-origin';
@@ -35,8 +35,8 @@ describe('article origin', () => {
   });
 
   it('creates a compact CRM source label', () => {
-    expect(createOrganicArticleSource('Investir em Ipanema', 'Ipanema')).toBe(
-      'Orgânico | artigo: Investir em Ipanema | região: Ipanema',
+    expect(createArticleLeadSource('Investir em Ipanema', 'Ipanema')).toBe(
+      'Conteúdo | artigo: Investir em Ipanema | região: Ipanema',
     );
   });
 });

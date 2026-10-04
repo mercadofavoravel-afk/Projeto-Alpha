@@ -1,4 +1,4 @@
-import { organicContentFromSource } from './lead-origin';
+import { contentFromSource } from './lead-origin';
 
 type LeadOriginGroup = {
   source: string | null;
@@ -17,14 +17,14 @@ export function summarizeLeadOrigins(groups: LeadOriginGroup[]) {
   const byContent = new Map<string, number>();
   const byRegion = new Map<string, number>();
   let total = 0;
-  let organicLeads = 0;
+  let contentLeads = 0;
 
   for (const group of groups) {
     total += group._count._all;
-    const content = organicContentFromSource(group.source);
+    const content = contentFromSource(group.source);
     if (!content) continue;
 
-    organicLeads += group._count._all;
+    contentLeads += group._count._all;
     byContent.set(content, (byContent.get(content) ?? 0) + group._count._all);
     const region = group.neighborhood || 'Rio de Janeiro';
     byRegion.set(region, (byRegion.get(region) ?? 0) + group._count._all);
@@ -32,7 +32,7 @@ export function summarizeLeadOrigins(groups: LeadOriginGroup[]) {
 
   return {
     total,
-    organicLeads,
+    contentLeads,
     contentCount: byContent.size,
     regionCount: byRegion.size,
     byContent: topFive(byContent),

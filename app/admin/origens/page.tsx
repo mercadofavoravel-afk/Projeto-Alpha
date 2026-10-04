@@ -172,9 +172,9 @@ export default async function OrigensPage() {
           A partir da ativação do rastreamento, contamos carregamentos de cada página de artigo.
           Reaberturas da mesma página contam novamente; estes números não representam pessoas
           únicas. A plataforma vem de UTM ou site referenciador quando o navegador os informa. A
-          página de referência registra apenas o caminho informado pelo navegador neste domínio.
-          Ela pode continuar a mesma durante a navegação entre artigos e não comprova a plataforma
-          de busca que trouxe o visitante.
+          página de referência registra apenas o caminho informado pelo navegador neste domínio. Ela
+          pode continuar a mesma durante a navegação entre artigos e não comprova a plataforma de
+          busca que trouxe o visitante.
         </p>
         <div className="table-wrap">
           <table className="table">

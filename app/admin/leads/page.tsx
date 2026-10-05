@@ -14,6 +14,7 @@ import {
   leadAssignmentWhere,
 } from '@/lib/lead-access';
 import { distributeUnassignedLeadsAction } from './actions';
+import { LeadRiskAlerts } from './LeadRiskAlerts';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +101,8 @@ export default async function LeadsPage({
             : 'Nenhum lead foi distribuído. Confira disponibilidade, capacidade e regiões da equipe.'}
         </div>
       )}
+
+      <LeadRiskAlerts user={user} />
 
       {canViewUnassignedLeads(user.role) && originSummary.total > 0 && (
         <form action={distributeUnassignedLeadsAction} className="admin-card">

@@ -400,10 +400,23 @@ model Lead {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   activities   LeadActivity[]
+  externalReceipts ExternalLeadReceipt[]
 
   @@index([status])
   @@index([assignedToId])
   @@index([createdAt])
+}
+
+model ExternalLeadReceipt {
+  id         String   @id @default(cuid())
+  provider   String
+  externalId String
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([provider, externalId])
+  @@index([leadId])
 }
 
 model Article {

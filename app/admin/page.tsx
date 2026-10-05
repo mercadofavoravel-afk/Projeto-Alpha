@@ -6,6 +6,7 @@ import { hasPermission } from '@/lib/permissions';
 import { canViewUnassignedLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
 import { channelFromLead } from '@/lib/lead-channel';
 import { isArticleSource } from '@/lib/lead-origin';
+import { LeadRiskAlerts } from './leads/LeadRiskAlerts';
 
 export const dynamic = 'force-dynamic';
 
@@ -160,6 +161,8 @@ export default async function Page() {
           )}
         </div>
       </section>
+
+      {hasPermission(user.role, 'crm:read') && <LeadRiskAlerts user={user} />}
 
       <div className="kpis">
         <div className="kpi">

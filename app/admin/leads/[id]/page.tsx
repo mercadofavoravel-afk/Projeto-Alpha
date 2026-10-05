@@ -8,6 +8,8 @@ import { LeadStatusForm } from './LeadStatusForm';
 import { AssignmentForm } from './AssignmentForm';
 import { leadAccessWhere } from '@/lib/lead-access';
 import { hasPermission } from '@/lib/permissions';
+import { FollowUpActions } from '@/app/admin/agenda/FollowUpActions';
+import { createWhatsAppHref, getFollowUpMessage } from '@/lib/whatsapp-follow-up';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +37,7 @@ function formatDate(value: Date | null | undefined) {
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(value);
@@ -77,26 +80,6 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     notFound();
   }
 
-  const submission = await db.analyticsEvent.findFirst({
-    where: {
-      name: 'lead_submitted',
-      metadata: { path: ['leadId'], equals: lead.id },
-    },
-    select: { metadata: true },
-    orderBy: { createdAt: 'desc' },
-  });
-  const metadata = submission?.metadata;
-  const previousPage =
-    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
-      ? metadata.referrerPath
-      : null;
-  const previousPath =
-    typeof previousPage === 'string' &&
-    previousPage.startsWith('/') &&
-    !previousPage.startsWith('//')
-      ? previousPage
-      : null;
-
   const assignees = hasPermission(user.role, 'crm:assign')
     ? await db.user.findMany({
         where:
@@ -113,6 +96,14 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         orderBy: { name: 'asc' },
       })
     : [];
+
+  const pendingFollowUps =
+    lead.status === 'WON' || lead.status === 'LOST'
+      ? []
+      : lead.activities
+          .filter((activity) => activity.dueAt && !activity.completedAt)
+          .sort((a, b) => a.dueAt!.getTime() - b.dueAt!.getTime())
+          .slice(0, 5);
 
   return (
     <>
@@ -215,13 +206,6 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               </div>
             )}
 
-            {previousPath && (
-              <div>
-                <dt>Página de referência no domínio</dt>
-                <dd>{previousPath}</dd>
-              </div>
-            )}
-
             <div>
               <dt>UTM Source</dt>
               <dd>{lead.utmSource || '—'}</dd>
@@ -249,6 +233,40 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         <section className="admin-card">
           <div className="eyebrow">Mensagem</div>
           <p>{lead.message}</p>
+        </section>
+      )}
+
+      {pendingFollowUps.length > 0 && (
+        <section className="admin-card">
+          <div className="eyebrow">Próximos passos</div>
+          <h2>Acompanhamentos pendentes</h2>
+          <p>Registre o contato e o resultado no histórico ao concluir cada acompanhamento.</p>
+          <div className="timeline">
+            {pendingFollowUps.map((activity) => (
+              <article className="timeline-item" key={activity.id}>
+                <div className="timeline-marker" />
+                <div>
+                  <strong>
+                    {activityLabel(activity.type)} · {formatDate(activity.dueAt)}
+                  </strong>
+                  {activity.note && <p>{activity.note}</p>}
+                  {hasPermission(user.role, 'crm:write') && (
+                    <FollowUpActions
+                      activityId={activity.id}
+                      href={
+                        activity.type === 'WHATSAPP'
+                          ? createWhatsAppHref(
+                              lead.phone,
+                              getFollowUpMessage(activity.note, lead.name, lead.neighborhood),
+                            )
+                          : undefined
+                      }
+                    />
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       )}
 

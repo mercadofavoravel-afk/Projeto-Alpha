@@ -13,14 +13,35 @@ describe('leadRiskQueries', () => {
     }
   });
 
-  it('uses elapsed time and recorded completion, not scheduled messages, for the alerts', () => {
+  it('uses actual contact activity or completed work, not just a scheduled message', () => {
     const queries = leadRiskQueries({ id: 'admin-1', role: 'ADMIN' }, now);
     expect(queries.unassigned?.AND).toContainEqual({
       assignedToId: null,
       createdAt: { lt: new Date('2026-10-05T17:45:00.000Z') },
     });
     expect(queries.stalled?.AND).toContainEqual({
-      activities: { none: { completedAt: { gte: new Date('2026-10-03T18:00:00.000Z') } } },
+      activities: {
+        none: {
+          OR: [
+            { completedAt: { gte: new Date('2026-10-03T18:00:00.000Z') } },
+            {
+              type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] },
+              dueAt: null,
+              createdAt: { gte: new Date('2026-10-03T18:00:00.000Z') },
+            },
+          ],
+        },
+      },
+    });
+    expect(queries.firstContact?.AND).toContainEqual({
+      activities: {
+        none: {
+          OR: [
+            { completedAt: { not: null } },
+            { type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] }, dueAt: null },
+          ],
+        },
+      },
     });
   });
 

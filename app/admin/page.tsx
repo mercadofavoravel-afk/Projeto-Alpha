@@ -4,26 +4,17 @@ import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
 import { canViewUnassignedLeads, leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
-import { channelFromLead } from '@/lib/lead-channel';
-import { isArticleSource } from '@/lib/lead-origin';
 import { LeadRiskAlerts } from './leads/LeadRiskAlerts';
+import { crmDayWindow } from '@/lib/crm-day';
 
 export const dynamic = 'force-dynamic';
 
 type LeadMetric = {
-  articleSlug: string | null;
   source: string | null;
   utmSource: string | null;
-  utmMedium: string | null;
   utmCampaign: string | null;
   status: string;
 };
-
-function startOfDay(value: Date) {
-  const date = new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
 
 function countBy(values: string[]) {
   return Array.from(
@@ -35,6 +26,14 @@ function countBy(values: string[]) {
     .map(([label, count]) => ({ label, count }))
     .sort((first, second) => second.count - first.count || first.label.localeCompare(second.label))
     .slice(0, 5);
+}
+
+function channelFromLead(lead: LeadMetric) {
+  if (lead.source?.startsWith('Orgânico | artigo:')) {
+    return 'Orgânico (artigos)';
+  }
+
+  return lead.utmSource || lead.source || 'Direto';
 }
 
 function statusLabel(status: string) {
@@ -53,9 +52,7 @@ function statusLabel(status: string) {
 export default async function Page() {
   const user = await requireUser();
   const leadScope = leadAccessWhere(user);
-  const today = startOfDay(new Date());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const { today, tomorrow } = crmDayWindow(new Date());
 
   const [
     projects,
@@ -77,10 +74,8 @@ export default async function Page() {
     db.lead.findMany({
       where: leadScope,
       select: {
-        articleSlug: true,
         source: true,
         utmSource: true,
-        utmMedium: true,
         utmCampaign: true,
         status: true,
       },
@@ -118,8 +113,8 @@ export default async function Page() {
       : Promise.resolve(0),
   ]);
 
-  const articleLeads = recentLeads.filter(
-    (lead: LeadMetric) => Boolean(lead.articleSlug) || isArticleSource(lead.source),
+  const organicLeads = recentLeads.filter((lead: LeadMetric) =>
+    lead.source?.startsWith('Orgânico | artigo:'),
   ).length;
   const channels = countBy(recentLeads.map((lead: LeadMetric) => channelFromLead(lead)));
   const campaigns = countBy(
@@ -182,7 +177,7 @@ export default async function Page() {
           </div>
         )}
         <div className="kpi">
-          <b>{articleLeads}</b>Leads de artigos
+          <b>{organicLeads}</b>Leads orgânicos
         </div>
         <div className="kpi">
           <b>{books}</b>Books

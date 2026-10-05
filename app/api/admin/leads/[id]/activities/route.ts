@@ -43,7 +43,14 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     select: { id: true },
   });
   if (!lead) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
-  const activity = await db.leadActivity.create({ data: { ...parsed.data, leadId: id } });
+  // A dated activity is a future reminder. A contact without a due date records work done now.
+  const completedAt =
+    !parsed.data.dueAt && ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'].includes(parsed.data.type)
+      ? new Date()
+      : undefined;
+  const activity = await db.leadActivity.create({
+    data: { ...parsed.data, leadId: id, completedAt },
+  });
   await audit('lead.activity_created', 'Lead', id, auth.user.id, { type: parsed.data.type });
 
   return NextResponse.json(activity, { status: 201 });

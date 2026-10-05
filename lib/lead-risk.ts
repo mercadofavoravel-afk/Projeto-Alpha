@@ -6,6 +6,7 @@ type Viewer = { id: string; role: UserRole };
 
 export const firstContactMinutes = 15;
 export const stalledHours = 48;
+const contactTypes = ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'];
 
 export function leadRiskQueries(viewer: Viewer, now: Date): Record<string, Prisma.LeadWhereInput> {
   const firstContactCutoff = new Date(now.getTime() - firstContactMinutes * 60_000);
@@ -25,7 +26,13 @@ export function leadRiskQueries(viewer: Viewer, now: Date): Record<string, Prism
       AND: [
         scope,
         { status: 'NEW', assignedToId: { not: null }, createdAt: { lt: firstContactCutoff } },
-        { activities: { none: { completedAt: { not: null } } } },
+        {
+          activities: {
+            none: {
+              OR: [{ completedAt: { not: null } }, { type: { in: contactTypes }, dueAt: null }],
+            },
+          },
+        },
       ],
     },
     overdueFollowUp: {
@@ -42,7 +49,16 @@ export function leadRiskQueries(viewer: Viewer, now: Date): Record<string, Prism
           status: { in: ['CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED'] },
           createdAt: { lt: stalledCutoff },
         },
-        { activities: { none: { completedAt: { gte: stalledCutoff } } } },
+        {
+          activities: {
+            none: {
+              OR: [
+                { completedAt: { gte: stalledCutoff } },
+                { type: { in: contactTypes }, dueAt: null, createdAt: { gte: stalledCutoff } },
+              ],
+            },
+          },
+        },
       ],
     },
   };

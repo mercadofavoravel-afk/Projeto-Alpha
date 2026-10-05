@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 type FollowUpActionsProps = {
   activityId: string;
   href?: string;
-  leadHref: string;
+  leadHref?: string;
 };
 
 export function FollowUpActions({ activityId, href, leadHref }: FollowUpActionsProps) {
@@ -46,11 +46,11 @@ export function FollowUpActions({ activityId, href, leadHref }: FollowUpActionsP
         <a className="btn" href={href} rel="noreferrer" target="_blank">
           Preparar mensagem
         </a>
-      ) : (
+      ) : leadHref ? (
         <a className="btn" href={alphaPath(leadHref)}>
           Abrir lead
         </a>
-      )}{' '}
+      ) : null}{' '}
       <button className="btn" disabled={saving} onClick={markAsCompleted} type="button">
         {saving ? 'Registrando...' : 'Concluir acompanhamento'}
       </button>

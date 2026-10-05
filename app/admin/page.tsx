@@ -7,6 +7,7 @@ import { canViewUnassignedLeads, leadAccessWhere, leadAssignmentWhere } from '@/
 import { channelFromLead } from '@/lib/lead-channel';
 import { isArticleSource } from '@/lib/lead-origin';
 import { LeadRiskAlerts } from './leads/LeadRiskAlerts';
+import { crmDayWindow } from '@/lib/crm-day';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,12 +19,6 @@ type LeadMetric = {
   utmCampaign: string | null;
   status: string;
 };
-
-function startOfDay(value: Date) {
-  const date = new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
 
 function countBy(values: string[]) {
   return Array.from(
@@ -53,9 +48,7 @@ function statusLabel(status: string) {
 export default async function Page() {
   const user = await requireUser();
   const leadScope = leadAccessWhere(user);
-  const today = startOfDay(new Date());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const { today, tomorrow } = crmDayWindow(new Date());
 
   const [
     projects,

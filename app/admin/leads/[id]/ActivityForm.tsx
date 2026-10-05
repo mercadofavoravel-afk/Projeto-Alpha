@@ -100,6 +100,10 @@ export function ActivityForm({ leadId }: { leadId: string }) {
           value={dueAt}
           onChange={(event) => setDueAt(event.target.value)}
         />
+        <small>
+          Deixe em branco ao registrar uma ligação, mensagem, e-mail ou visita já realizada. Informe
+          uma data para criar um lembrete futuro.
+        </small>
       </div>
 
       <button className="btn" type="submit" disabled={loading}>

@@ -37,11 +37,24 @@ export async function PATCH(_: Request, { params }: RouteContext) {
     return NextResponse.json({ ok: true, alreadyCompleted: true });
   }
 
-  const result = await db.leadActivity.updateMany({
-    where: { id, completedAt: null, lead: leadAccessWhere(auth.user) },
-    data: {
-      completedAt: new Date(),
-    },
+  const completedAt = new Date();
+  const result = await db.$transaction(async (transaction) => {
+    const updated = await transaction.leadActivity.updateMany({
+      where: { id, completedAt: null, lead: leadAccessWhere(auth.user) },
+      data: { completedAt },
+    });
+    if (updated.count > 0) {
+      await transaction.auditLog.create({
+        data: {
+          action: 'lead.activity_completed',
+          entityType: 'LeadActivity',
+          entityId: id,
+          userId: auth.user.id,
+          metadata: { completedAt: completedAt.toISOString() },
+        },
+      });
+    }
+    return updated;
   });
 
   if (result.count === 0)

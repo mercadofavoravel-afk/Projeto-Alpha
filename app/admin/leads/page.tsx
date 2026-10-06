@@ -4,6 +4,8 @@ import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
 import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { summarizeLeadOrigins } from '@/lib/lead-origin-summary';
+import { summarizeUnassignedCoverage } from '@/lib/lead-coverage';
+import type { DistributionCandidate } from '@/lib/lead-distribution';
 import { leadPageHref, leadsPerPage, resolveLeadPage } from '@/lib/lead-pagination';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
@@ -70,6 +72,45 @@ export default async function LeadsPage({
     _count: { _all: true },
   });
   const originSummary = summarizeLeadOrigins(originGroups);
+  const coverage = canViewUnassignedLeads(user.role)
+    ? await Promise.all([
+        db.lead.groupBy({
+          by: ['neighborhood'],
+          where: { assignedToId: null, status: { notIn: ['WON', 'LOST'] } },
+          _count: { _all: true },
+          _min: { createdAt: true },
+        }),
+        db.user.findMany({
+          where: {
+            isActive: true,
+            acceptsLeads: true,
+            role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+          },
+          select: {
+            id: true,
+            leadCapacity: true,
+            serviceRegions: true,
+            lastLeadAssignedAt: true,
+            _count: {
+              select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
+            },
+          },
+        }),
+      ]).then(([groups, users]) =>
+        summarizeUnassignedCoverage(
+          groups,
+          users.map(
+            (professional): DistributionCandidate => ({
+              id: professional.id,
+              activeLeadCount: professional._count.assignedLeads,
+              leadCapacity: professional.leadCapacity,
+              serviceRegions: professional.serviceRegions,
+              lastLeadAssignedAt: professional.lastLeadAssignedAt,
+            }),
+          ),
+        ),
+      )
+    : null;
   const { page, totalPages, skip } = resolveLeadPage(params.page, originSummary.total);
   const leads = await db.lead.findMany({
     where,
@@ -104,7 +145,73 @@ export default async function LeadsPage({
 
       <LeadRiskAlerts user={user} />
 
-      {canViewUnassignedLeads(user.role) && originSummary.total > 0 && (
+      {coverage && (
+        <section className="admin-card">
+          <div className="head">
+            <div>
+              <div className="eyebrow">Cobertura da equipe</div>
+              <h2>Leads sem responsável por região</h2>
+              <p>Fila aberta da empresa, independentemente dos filtros desta página.</p>
+            </div>
+            <Link className="btn btn-ghost" href="/admin/usuarios">
+              Gerenciar equipe
+            </Link>
+          </div>
+          <div className="kpis">
+            <div className="kpi">
+              <b>{coverage.total}</b>
+              Leads aguardando distribuição
+            </div>
+            <div className="kpi">
+              <b>{coverage.withoutCoverage}</b>
+              Sem profissional elegível
+            </div>
+          </div>
+          {coverage.total > 0 ? (
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Região</th>
+                    <th>Na fila</th>
+                    <th>Mais antigo</th>
+                    <th>Profissionais disponíveis</th>
+                    <th>Vagas livres</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {coverage.regions.map((region) => (
+                    <tr key={region.region}>
+                      <td>{region.region}</td>
+                      <td>{region.count}</td>
+                      <td>
+                        {region.oldestAt
+                          ? new Intl.DateTimeFormat('pt-BR', {
+                              dateStyle: 'short',
+                              timeZone: 'America/Sao_Paulo',
+                            }).format(region.oldestAt)
+                          : '—'}
+                      </td>
+                      <td>{region.availableProfessionals || 'Sem cobertura'}</td>
+                      <td>{region.freeCapacity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>Não há leads abertos sem responsável.</p>
+          )}
+          {coverage.withoutCoverage > 0 && (
+            <p>
+              Cadastre um profissional para a região ou confirme com a equipe quem pode atendê-la.
+              Revise manualmente os leads antigos antes do contato.
+            </p>
+          )}
+        </section>
+      )}
+
+      {coverage && coverage.total > 0 && (
         <form action={distributeUnassignedLeadsAction} className="admin-card">
           <div className="head">
             <div>

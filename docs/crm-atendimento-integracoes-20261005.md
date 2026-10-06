@@ -21,6 +21,12 @@ Esta alteração prepara o receptor, mas **não configura a conta Google Ads, ne
 
 A integração direta de formulários instantâneos da Meta precisa de aplicativo e Página autorizados, assinatura de `leadgen`, escopos/permissões aprovados, verificação da assinatura do webhook, obtenção dos dados pelo Graph API com token no servidor e deduplicação pelo identificador do lead. O webhook costuma entregar um identificador, não todos os campos do cliente. O [exemplo oficial da Meta](https://github.com/fbsamples/lead-ads-webhook-sample) demonstra o recebimento e a busca subsequente. **Não há conexão Meta ativa nesta alteração.** Cliques de Instagram para o site são uma rota distinta e podem ser rastreados por UTMs no formulário do Alpha.
 
+### Receptor preparado em 06/10/2026
+
+O endpoint `/alpha/api/integrations/meta/leads` verifica o token de callback no GET e a assinatura HMAC SHA-256 do corpo no POST. Aceita apenas notificações `leadgen` de Páginas autorizadas, consulta os dados pelo Graph API com token no servidor, exige nome e telefone, deduplica por `leadgen_id`, cria a tarefa de primeiro atendimento e tenta atribuir por região e capacidade. Se faltar profissional elegível, deixa o contato na fila da gestão. O campo `consent` permanece `false`, pois o evento não comprova aceite específico para mensagens; não há envio automático. A origem identifica **Meta Lead Ads**, sem presumir Instagram ou Facebook quando o evento não informa a plataforma.
+
+Para ativar, configurar `META_LEAD_VERIFY_TOKEN`, `META_LEAD_APP_SECRET`, `META_LEAD_ACCESS_TOKEN`, `META_LEAD_PAGE_IDS` (IDs numéricos separados por vírgula) e `META_GRAPH_VERSION` na Vercel. Em seguida, registrar o callback HTTPS na aplicação Meta, assinar `leadgen` para a Página e conceder as permissões de leitura de leads exigidas pela Meta. O token deve ter acesso aos leads da Página. Revalidar a versão Graph e os escopos aprovados no painel Meta antes de habilitar a conexão. Sem credenciais, Página autorizada e assinatura, o receptor devolve 503 e a integração **não está operacional**. O teste automatizado usa respostas simuladas e não envia leads reais.
+
 ## Próximas entregas para um gestor comercial completo
 
 1. **SLA administrável:** horários de plantão, prazos por fonte, aceite do lead pelo corretor, avisos no celular/e-mail e reatribuição com trilha de auditoria. O alerta visual entregue aqui é a primeira camada.

@@ -11,36 +11,47 @@ function configured(value: string | undefined) {
   return Boolean(value?.trim());
 }
 
-function dateLabel(date: Date | undefined) {
+function dateLabel(date: Date | undefined, empty = 'Nenhum recebimento registrado') {
   return date
     ? new Intl.DateTimeFormat('pt-BR', {
         dateStyle: 'short',
         timeStyle: 'short',
         timeZone: 'America/Sao_Paulo',
       }).format(date)
-    : 'Nenhum recebimento registrado';
+    : empty;
 }
 
 export default async function IntegrationsPage() {
   await requirePermission('users:manage');
 
   const since = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
-  const [googleCount, metaCount, googleLatest, metaLatest] = await Promise.all([
-    db.externalLeadReceipt.count({ where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } } }),
-    db.externalLeadReceipt.count({
-      where: { provider: 'META_LEAD_ADS', createdAt: { gte: since } },
-    }),
-    db.externalLeadReceipt.findFirst({
-      where: { provider: 'GOOGLE_ADS' },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true },
-    }),
-    db.externalLeadReceipt.findFirst({
-      where: { provider: 'META_LEAD_ADS' },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true },
-    }),
-  ]);
+  const [googleCount, metaCount, googleLatest, metaLatest, digestCount, digestLatest] =
+    await Promise.all([
+      db.externalLeadReceipt.count({
+        where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } },
+      }),
+      db.externalLeadReceipt.count({
+        where: { provider: 'META_LEAD_ADS', createdAt: { gte: since } },
+      }),
+      db.externalLeadReceipt.findFirst({
+        where: { provider: 'GOOGLE_ADS' },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+      db.externalLeadReceipt.findFirst({
+        where: { provider: 'META_LEAD_ADS' },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+      db.auditLog.count({
+        where: { action: 'crm.daily_digest.sent', createdAt: { gte: since } },
+      }),
+      db.auditLog.findFirst({
+        where: { action: 'crm.daily_digest.sent' },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+    ]);
 
   const channels = [
     {
@@ -102,6 +113,27 @@ export default async function IntegrationsPage() {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="panel">
+        <h2>Avisos internos de atendimento</h2>
+        <p>
+          Resumo diário por e-mail:{' '}
+          {configured(process.env.CRON_SECRET) &&
+          configured(process.env.RESEND_API_KEY) &&
+          configured(process.env.EMAIL_FROM)
+            ? 'variáveis presentes; confira o primeiro envio na próxima execução'
+            : 'configuração incompleta'}
+          .
+        </p>
+        <p>
+          {digestCount} envios aceitos pela API de e-mail nos últimos {periodDays} dias. Último
+          registro: {dateLabel(digestLatest?.createdAt, 'Nenhum envio registrado')}. A aceitação
+          pela API não comprova leitura nem entrega na caixa de entrada.
+        </p>
+        <p>
+          O resumo é diário e complementa os alertas exibidos com o painel aberto. Para conferir as
+          fichas e os prazos, abra a <Link href="/admin/agenda">agenda comercial</Link>.
+        </p>
       </div>
       <p>
         Estes números são cadastros externos deduplicados, não visitas, cliques ou pessoas únicas.

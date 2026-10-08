@@ -34,12 +34,16 @@ describe('leadRiskQueries', () => {
       },
     });
     expect(queries.firstContact?.AND).toContainEqual({
+      status: { notIn: ['WON', 'LOST'] },
+      assignedToId: { not: null },
+      createdAt: { lt: new Date('2026-10-05T17:45:00.000Z') },
+    });
+    expect(queries.firstContact?.AND).toContainEqual({
       activities: {
         none: {
-          OR: [
-            { completedAt: { not: null } },
-            { type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] }, dueAt: null },
-          ],
+          type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] },
+          dueAt: null,
+          completedAt: { not: null },
         },
       },
     });

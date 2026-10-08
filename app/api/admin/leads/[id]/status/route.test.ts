@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   updateLead: vi.fn(),
   completeActivities: vi.fn(),
   createActivity: vi.fn(),
+  createAudit: vi.fn(),
 }));
 
 vi.mock('@/lib/auth', () => ({ requireApiPermission: mocks.auth }));
@@ -16,6 +17,7 @@ vi.mock('@/lib/db', () => ({
       callback({
         lead: { updateMany: mocks.updateLead },
         leadActivity: { updateMany: mocks.completeActivities, create: mocks.createActivity },
+        auditLog: { create: mocks.createAudit },
       }),
   },
 }));
@@ -32,7 +34,7 @@ describe('CRM status update', () => {
     mocks.createActivity.mockResolvedValue({ id: 'nota-1' });
   });
 
-  it('closes the first-contact task without removing scheduled follow-ups after contact', async () => {
+  it('does not mistake a stage change for actual first contact', async () => {
     const response = await PATCH(
       new Request('http://localhost/api/admin/leads/lead-1/status', {
         method: 'PATCH',
@@ -42,17 +44,16 @@ describe('CRM status update', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(mocks.completeActivities).toHaveBeenCalledWith({
-      where: {
-        leadId: 'lead-1',
-        completedAt: null,
-        type: 'TASK',
-        note: { startsWith: 'Primeiro atendimento pendente:' },
-      },
-      data: { completedAt: expect.any(Date) },
-    });
+    expect(mocks.completeActivities).not.toHaveBeenCalled();
     expect(mocks.createActivity).toHaveBeenCalledWith({
-      data: expect.objectContaining({ leadId: 'lead-1', type: 'NOTE' }),
+      data: expect.objectContaining({
+        leadId: 'lead-1',
+        type: 'NOTE',
+        note: 'Estágio atualizado para Em atendimento.',
+      }),
+    });
+    expect(mocks.createAudit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.status_changed' }),
     });
   });
 

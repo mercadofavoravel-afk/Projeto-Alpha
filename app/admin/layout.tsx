@@ -6,6 +6,7 @@ import { logoutAction } from '@/app/login/actions';
 import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
 import { alphaPath } from '@/lib/public-path';
+import { LeadAttention } from './LeadAttention';
 
 export const metadata: Metadata = {
   title: 'Administração',
@@ -56,6 +57,9 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/leads/kanban">Quadro comercial</Link>
 
           <Link href="/admin/agenda">Agenda</Link>
+          {['ADMIN', 'DIRECTOR', 'MANAGER'].includes(role) && (
+            <Link href="/admin/equipe">Equipe comercial</Link>
+          )}
         </>
       )}
 
@@ -116,7 +120,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </form>
       </aside>
 
-      <main className="main">{children}</main>
+      <main className="main">
+        {hasPermission(user.role, 'crm:read') && <LeadAttention />}
+        {children}
+      </main>
     </div>
   );
 }

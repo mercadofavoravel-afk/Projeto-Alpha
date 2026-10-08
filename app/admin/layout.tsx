@@ -87,7 +87,12 @@ function AdminLinks({ role }: { role: UserRole }) {
         <Link href="/admin/origens">Origens e conversões</Link>
       )}
 
-      {hasPermission(role, 'users:manage') && <Link href="/admin/usuarios">Usuários</Link>}
+      {hasPermission(role, 'users:manage') && (
+        <>
+          <Link href="/admin/usuarios">Usuários</Link>
+          <Link href="/admin/integracoes">Integrações de leads</Link>
+        </>
+      )}
       <Link href="/admin/minha-conta">Senha e segurança</Link>
     </>
   );

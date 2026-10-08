@@ -10,6 +10,7 @@ Atualizado em 08/10/2026. Este documento cobre o uso da imobiliária proprietár
 4. O corretor registra uma ligação, WhatsApp, e-mail ou visita **realizada**, sem prazo futuro, na ficha do lead. Só esse registro confirma o primeiro contato, conclui a tarefa inicial e promove um lead `NEW` a `CONTACTED`. Trocar apenas o estágio do funil não comprova atendimento.
 5. O corretor agenda o próximo contato com prazo na mesma ficha; o item aparece em `/alpha/admin/agenda`. A gestão revisa os atrasos e transfere manualmente se necessário. Concluir um lembrete não envia mensagem automaticamente.
 6. O gerente ou diretor filtra a carteira por profissional; a exportação CSV aplica o mesmo filtro e as permissões de acesso.
+7. O administrador ou diretor consulta `/alpha/admin/integracoes` para ver se as variáveis dos receptores Google Ads e Meta estão presentes, quantos recebimentos externos deduplicados foram registrados nos últimos 28 dias e a data do último recebimento. Variáveis presentes não comprovam conexão com a plataforma; o painel não revela segredos nem mede cliques ou visitas.
 
 ## Validação antes de depender do CRM como canal principal
 

@@ -22,3 +22,5 @@ Atualizado em 08/10/2026. Este documento cobre o uso da imobiliária proprietár
 ## Limites desta entrega
 
 O aviso ativo depende de o painel permanecer aberto e de conexão com a internet. O resumo por e-mail roda diariamente, sem garantia de entrega na caixa de entrada, e não substitui um alerta de 15 minutos. Não há repasse automático por SLA, check-in de plantão, WhatsApp bidirecional, importação de portais, aplicativo nativo, isolamento de organizações ou cobrança de licenças. Nenhum desses recursos deve ser anunciado como operacional sem integração e validação em produção.
+
+A execução diária atende até 25 profissionais ativos nesta fase. Acima disso, a rotina recusa o lote inteiro e precisa ser convertida em processamento em lotes antes de ampliar a equipe.

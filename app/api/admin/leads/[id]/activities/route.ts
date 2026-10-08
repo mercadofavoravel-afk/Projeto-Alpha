@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireApiPermission } from '@/lib/auth';
-import { audit } from '@/lib/audit';
 import { leadAccessWhere } from '@/lib/lead-access';
+import { contactTypes } from '@/lib/lead-risk';
+import { firstContactNotePrefix } from '@/lib/lead-follow-up';
 
 const activitySchema = z.object({
   type: z.enum(['NOTE', 'CALL', 'WHATSAPP', 'EMAIL', 'VISIT', 'TASK']),
@@ -38,20 +39,46 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       { status: 400 },
     );
   }
-  const lead = await db.lead.findFirst({
-    where: { id, ...leadAccessWhere(auth.user) },
-    select: { id: true },
-  });
-  if (!lead) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
-  // A dated activity is a future reminder. A contact without a due date records work done now.
+  // A dated activity is a future reminder. Only a completed contact confirms first response.
   const completedAt =
-    !parsed.data.dueAt && ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'].includes(parsed.data.type)
-      ? new Date()
-      : undefined;
-  const activity = await db.leadActivity.create({
-    data: { ...parsed.data, leadId: id, completedAt },
+    !parsed.data.dueAt && contactTypes.includes(parsed.data.type) ? new Date() : undefined;
+  const activity = await db.$transaction(async (transaction) => {
+    const lead = await transaction.lead.findFirst({
+      where: { id, ...leadAccessWhere(auth.user) },
+      select: { id: true },
+    });
+    if (!lead) return null;
+
+    const created = await transaction.leadActivity.create({
+      data: { ...parsed.data, leadId: id, completedAt },
+    });
+    if (completedAt) {
+      await transaction.lead.updateMany({
+        where: { id, status: 'NEW' },
+        data: { status: 'CONTACTED' },
+      });
+      await transaction.leadActivity.updateMany({
+        where: {
+          leadId: id,
+          type: 'TASK',
+          note: { startsWith: firstContactNotePrefix },
+          completedAt: null,
+        },
+        data: { completedAt },
+      });
+    }
+    await transaction.auditLog.create({
+      data: {
+        action: 'lead.activity_created',
+        entityType: 'Lead',
+        entityId: id,
+        userId: auth.user.id,
+        metadata: { type: parsed.data.type, completedContact: Boolean(completedAt) },
+      },
+    });
+    return created;
   });
-  await audit('lead.activity_created', 'Lead', id, auth.user.id, { type: parsed.data.type });
+  if (!activity) return NextResponse.json({ error: 'Lead não encontrado.' }, { status: 404 });
 
   return NextResponse.json(activity, { status: 201 });
 }

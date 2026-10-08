@@ -9,11 +9,13 @@ describe('lead filters', () => {
         channel: 'organic',
         campaign: ' Forms Leads Ipanema ',
         status: 'QUALIFIED',
+        responsible: 'corretor-1',
       }),
     ).toEqual({
       channel: 'organic',
       campaign: 'Forms Leads Ipanema',
       status: 'QUALIFIED',
+      responsible: 'corretor-1',
     });
 
     expect(parseLeadFilters({ channel: 'unknown', status: 'INVALID' })).toEqual({});
@@ -33,6 +35,12 @@ describe('lead filters', () => {
         contains: 'ipanema',
         mode: 'insensitive',
       },
+    });
+  });
+
+  it('filters the same responsible professional in the panel and CSV export', () => {
+    expect(buildLeadWhere(parseLeadFilters({ responsible: ' corretor-1 ' }))).toEqual({
+      assignedToId: 'corretor-1',
     });
   });
 

@@ -40,6 +40,7 @@ export default async function LeadsPage({
     channel?: string;
     campaign?: string;
     status?: string;
+    responsible?: string;
     assignment?: string;
     page?: string;
     distribuidos?: string;
@@ -49,7 +50,7 @@ export default async function LeadsPage({
 
   const params = await searchParams;
   const filters = parseLeadFilters(params);
-  const { channel, campaign, status } = filters;
+  const { channel, campaign, status, responsible } = filters;
   const assignment = canViewUnassignedLeads(user.role) ? params.assignment : undefined;
   const where = {
     ...buildLeadWhere(filters),
@@ -61,6 +62,7 @@ export default async function LeadsPage({
   if (channel) exportParams.set('channel', channel);
   if (campaign) exportParams.set('campaign', campaign);
   if (status) exportParams.set('status', status);
+  if (responsible) exportParams.set('responsible', responsible);
   if (assignment === 'unassigned' || assignment === 'assigned')
     exportParams.set('assignment', assignment);
 
@@ -72,6 +74,21 @@ export default async function LeadsPage({
     _count: { _all: true },
   });
   const originSummary = summarizeLeadOrigins(originGroups);
+  const professionals = canViewAllLeads(user.role)
+    ? await db.user.findMany({
+        where:
+          user.role === 'MANAGER'
+            ? {
+                OR: [
+                  { id: user.id, role: 'MANAGER' },
+                  { managerId: user.id, role: 'CONSULTANT' },
+                ],
+              }
+            : { role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+        select: { id: true, name: true, email: true },
+        orderBy: { name: 'asc' },
+      })
+    : [];
   const coverage = canViewUnassignedLeads(user.role)
     ? await Promise.all([
         db.lead.groupBy({
@@ -122,7 +139,7 @@ export default async function LeadsPage({
     skip,
     take: leadsPerPage,
   });
-  const hasFilters = Boolean(channel || campaign || status || assignment);
+  const hasFilters = Boolean(channel || campaign || status || assignment || responsible);
 
   return (
     <>
@@ -264,6 +281,20 @@ export default async function LeadsPage({
               ))}
             </select>
           </label>
+
+          {canViewAllLeads(user.role) && (
+            <label>
+              Profissional responsável
+              <select defaultValue={responsible || ''} name="responsible">
+                <option value="">Toda a equipe</option>
+                {professionals.map((professional) => (
+                  <option key={professional.id} value={professional.id}>
+                    {professional.name || professional.email}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {canViewUnassignedLeads(user.role) && (
             <label>

@@ -136,6 +136,9 @@ export default async function Page() {
             <>
               <Link href="/admin/leads">CRM e leads</Link>
               <Link href="/admin/agenda">Follow-up e agenda</Link>
+              {['ADMIN', 'DIRECTOR', 'MANAGER'].includes(user.role) && (
+                <Link href="/admin/equipe">Equipe comercial</Link>
+              )}
               {canViewUnassignedLeads(user.role) && (
                 <Link href="/admin/leads?assignment=unassigned">Distribuir leads</Link>
               )}

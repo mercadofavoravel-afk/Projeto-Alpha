@@ -66,7 +66,9 @@ export function LeadStatusForm({ leadId, initialStatus }: LeadStatusFormProps) {
       </select>
 
       <p>
-        Ao sair de “Novo”, os follow-ups programados são encerrados para evitar mensagens indevidas.
+        O estágio organiza o funil. Para confirmar o primeiro atendimento, registre uma ligação,
+        mensagem, e-mail ou visita realizada em “Registrar acompanhamento”. Ao encerrar o lead, os
+        lembretes automáticos pendentes são concluídos.
       </p>
 
       <button className="btn" disabled={saving} onClick={saveStatus} type="button">

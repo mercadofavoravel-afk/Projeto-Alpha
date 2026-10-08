@@ -27,6 +27,7 @@ export async function GET(request: Request) {
     channel: url.searchParams.get('channel') || undefined,
     campaign: url.searchParams.get('campaign') || undefined,
     status: url.searchParams.get('status') || undefined,
+    responsible: url.searchParams.get('responsible') || undefined,
   });
 
   const leads = await db.lead.findMany({

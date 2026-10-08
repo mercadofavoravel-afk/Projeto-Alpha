@@ -15,6 +15,7 @@ export type LeadFilters = {
   channel?: 'organic' | 'campaign' | 'direct';
   campaign?: string;
   status?: LeadStatusFilter;
+  responsible?: string;
 };
 
 function validStatus(value: string | undefined): LeadStatusFilter | undefined {
@@ -25,22 +26,26 @@ export function parseLeadFilters(values: {
   channel?: string;
   campaign?: string;
   status?: string;
+  responsible?: string;
 }): LeadFilters {
   const channel = ['organic', 'campaign', 'direct'].includes(values.channel || '')
     ? (values.channel as LeadFilters['channel'])
     : undefined;
   const campaign = values.campaign?.trim() || undefined;
+  const responsible = values.responsible?.trim().slice(0, 128) || undefined;
 
   return {
     channel,
     campaign,
     status: validStatus(values.status),
+    ...(responsible ? { responsible } : {}),
   };
 }
 
 export function buildLeadWhere(filters: LeadFilters): Prisma.LeadWhereInput {
   return {
     ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.responsible ? { assignedToId: filters.responsible } : {}),
     ...(filters.campaign
       ? {
           utmCampaign: {

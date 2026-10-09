@@ -140,9 +140,27 @@ export default async function TeamPage() {
                       {member.active}
                     </Link>
                   </td>
-                  <td>{member.firstContact}</td>
-                  <td>{member.overdue}</td>
-                  <td>{member.stalled}</td>
+                  <td>
+                    <Link
+                      href={`/admin/leads?responsible=${encodeURIComponent(member.id)}&risk=firstContact`}
+                    >
+                      {member.firstContact}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link
+                      href={`/admin/leads?responsible=${encodeURIComponent(member.id)}&risk=overdueFollowUp`}
+                    >
+                      {member.overdue}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link
+                      href={`/admin/leads?responsible=${encodeURIComponent(member.id)}&risk=stalled`}
+                    >
+                      {member.stalled}
+                    </Link>
+                  </td>
                 </tr>
               ))}
               {members.length === 0 && (

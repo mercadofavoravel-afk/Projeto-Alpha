@@ -2,19 +2,15 @@ import Link from 'next/link';
 
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
-import { buildLeadWhere, leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
+import { leadStatuses, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { summarizeLeadOrigins } from '@/lib/lead-origin-summary';
 import { summarizeUnassignedCoverage } from '@/lib/lead-coverage';
 import type { DistributionCandidate } from '@/lib/lead-distribution';
 import { leadPageHref, leadsPerPage, resolveLeadPage } from '@/lib/lead-pagination';
+import { buildLeadListWhere, parseLeadRiskFilter } from '@/lib/lead-list-query';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { alphaPath } from '@/lib/public-path';
-import {
-  canViewAllLeads,
-  canViewUnassignedLeads,
-  leadAccessWhere,
-  leadAssignmentWhere,
-} from '@/lib/lead-access';
+import { canViewAllLeads, canViewUnassignedLeads } from '@/lib/lead-access';
 import { distributeUnassignedLeadsAction } from './actions';
 import { LeadRiskAlerts } from './LeadRiskAlerts';
 
@@ -42,6 +38,7 @@ export default async function LeadsPage({
     status?: string;
     responsible?: string;
     assignment?: string;
+    risk?: string;
     page?: string;
     distribuidos?: string;
   }>;
@@ -52,11 +49,8 @@ export default async function LeadsPage({
   const filters = parseLeadFilters(params);
   const { channel, campaign, status, responsible } = filters;
   const assignment = canViewUnassignedLeads(user.role) ? params.assignment : undefined;
-  const where = {
-    ...buildLeadWhere(filters),
-    ...leadAccessWhere(user),
-    ...leadAssignmentWhere(user, assignment),
-  };
+  const risk = parseLeadRiskFilter(params.risk);
+  const where = buildLeadListWhere(filters, user, assignment, risk, new Date());
 
   const exportParams = new URLSearchParams();
   if (channel) exportParams.set('channel', channel);
@@ -65,6 +59,7 @@ export default async function LeadsPage({
   if (responsible) exportParams.set('responsible', responsible);
   if (assignment === 'unassigned' || assignment === 'assigned')
     exportParams.set('assignment', assignment);
+  if (risk) exportParams.set('risk', risk);
 
   const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
 
@@ -139,7 +134,7 @@ export default async function LeadsPage({
     skip,
     take: leadsPerPage,
   });
-  const hasFilters = Boolean(channel || campaign || status || assignment || responsible);
+  const hasFilters = Boolean(channel || campaign || status || assignment || responsible || risk);
 
   return (
     <>
@@ -279,6 +274,19 @@ export default async function LeadsPage({
                   {statusLabel(item)}
                 </option>
               ))}
+            </select>
+          </label>
+
+          <label>
+            Prioridade de atendimento
+            <select defaultValue={risk || ''} name="risk">
+              <option value="">Todas as prioridades</option>
+              {canViewUnassignedLeads(user.role) && (
+                <option value="unassigned">Sem responsável há mais de 15 min</option>
+              )}
+              <option value="firstContact">Primeiro atendimento pendente</option>
+              <option value="overdueFollowUp">Acompanhamento vencido</option>
+              <option value="stalled">Sem contato concluído há mais de 48 h</option>
             </select>
           </label>
 

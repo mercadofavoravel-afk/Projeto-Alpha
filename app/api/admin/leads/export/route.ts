@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import { requireApiPermission } from '@/lib/auth';
-import { buildLeadWhere, parseLeadFilters, statusLabel } from '@/lib/lead-filters';
+import { parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { typologyFromMessage } from '@/lib/lead-typology';
-import { leadAccessWhere, leadAssignmentWhere } from '@/lib/lead-access';
+import { buildLeadListWhere, parseLeadRiskFilter } from '@/lib/lead-list-query';
 
 function csvCell(value: unknown) {
   const text = String(value ?? '');
@@ -31,11 +31,13 @@ export async function GET(request: Request) {
   });
 
   const leads = await db.lead.findMany({
-    where: {
-      ...buildLeadWhere(filters),
-      ...leadAccessWhere(auth.user),
-      ...leadAssignmentWhere(auth.user, url.searchParams.get('assignment') || undefined),
-    },
+    where: buildLeadListWhere(
+      filters,
+      auth.user,
+      url.searchParams.get('assignment') || undefined,
+      parseLeadRiskFilter(url.searchParams.get('risk') || undefined),
+      new Date(),
+    ),
     select: {
       createdAt: true,
       name: true,

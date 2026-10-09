@@ -58,10 +58,9 @@ export function leadRiskQueries(viewer: Viewer, now: Date): Record<string, Prism
         {
           activities: {
             none: {
-              OR: [
-                { completedAt: { gte: stalledCutoff } },
-                { type: { in: contactTypes }, dueAt: null, createdAt: { gte: stalledCutoff } },
-              ],
+              type: { in: contactTypes },
+              dueAt: null,
+              completedAt: { gte: stalledCutoff },
             },
           },
         },

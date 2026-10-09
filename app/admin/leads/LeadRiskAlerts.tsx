@@ -60,6 +60,11 @@ export async function LeadRiskAlerts({ user }: { user: { id: string; role: UserR
               <p>Nenhum lead nesta condição.</p>
             )}
             {count > leads.length && <p>Mostrando os {leads.length} mais antigos.</p>}
+            {count > 0 && (
+              <Link href={`/admin/leads?risk=${encodeURIComponent(key)}`}>
+                Ver todos os {count} leads desta prioridade
+              </Link>
+            )}
           </div>
         ))}
       </div>

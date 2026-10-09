@@ -13,7 +13,7 @@ describe('leadRiskQueries', () => {
     }
   });
 
-  it('uses actual contact activity or completed work, not just a scheduled message', () => {
+  it('requires a completed contact to clear first response and stalled alerts', () => {
     const queries = leadRiskQueries({ id: 'admin-1', role: 'ADMIN' }, now);
     expect(queries.unassigned?.AND).toContainEqual({
       assignedToId: null,
@@ -22,14 +22,9 @@ describe('leadRiskQueries', () => {
     expect(queries.stalled?.AND).toContainEqual({
       activities: {
         none: {
-          OR: [
-            { completedAt: { gte: new Date('2026-10-03T18:00:00.000Z') } },
-            {
-              type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] },
-              dueAt: null,
-              createdAt: { gte: new Date('2026-10-03T18:00:00.000Z') },
-            },
-          ],
+          type: { in: ['CALL', 'WHATSAPP', 'EMAIL', 'VISIT'] },
+          dueAt: null,
+          completedAt: { gte: new Date('2026-10-03T18:00:00.000Z') },
         },
       },
     });

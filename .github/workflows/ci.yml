@@ -69,6 +69,22 @@ jobs:
       - name: Validate Prisma schema
         run: npx prisma validate --schema=prisma/schema.prisma
 
+      - name: Verify new SQL migrations from the base schema
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          git show "$BASE_SHA:prisma/schema.prisma" > prisma/ci-base-schema.prisma
+          npx prisma db push --schema=prisma/ci-base-schema.prisma --skip-generate
+
+          mapfile -t migrations < <(
+            git diff --name-only --diff-filter=A "$BASE_SHA" "$GITHUB_SHA" -- 'prisma/migrations/*/migration.sql' | sort
+          )
+          for migration in "${migrations[@]}"; do
+            npx prisma db execute --file "$migration" --url "$DATABASE_URL"
+          done
+
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
+
       - name: Prepare test database
         run: npx prisma db push --schema=prisma/schema.prisma --skip-generate
 

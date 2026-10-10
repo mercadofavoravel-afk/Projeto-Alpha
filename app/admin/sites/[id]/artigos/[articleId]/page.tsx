@@ -28,7 +28,8 @@ export default async function SiteArticleEditor({
       <h1>{article.title}</h1>
       <p>
         Status: {article.status}. Primeiro salve e revise; depois envie um rascunho ao WordPress. A
-        publicação exige outra ação explícita.
+        publicação exige outra ação explícita. O post receberá um link para o formulário seguro
+        deste artigo no Alpha; os contatos entram no CRM exclusivo deste site.
       </p>
       {article.publicUrl && (
         <p>

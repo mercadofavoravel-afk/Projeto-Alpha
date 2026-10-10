@@ -216,6 +216,7 @@ model CustomerSite {
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
   articles                     CustomerArticle[]
+  leads                        CustomerLead[]
 
   @@index([ownerId])
 }
@@ -236,9 +237,53 @@ model CustomerArticle {
   publishedAt    DateTime?
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
+  leads          CustomerLead[]
 
   @@unique([siteId, slug])
   @@index([siteId, status])
+}
+
+// Customer contacts are separate from the matrix Lead/LeadActivity tables.
+model CustomerLead {
+  id           String                 @id @default(cuid())
+  siteId       String
+  site         CustomerSite           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  articleId    String?
+  article      CustomerArticle?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  name         String
+  phone        String
+  email        String?
+  objective    LeadObjective          @default(OTHER)
+  typology     String?
+  message      String?
+  consent      Boolean
+  source       String
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  status       LeadStatus             @default(NEW)
+  activities   CustomerLeadActivity[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([siteId, createdAt])
+  @@index([siteId, status])
+  @@index([articleId])
+  @@index([siteId, phone, createdAt])
+}
+
+model CustomerLeadActivity {
+  id          String       @id @default(cuid())
+  leadId      String
+  lead        CustomerLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type        String
+  note        String?
+  dueAt       DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([dueAt, completedAt])
 }
 
 model Neighborhood {

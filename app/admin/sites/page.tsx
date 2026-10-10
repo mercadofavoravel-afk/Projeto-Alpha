@@ -76,6 +76,9 @@ export default async function SitesPage({
             <p>
               <Link href={`/admin/sites/${site.id}/artigos`}>Abrir blog deste site</Link>
             </p>
+            <p>
+              <Link href={`/admin/sites/${site.id}/leads`}>Leads e atendimento deste site</Link>
+            </p>
             <form action={disconnectWordPressSite}>
               <input type="hidden" name="siteId" value={site.id} />
               <button type="submit">Desconectar</button>

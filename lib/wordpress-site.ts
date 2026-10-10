@@ -4,6 +4,8 @@ import { lookup } from 'node:dns/promises';
 import { request } from 'node:https';
 import { BlockList, isIP } from 'node:net';
 
+import { customerArticleCta } from '@/lib/customer-intake';
+
 const blocked = new BlockList();
 for (const [address, prefix] of [
   ['0.0.0.0', 8],
@@ -149,6 +151,7 @@ async function wordPressJson(
 export async function writeWordPressPost(
   site: { siteUrl: string; wpUsername: string; applicationPassword: string },
   article: {
+    id: string;
     wpPostId: number | null;
     title: string;
     slug: string;
@@ -166,7 +169,7 @@ export async function writeWordPressPost(
     title: article.title,
     slug: article.slug,
     excerpt: article.excerpt,
-    content: article.content,
+    content: `${article.content}\n\n${customerArticleCta(article.id)}`,
     status,
   };
   const response = await wordPressJson(

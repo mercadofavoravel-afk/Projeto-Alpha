@@ -234,7 +234,9 @@ export async function POST(request: Request) {
   for (const notification of notifications) {
     if (notification.isTest) continue;
     const personal = await db.marketingConnection.findUnique({
-      where: { provider_selectedAccountId: { provider, selectedAccountId: notification.pageId } },
+      where: {
+        provider_selectedAccountId: { provider: 'meta', selectedAccountId: notification.pageId },
+      },
       select: {
         userId: true,
         selectedTokenEncrypted: true,

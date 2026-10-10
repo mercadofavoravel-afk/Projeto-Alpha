@@ -199,6 +199,10 @@ describe('Meta Lead Ads webhook', () => {
       user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
     });
     expect((await POST(notification(payload))).status).toBe(200);
+    expect(calls.personalConnection).toHaveBeenCalledWith({
+      where: { provider_selectedAccountId: { provider: 'meta', selectedAccountId: '123' } },
+      select: expect.objectContaining({ leadSiteId: true, userId: true }),
+    });
     expect(calls.storeCustomerExternal).toHaveBeenCalledWith(
       expect.objectContaining({
         siteId: 'site-1',

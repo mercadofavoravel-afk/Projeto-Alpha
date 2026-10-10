@@ -8,6 +8,11 @@ const calls = vi.hoisted(() => ({
   audit: vi.fn(),
   updateUser: vi.fn(),
   personalConnection: vi.fn(),
+  storeCustomerExternal: vi.fn(),
+}));
+
+vi.mock('@/lib/customer-external-lead', () => ({
+  storeCustomerExternalLead: calls.storeCustomerExternal,
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -60,6 +65,7 @@ describe('Google Ads lead form receiver', () => {
     ]);
     calls.createLead.mockResolvedValue({ id: 'lead-1' });
     calls.personalConnection.mockResolvedValue(null);
+    calls.storeCustomerExternal.mockResolvedValue(true);
   });
   afterEach(() => {
     if (previousKey === undefined) delete process.env.GOOGLE_ADS_LEAD_WEBHOOK_KEY;
@@ -151,6 +157,26 @@ describe('Google Ads lead form receiver', () => {
       user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
     });
     expect((await POST(request('personal-key'))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('routes a commercial form to the site selected by its owner', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      leadSiteId: 'site-1',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(request('personal-key'))).status).toBe(200);
+    expect(calls.storeCustomerExternal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        siteId: 'site-1',
+        ownerId: 'customer-1',
+        provider: 'GOOGLE_ADS',
+        externalId: 'google-lead-001',
+      }),
+    );
     expect(calls.createLead).not.toHaveBeenCalled();
   });
 });

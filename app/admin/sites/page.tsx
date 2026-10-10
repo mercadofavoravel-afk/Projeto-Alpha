@@ -21,7 +21,7 @@ export default async function SitesPage({
     connected: 'Site conectado e acesso editorial verificado.',
     disconnected: 'Conexão removida da sua conta.',
     'has-articles':
-      'Este site possui artigos. A desconexão foi interrompida para preservar o histórico e os posts remotos.',
+      'Este site possui artigos, leads ou uma conta de anúncios vinculada. A desconexão foi interrompida para preservar o histórico.',
     invalid: 'Confira o endereço HTTPS, o usuário e a senha de aplicativo do WordPress.',
     'in-use': 'Este site já pertence a outra conta do Alpha.',
     limit: 'Limite de dez sites por conta atingido.',

@@ -217,6 +217,7 @@ model CustomerSite {
   updatedAt                    DateTime @updatedAt
   articles                     CustomerArticle[]
   leads                        CustomerLead[]
+  marketingConnections         MarketingConnection[]
 
   @@index([ownerId])
 }
@@ -258,6 +259,8 @@ model CustomerLead {
   message      String?
   consent      Boolean
   source       String
+  externalProvider String?
+  externalId       String?
   utmSource    String?
   utmMedium    String?
   utmCampaign  String?
@@ -270,6 +273,7 @@ model CustomerLead {
   @@index([siteId, status])
   @@index([articleId])
   @@index([siteId, phone, createdAt])
+  @@unique([siteId, externalProvider, externalId])
 }
 
 model CustomerLeadActivity {
@@ -540,6 +544,8 @@ model MarketingConnection {
   scopes                String?
   selectedAccountId     String?
   selectedAccountName   String?
+  leadSiteId            String?
+  leadSite              CustomerSite? @relation(fields: [leadSiteId], references: [id], onDelete: SetNull)
   selectedTokenEncrypted String?
   webhookKeyHash        String?  @unique
   createdAt             DateTime @default(now())
@@ -549,6 +555,7 @@ model MarketingConnection {
   @@unique([userId, provider])
   @@unique([provider, selectedAccountId])
   @@index([provider, providerUserId])
+  @@index([leadSiteId])
 }
 
 model MarketingAuthState {

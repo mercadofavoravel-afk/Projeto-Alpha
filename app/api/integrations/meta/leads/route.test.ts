@@ -11,6 +11,11 @@ const calls = vi.hoisted(() => ({
   createAudit: vi.fn(),
   updateUser: vi.fn(),
   personalConnection: vi.fn(),
+  storeCustomerExternal: vi.fn(),
+}));
+
+vi.mock('@/lib/customer-external-lead', () => ({
+  storeCustomerExternalLead: calls.storeCustomerExternal,
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -62,6 +67,7 @@ describe('Meta Lead Ads webhook', () => {
     vi.stubEnv('META_LEAD_PAGE_IDS', '123');
     calls.findReceipt.mockResolvedValue(null);
     calls.personalConnection.mockResolvedValue(null);
+    calls.storeCustomerExternal.mockResolvedValue(true);
     calls.findUsers.mockResolvedValue([]);
     calls.createLead.mockResolvedValue({ id: 'new-lead' });
     vi.stubGlobal(
@@ -180,6 +186,27 @@ describe('Meta Lead Ads webhook', () => {
     });
     expect((await POST(notification(payload))).status).toBe(503);
     expect(fetch).not.toHaveBeenCalled();
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('routes a commercial Page to the site selected by its owner', async () => {
+    vi.stubEnv('MARKETING_TOKEN_ENCRYPTION_KEY', Buffer.alloc(32, 7).toString('base64url'));
+    vi.stubEnv('META_LEAD_PAGE_IDS', '');
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      selectedTokenEncrypted: encryptMarketingToken('page-token'),
+      leadSiteId: 'site-1',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(notification(payload))).status).toBe(200);
+    expect(calls.storeCustomerExternal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        siteId: 'site-1',
+        ownerId: 'customer-1',
+        provider: 'META_LEAD_ADS',
+        externalId: '456',
+      }),
+    );
     expect(calls.createLead).not.toHaveBeenCalled();
   });
 });

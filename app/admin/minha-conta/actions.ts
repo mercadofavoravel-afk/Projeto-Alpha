@@ -75,9 +75,10 @@ export async function disconnectMarketingAccount(formData: FormData) {
 
 export async function selectMarketingAccount(formData: FormData) {
   const user = await requireUser();
-  if (isCommercialCustomer(user)) redirect('/admin/minha-conta?integracao=crm-pendente');
+  const commercial = isCommercialCustomer(user);
   const provider = formData.get('provider');
   const accountId = formData.get('accountId');
+  const leadSiteId = formData.get('leadSiteId');
   if (
     typeof provider !== 'string' ||
     !isMarketingProvider(provider) ||
@@ -85,6 +86,15 @@ export async function selectMarketingAccount(formData: FormData) {
     !/^\d{1,40}$/.test(accountId)
   )
     redirect('/admin/minha-conta?integracao=invalido');
+  if (commercial) {
+    if (typeof leadSiteId !== 'string' || !/^[a-z0-9]{20,40}$/u.test(leadSiteId))
+      redirect('/admin/minha-conta?integracao=site-invalido');
+    const site = await db.customerSite.findFirst({
+      where: { id: leadSiteId, ownerId: user.id },
+      select: { id: true },
+    });
+    if (!site) redirect('/admin/minha-conta?integracao=site-invalido');
+  }
   const connection = await db.marketingConnection.findUnique({
     where: { userId_provider: { userId: user.id, provider } },
   });
@@ -135,6 +145,7 @@ export async function selectMarketingAccount(formData: FormData) {
       data: {
         selectedAccountId: selected.id,
         selectedAccountName: selected.name,
+        leadSiteId: commercial ? (leadSiteId as string) : null,
         selectedTokenEncrypted: selected.token ? encryptMarketingToken(selected.token) : null,
         webhookKeyHash:
           provider === 'google_ads'
@@ -153,7 +164,11 @@ export async function selectMarketingAccount(formData: FormData) {
       entityType: 'User',
       entityId: user.id,
       userId: user.id,
-      metadata: { provider, accountId: selected.id },
+      metadata: {
+        provider,
+        accountId: selected.id,
+        leadSiteId: commercial ? (leadSiteId as string) : null,
+      },
     },
   });
   if (

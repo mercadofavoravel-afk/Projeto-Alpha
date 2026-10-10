@@ -16,6 +16,8 @@ O editor de cada site salva artigos em rascunho isolado, permite marcar revisado
 
 O post recebe um link individual para `/alpha/captacao/<id>` no domínio configurado do Alpha. O formulário fica disponível após a confirmação de publicação e exige consentimento. O contato, a origem do artigo, os parâmetros UTM recebidos e a tarefa de primeiro atendimento ficam em `CustomerLead`/`CustomerLeadActivity`, separados das tabelas de leads da matriz. O dono do site acompanha esses contatos em **Meus sites → Leads**, altera status e registra notas. Esta etapa não instala um formulário dentro do WordPress; antes de comercializar, validar o percurso entre o post público, a página de cadastro e o CRM com autorização de teste, além de controles de abuso e privacidade por cliente.
 
+Contas Google Ads e Páginas Meta podem ser vinculadas pelo próprio usuário a um único site conectado. O receptor aceita o lead somente quando o titular e o site destinatário estão ativos e gravará um registro separado, com provedor, identificador externo e tarefa. Se a conexão não possui site destinatário, retorna erro temporário e não escreve no CRM da matriz. Cada conta/Página só pode ser selecionada por um usuário do Alpha nesta etapa. Isso ainda exige configuração oficial e ensaio real antes de ser ofertado.
+
 ## WhatsApp
 
 O botão `wa.me` atual abre uma conversa individual e não é um disparador automatizado. O módulo comercial de envio deve associar uma conta WhatsApp Business Platform à organização, guardar os identificadores e tokens por cliente, registrar consentimento do destinatário e opt-out, usar modelos aprovados quando a empresa inicia a conversa, limitar envios, guardar tentativas/respostas e processar webhooks assinados. Nenhum envio em massa ou teste é ativado por esta migração.
@@ -25,7 +27,7 @@ Referência: [Política de Negócios oficial do WhatsApp](https://business.whats
 ## Antes de oferecer a clientes externos
 
 1. Criar organizações e membros com papéis próprios, migrar a matriz e escopar **todas** as consultas e mutações de leads, equipe, artigos, catálogo, arquivos, fontes, analítica e integrações.
-2. Completar reconciliação de falhas remotas, renovação/revogação de credenciais e suporte a plugins SEO conhecidos; conferir o formulário e a origem de cada lead no site conectado.
+2. Completar reconciliação de falhas remotas, renovação/revogação de credenciais e suporte a plugins SEO conhecidos; conferir formulário, anúncios e origem de cada lead no site conectado.
 3. Conectar Search Console por propriedade verificada e gerar recomendações e arquivos compatíveis com cada CMS, sem presumir acesso à hospedagem.
 4. Integrar oficialmente WhatsApp Business Platform por cliente, com consentimento, templates aprovados, webhook e auditoria.
 5. Concluir cobrança com valor configurável, boleto e confirmação autenticada, aplicar teste de 30 dias e tolerância de cinco apenas à organização inadimplente, além de validar reativação.

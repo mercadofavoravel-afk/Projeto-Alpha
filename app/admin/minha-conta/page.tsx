@@ -18,6 +18,13 @@ export default async function AccountPage({
   const connections = await db.marketingConnection.findMany({
     where: { userId: user.id },
   });
+  const sites = commercial
+    ? await db.customerSite.findMany({
+        where: { ownerId: user.id },
+        select: { id: true, siteUrl: true },
+        orderBy: { createdAt: 'desc' },
+      })
+    : [];
   const accountOptions = new Map(
     await Promise.all(
       connections.map(async (connection) => {
@@ -51,8 +58,7 @@ export default async function AccountPage({
       'Conta selecionada. Confira a configuração do formulário e o primeiro recebimento real antes de considerar a captação ativa.',
     assinatura:
       'A Meta não aceitou a assinatura de leads da Página. Confira permissões e o aplicativo de webhooks.',
-    'crm-pendente':
-      'A captação por anúncios será habilitada quando o CRM desta empresa estiver isolado.',
+    'site-invalido': 'Selecione um site conectado à sua conta para receber estes leads.',
   };
   return (
     <>
@@ -118,8 +124,8 @@ export default async function AccountPage({
         </p>
         {commercial && (
           <p>
-            O recebimento de leads desta conta ainda não está disponível. A seleção de conta de
-            anúncios e de Página ficará bloqueada até o CRM individual estar pronto.
+            Selecione o site destinatário antes de ativar os formulários de anúncios. Os contatos
+            recebidos ficam no CRM deste site.
           </p>
         )}
         {integracao && notices[integracao] && <p role="status">{notices[integracao]}</p>}
@@ -156,58 +162,89 @@ export default async function AccountPage({
                     ({account.selectedAccountId}).
                   </p>
                 )}
+                {commercial && account?.leadSiteId && (
+                  <p>
+                    Site destinatário:{' '}
+                    {sites.find((site) => site.id === account.leadSiteId)?.siteUrl ||
+                      'Conexão indisponível'}
+                    .
+                  </p>
+                )}
                 {ready && (
                   <Link className="btn" href={`/api/admin/integrations/${provider}/start`}>
                     {account ? 'Reconectar conta' : `Conectar ${label}`}
                   </Link>
                 )}
-                {account && !commercial && (accountOptions.get(provider)?.length || 0) > 0 && (
-                  <form action={selectMarketingAccount}>
-                    <input type="hidden" name="provider" value={provider} />
-                    <label>
-                      {provider === 'google_ads'
-                        ? 'Conta de anúncios acessível'
-                        : 'Página que recebe os formulários'}
-                      <select
-                        name="accountId"
-                        defaultValue={account.selectedAccountId || ''}
-                        required
-                      >
-                        <option value="" disabled>
-                          Selecione uma conta
-                        </option>
-                        {accountOptions.get(provider)?.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
+                {account &&
+                  (!commercial || sites.length > 0) &&
+                  (accountOptions.get(provider)?.length || 0) > 0 && (
+                    <form action={selectMarketingAccount}>
+                      <input type="hidden" name="provider" value={provider} />
+                      <label>
+                        {provider === 'google_ads'
+                          ? 'Conta de anúncios acessível'
+                          : 'Página que recebe os formulários'}
+                        <select
+                          name="accountId"
+                          defaultValue={account.selectedAccountId || ''}
+                          required
+                        >
+                          <option value="" disabled>
+                            Selecione uma conta
                           </option>
-                        ))}
-                      </select>
-                    </label>
-                    <button type="submit">Usar esta conta no Alpha</button>
-                  </form>
-                )}
-                {provider === 'google_ads' && !commercial && account?.selectedAccountId && (
-                  <div>
-                    <p>
-                      Para formulários nativos do Google Ads, configure no formulário desta conta:
-                    </p>
-                    <label>
-                      URL do webhook
-                      <input
-                        readOnly
-                        value={`${new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').origin}${alphaPath('/api/integrations/google-ads/leads')}`}
-                      />
-                    </label>
-                    <label>
-                      Chave do webhook desta conexão
-                      <input readOnly value={personalGoogleWebhookKey(account.id)} />
-                    </label>
-                    <p>
-                      Esta chave é confidencial. Ela identifica a conta selecionada e encaminha seus
-                      leads ao usuário conectado.
-                    </p>
-                  </div>
-                )}
+                          {accountOptions.get(provider)?.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {commercial && (
+                        <label>
+                          Site que receberá os leads
+                          <select
+                            name="leadSiteId"
+                            defaultValue={account.leadSiteId || ''}
+                            required
+                          >
+                            <option value="" disabled>
+                              Selecione seu site
+                            </option>
+                            {sites.map((site) => (
+                              <option key={site.id} value={site.id}>
+                                {site.siteUrl}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+                      <button type="submit">Usar esta conta no Alpha</button>
+                    </form>
+                  )}
+                {provider === 'google_ads' &&
+                  account?.selectedAccountId &&
+                  (!commercial || account.leadSiteId) && (
+                    <div>
+                      <p>
+                        Para formulários nativos do Google Ads, configure no formulário desta conta:
+                      </p>
+                      <label>
+                        URL do webhook
+                        <input
+                          readOnly
+                          value={`${new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').origin}${alphaPath('/api/integrations/google-ads/leads')}`}
+                        />
+                      </label>
+                      <label>
+                        Chave do webhook desta conexão
+                        <input readOnly value={personalGoogleWebhookKey(account.id)} />
+                      </label>
+                      <p>
+                        Esta chave é confidencial. Ela identifica a conta selecionada e encaminha
+                        seus leads ao usuário conectado.
+                      </p>
+                    </div>
+                  )}
                 {account && (
                   <form action={disconnectMarketingAccount}>
                     <input type="hidden" name="provider" value={provider} />

@@ -97,7 +97,13 @@ export async function disconnectWordPressSite(formData: FormData) {
     const articleCount = await tx.customerArticle.count({
       where: { siteId: id, site: { ownerId: user.id } },
     });
-    if (articleCount) return;
+    const leadCount = await tx.customerLead.count({
+      where: { siteId: id, site: { ownerId: user.id } },
+    });
+    const marketingCount = await tx.marketingConnection.count({
+      where: { leadSiteId: id, userId: user.id },
+    });
+    if (articleCount || leadCount || marketingCount) return;
     const removed = await tx.customerSite.deleteMany({ where: { id, ownerId: user.id } });
     if (removed.count)
       await tx.auditLog.create({

@@ -56,8 +56,9 @@ export default async function Page() {
           Conecte seu WordPress com uma senha de aplicativo individual e prepare artigos no blog
           deste site. Antes de publicar, revise o texto e a prévia no WordPress. Cada artigo pode
           direcionar ao seu formulário no Alpha, com contatos separados por site. A captação de
-          leads por anúncios, o disparador de WhatsApp e os metadados de plugins SEO ainda dependem
-          das integrações comerciais específicas.
+          leads por anúncios exige conectar a conta ao site e fazer um ensaio autorizado. O
+          disparador de WhatsApp e os metadados de plugins SEO ainda dependem de integrações
+          específicas.
         </p>
         <div className="admin-shortcuts">
           <Link href="/admin/sites">Meus sites</Link>

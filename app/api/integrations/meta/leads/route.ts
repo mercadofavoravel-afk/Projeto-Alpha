@@ -8,6 +8,7 @@ import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribut
 import { parseMetaLeadDetail, parseMetaNotifications } from '@/lib/meta-lead-form';
 import { decryptMarketingToken } from '@/lib/marketing-oauth';
 import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
+import { storeCustomerExternalLead } from '@/lib/customer-external-lead';
 
 const provider = 'META_LEAD_ADS';
 
@@ -54,10 +55,19 @@ export async function GET(request: Request) {
 
 async function receiveLead(
   notification: { externalId: string; pageId: string; formId: string | null },
-  settings: { accessToken: string; graphVersion: string; ownerId: string | null },
+  settings: {
+    accessToken: string;
+    graphVersion: string;
+    ownerId: string | null;
+    commercialSiteId?: string | null;
+  },
 ) {
   const key = { provider_externalId: { provider, externalId: notification.externalId } };
-  if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) return true;
+  if (
+    !settings.commercialSiteId &&
+    (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } }))
+  )
+    return true;
 
   const url = new URL(
     `https://graph.facebook.com/${settings.graphVersion}/${notification.externalId}`,
@@ -79,6 +89,19 @@ async function receiveLead(
     notification.externalId,
   );
   if (!details) return false;
+
+  if (settings.commercialSiteId && settings.ownerId)
+    return storeCustomerExternalLead({
+      siteId: settings.commercialSiteId,
+      ownerId: settings.ownerId,
+      provider: 'META_LEAD_ADS',
+      externalId: notification.externalId,
+      name: details.name,
+      phone: details.phone,
+      email: details.email,
+      source: `Meta Lead Ads | formulário ${details.formId || notification.formId || 'não informado'}`,
+      utmSource: 'meta',
+    });
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
@@ -215,6 +238,7 @@ export async function POST(request: Request) {
       select: {
         userId: true,
         selectedTokenEncrypted: true,
+        leadSiteId: true,
         user: { select: { billingMode: true, isPlatformOwner: true } },
       },
     });
@@ -223,8 +247,10 @@ export async function POST(request: Request) {
       : null;
     if (!personal && !legacy)
       return NextResponse.json({ message: 'Página não autorizada.' }, { status: 403 });
-    if (personal && (!personal.user || isCommercialCustomer(personal.user)))
-      return NextResponse.json({ message: 'CRM individual indisponível.' }, { status: 503 });
+    if (personal && !personal.user)
+      return NextResponse.json({ message: 'Titular indisponível.' }, { status: 503 });
+    if (personal?.user && isCommercialCustomer(personal.user) && !personal.leadSiteId)
+      return NextResponse.json({ message: 'Site destinatário indisponível.' }, { status: 503 });
     let accessToken: string;
     try {
       accessToken = personal?.selectedTokenEncrypted
@@ -239,6 +265,8 @@ export async function POST(request: Request) {
         accessToken,
         graphVersion: settings.graphVersion,
         ownerId: personal?.userId || null,
+        commercialSiteId:
+          personal?.user && isCommercialCustomer(personal.user) ? personal.leadSiteId : null,
       }))
     )
       return NextResponse.json({ message: 'Falha temporária. Tente novamente.' }, { status: 503 });

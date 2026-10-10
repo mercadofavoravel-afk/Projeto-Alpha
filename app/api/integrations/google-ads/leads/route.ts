@@ -8,6 +8,7 @@ import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribut
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
 import { hashOAuthState } from '@/lib/marketing-oauth';
 import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
+import { storeCustomerExternalLead } from '@/lib/customer-external-lead';
 
 function sameKey(actual: string, expected: string) {
   const actualHash = createHash('sha256').update(actual).digest();
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
           userId: true,
           provider: true,
           selectedAccountId: true,
+          leadSiteId: true,
           user: { select: { billingMode: true, isPlatformOwner: true } },
         },
       });
@@ -56,8 +58,25 @@ export async function POST(request: Request) {
   // The Google Ads form builder sends sample leads. A test must never enter the commercial queue.
   if (lead.isTest) return NextResponse.json({});
   // A commercial lead must never be written to the shared matrix CRM.
-  if (personal && (!personal.user || isCommercialCustomer(personal.user)))
-    return NextResponse.json({ message: 'CRM individual indisponível.' }, { status: 503 });
+  if (personal && (!personal.user || isCommercialCustomer(personal.user))) {
+    if (!personal.user || !personal.leadSiteId)
+      return NextResponse.json({ message: 'Site destinatário indisponível.' }, { status: 503 });
+    const stored = await storeCustomerExternalLead({
+      siteId: personal.leadSiteId,
+      ownerId: personal.userId,
+      provider: 'GOOGLE_ADS',
+      externalId: lead.externalId,
+      name: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      source: `Google Ads | formulário ${lead.formId || 'não informado'}`,
+      utmSource: 'google',
+      utmCampaign: lead.campaignId,
+    });
+    return NextResponse.json(stored ? {} : { message: 'Falha temporária.' }, {
+      status: stored ? 200 : 503,
+    });
+  }
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {

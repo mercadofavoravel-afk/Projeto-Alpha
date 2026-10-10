@@ -21,21 +21,16 @@ export default function Page() {
             <div>
               <div className="eyebrow">Curadoria personalizada</div>
 
-              <h1>
-                Seu próximo endereço começa pelo seu perfil.
-              </h1>
+              <h1>Seu próximo endereço começa pelo seu perfil.</h1>
             </div>
 
             <div className="discovery-hero-copy">
               <p>
-                Compartilhe suas preferências, prioridades e objetivos.
-                A partir delas, apresentamos uma seleção de imóveis com
-                maior aderência ao seu momento.
+                Compartilhe suas preferências, prioridades e objetivos. A partir delas, apresentamos
+                uma seleção de imóveis com maior aderência ao seu momento.
               </p>
 
-              <span>
-                Uma experiência de descoberta, não uma busca genérica.
-              </span>
+              <span>Uma experiência de descoberta, não uma busca genérica.</span>
             </div>
           </div>
         </section>
@@ -45,14 +40,11 @@ export default function Page() {
             <div className="discovery-guidance">
               <div className="eyebrow">Como funciona</div>
 
-              <h2>
-                Critérios que ajudam a revelar o imóvel certo.
-              </h2>
+              <h2>Critérios que ajudam a revelar o imóvel certo.</h2>
 
               <p>
-                Localização, tipologia, orçamento, estilo de vida e
-                objetivo patrimonial são combinados para formar uma
-                seleção mais relevante.
+                Localização, tipologia, orçamento, estilo de vida e objetivo patrimonial são
+                combinados para formar uma seleção mais relevante.
               </p>
 
               <div className="discovery-principles">

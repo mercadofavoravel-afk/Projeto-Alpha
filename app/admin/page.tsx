@@ -47,6 +47,22 @@ function statusLabel(status: string) {
 
 export default async function Page() {
   const user = await requireUser();
+  if (user.billingMode === 'COMMERCIAL' && !user.isPlatformOwner) {
+    return (
+      <>
+        <div className="eyebrow">Conta comercial</div>
+        <h1>Seus sites no Alpha</h1>
+        <p>
+          Conecte o WordPress com uma senha de aplicativo individual. O editor por site, o
+          disparador de WhatsApp e o SEO multicliente ainda não estão habilitados para esta conta.
+        </p>
+        <div className="admin-shortcuts">
+          <Link href="/admin/sites">Meus sites</Link>
+          <Link href="/admin/minha-conta">Minha conta e conexões</Link>
+        </div>
+      </>
+    );
+  }
   const leadScope = leadAccessWhere(user);
   const { today, tomorrow } = crmDayWindow(new Date());
 

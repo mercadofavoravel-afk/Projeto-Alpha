@@ -25,9 +25,7 @@ async function main() {
   }
 
   if (adminPassword.length < 8) {
-    throw new Error(
-      'ADMIN_PASSWORD deve ter pelo menos 8 caracteres.',
-    );
+    throw new Error('ADMIN_PASSWORD deve ter pelo menos 8 caracteres.');
   }
 
   const passwordHash = await bcrypt.hash(adminPassword, 12);

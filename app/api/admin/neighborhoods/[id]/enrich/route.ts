@@ -9,14 +9,8 @@ type RouteContext = {
   }>;
 };
 
-export async function POST(
-  _request: Request,
-  context: RouteContext,
-) {
-  const permission =
-    await requireApiPermission(
-      'catalog:write',
-    );
+export async function POST(_request: Request, context: RouteContext) {
+  const permission = await requireApiPermission('catalog:write');
 
   if (!permission.ok) {
     return NextResponse.json(
@@ -35,8 +29,7 @@ export async function POST(
     if (!id) {
       return NextResponse.json(
         {
-          error:
-            'ID do bairro não informado.',
+          error: 'ID do bairro não informado.',
         },
         {
           status: 400,
@@ -44,26 +37,17 @@ export async function POST(
       );
     }
 
-    const evidence =
-      await collectNeighborhoodEvidence(
-        id,
-      );
+    const evidence = await collectNeighborhoodEvidence(id);
 
-    const result =
-      await enrichAndStoreNeighborhood(
-        id,
-        evidence,
-      );
+    const result = await enrichAndStoreNeighborhood(id, evidence);
 
     if (!result.ok) {
       return NextResponse.json(
         {
           ok: false,
           message: result.message,
-          evidenceCount:
-            result.evidenceCount,
-          sourceCount:
-            result.sourceUrls.length,
+          evidenceCount: result.evidenceCount,
+          sourceCount: result.sourceUrls.length,
         },
         {
           status: 422,
@@ -74,25 +58,17 @@ export async function POST(
     return NextResponse.json({
       ok: true,
       message: result.message,
-      neighborhoodId:
-        result.neighborhoodId,
-      neighborhoodSlug:
-        result.neighborhoodSlug,
-      evidenceCount:
-        result.evidenceCount,
-      sourceCount:
-        result.sourceUrls.length,
+      neighborhoodId: result.neighborhoodId,
+      neighborhoodSlug: result.neighborhoodSlug,
+      evidenceCount: result.evidenceCount,
+      sourceCount: result.sourceUrls.length,
     });
   } catch (error) {
-    console.error(
-      'Erro ao enriquecer bairro:',
-      error,
-    );
+    console.error('Erro ao enriquecer bairro:', error);
 
     return NextResponse.json(
       {
-        error:
-          'Não foi possível gerar o conteúdo do bairro neste momento.',
+        error: 'Não foi possível gerar o conteúdo do bairro neste momento.',
       },
       {
         status: 500,

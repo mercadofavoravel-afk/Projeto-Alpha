@@ -17,85 +17,40 @@ const faqEvidenceSchema = z.object({
 const neighborhoodEvidenceSchema = z.object({
   name: z.string().trim().min(2).max(120),
 
-  city: z
-    .string()
-    .trim()
-    .min(2)
-    .max(120)
-    .default('Rio de Janeiro'),
+  city: z.string().trim().min(2).max(120).default('Rio de Janeiro'),
 
-  state: z
-    .string()
-    .trim()
-    .min(2)
-    .max(80)
-    .default('Rio de Janeiro'),
+  state: z.string().trim().min(2).max(80).default('Rio de Janeiro'),
 
-  overview: z
-    .array(evidenceItemSchema)
-    .default([]),
+  overview: z.array(evidenceItemSchema).default([]),
 
-  lifestyle: z
-    .array(evidenceItemSchema)
-    .default([]),
+  lifestyle: z.array(evidenceItemSchema).default([]),
 
-  mobility: z
-    .array(evidenceItemSchema)
-    .default([]),
+  mobility: z.array(evidenceItemSchema).default([]),
 
-  beach: z
-    .array(evidenceItemSchema)
-    .default([]),
+  beach: z.array(evidenceItemSchema).default([]),
 
-  gastronomy: z
-    .array(evidenceItemSchema)
-    .default([]),
+  gastronomy: z.array(evidenceItemSchema).default([]),
 
-  services: z
-    .array(evidenceItemSchema)
-    .default([]),
+  services: z.array(evidenceItemSchema).default([]),
 
-  leisure: z
-    .array(evidenceItemSchema)
-    .default([]),
+  leisure: z.array(evidenceItemSchema).default([]),
 
-  architecture: z
-    .array(evidenceItemSchema)
-    .default([]),
+  architecture: z.array(evidenceItemSchema).default([]),
 
-  investment: z
-    .array(evidenceItemSchema)
-    .default([]),
+  investment: z.array(evidenceItemSchema).default([]),
 
-  audience: z
-    .array(evidenceItemSchema)
-    .default([]),
+  audience: z.array(evidenceItemSchema).default([]),
 
-  faq: z
-    .array(faqEvidenceSchema)
-    .default([]),
+  faq: z.array(faqEvidenceSchema).default([]),
 
-  heroImage: z
-    .string()
-    .trim()
-    .optional()
-    .nullable(),
+  heroImage: z.string().trim().optional().nullable(),
 
-  videoUrl: z
-    .string()
-    .trim()
-    .optional()
-    .nullable(),
+  videoUrl: z.string().trim().optional().nullable(),
 
-  videoTitle: z
-    .string()
-    .trim()
-    .optional()
-    .nullable(),
+  videoTitle: z.string().trim().optional().nullable(),
 });
 
-export type NeighborhoodEvidence =
-  z.input<typeof neighborhoodEvidenceSchema>;
+export type NeighborhoodEvidence = z.input<typeof neighborhoodEvidenceSchema>;
 
 export type NeighborhoodHighlight = {
   title: string;
@@ -126,9 +81,7 @@ export type NeighborhoodEnrichment = {
 };
 
 function cleanWhitespace(value: string) {
-  return value
-    .replace(/\s+/g, ' ')
-    .trim();
+  return value.replace(/\s+/g, ' ').trim();
 }
 
 function sentence(value: string) {
@@ -138,21 +91,14 @@ function sentence(value: string) {
     return '';
   }
 
-  return /[.!?]$/.test(cleaned)
-    ? cleaned
-    : `${cleaned}.`;
+  return /[.!?]$/.test(cleaned) ? cleaned : `${cleaned}.`;
 }
 
-function unique<T>(
-  items: T[],
-  key: (item: T) => string,
-) {
+function unique<T>(items: T[], key: (item: T) => string) {
   const seen = new Set<string>();
 
   return items.filter((item) => {
-    const value = key(item)
-      .trim()
-      .toLocaleLowerCase('pt-BR');
+    const value = key(item).trim().toLocaleLowerCase('pt-BR');
 
     if (!value || seen.has(value)) {
       return false;
@@ -164,47 +110,27 @@ function unique<T>(
   });
 }
 
-function limitText(
-  value: string,
-  maxLength: number,
-) {
+function limitText(value: string, maxLength: number) {
   const cleaned = cleanWhitespace(value);
 
   if (cleaned.length <= maxLength) {
     return cleaned;
   }
 
-  const shortened = cleaned
-    .slice(0, maxLength - 1)
-    .trimEnd();
+  const shortened = cleaned.slice(0, maxLength - 1).trimEnd();
 
-  const lastSpace =
-    shortened.lastIndexOf(' ');
+  const lastSpace = shortened.lastIndexOf(' ');
 
-  const safe =
-    lastSpace > maxLength * 0.65
-      ? shortened.slice(0, lastSpace)
-      : shortened;
+  const safe = lastSpace > maxLength * 0.65 ? shortened.slice(0, lastSpace) : shortened;
 
   return `${safe.trim()}.`;
 }
 
-function collectDescriptions(
-  groups: Array<
-    Array<z.infer<typeof evidenceItemSchema>>
-  >,
-) {
-  return unique(
-    groups.flat(),
-    (item) => item.description,
-  );
+function collectDescriptions(groups: Array<Array<z.infer<typeof evidenceItemSchema>>>) {
+  return unique(groups.flat(), (item) => item.description);
 }
 
-function collectSourceUrls(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-) {
+function collectSourceUrls(parsed: z.infer<typeof neighborhoodEvidenceSchema>) {
   const groups = [
     parsed.overview,
     parsed.lifestyle,
@@ -222,34 +148,16 @@ function collectSourceUrls(
     ...groups
       .flat()
       .map((item) => item.sourceUrl)
-      .filter(
-        (value): value is string =>
-          Boolean(value),
-      ),
+      .filter((value): value is string => Boolean(value)),
 
-    ...parsed.faq
-      .map((item) => item.sourceUrl)
-      .filter(
-        (value): value is string =>
-          Boolean(value),
-      ),
+    ...parsed.faq.map((item) => item.sourceUrl).filter((value): value is string => Boolean(value)),
   ];
 
-  return [
-    ...new Set(urls),
-  ];
+  return [...new Set(urls)];
 }
 
-function buildDescription(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-) {
-  const evidence = collectDescriptions([
-    parsed.overview,
-    parsed.lifestyle,
-    parsed.architecture,
-  ]);
+function buildDescription(parsed: z.infer<typeof neighborhoodEvidenceSchema>) {
+  const evidence = collectDescriptions([parsed.overview, parsed.lifestyle, parsed.architecture]);
 
   if (evidence.length === 0) {
     return (
@@ -262,22 +170,13 @@ function buildDescription(
 
   const selected = evidence
     .slice(0, 2)
-    .map((item) =>
-      sentence(item.description),
-    )
+    .map((item) => sentence(item.description))
     .join(' ');
 
-  return limitText(
-    selected,
-    520,
-  );
+  return limitText(selected, 520);
 }
 
-function buildExperienceDescription(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-) {
+function buildExperienceDescription(parsed: z.infer<typeof neighborhoodEvidenceSchema>) {
   const evidence = collectDescriptions([
     parsed.lifestyle,
     parsed.beach,
@@ -300,18 +199,14 @@ function buildExperienceDescription(
   return limitText(
     evidence
       .slice(0, 5)
-      .map((item) =>
-        sentence(item.description),
-      )
+      .map((item) => sentence(item.description))
       .join(' '),
     1400,
   );
 }
 
 function buildHighlights(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
+  parsed: z.infer<typeof neighborhoodEvidenceSchema>,
 ): NeighborhoodHighlight[] {
   const candidates = [
     ...parsed.beach,
@@ -323,82 +218,50 @@ function buildHighlights(
     ...parsed.architecture,
   ];
 
-  return unique(
-    candidates,
-    (item) => item.label,
-  )
+  return unique(candidates, (item) => item.label)
     .slice(0, 6)
     .map((item) => ({
       title: item.label,
-      description: limitText(
-        item.description,
-        300,
-      ),
+      description: limitText(item.description, 300),
     }));
 }
 
-function buildFaq(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-): NeighborhoodFaq[] {
+function buildFaq(parsed: z.infer<typeof neighborhoodEvidenceSchema>): NeighborhoodFaq[] {
   if (parsed.faq.length > 0) {
-    return unique(
-      parsed.faq,
-      (item) => item.question,
-    )
+    return unique(parsed.faq, (item) => item.question)
       .slice(0, 8)
       .map((item) => ({
         question: item.question,
-        answer: limitText(
-          item.answer,
-          1000,
-        ),
+        answer: limitText(item.answer, 1000),
       }));
   }
 
-  const generated: NeighborhoodFaq[] =
-    [];
+  const generated: NeighborhoodFaq[] = [];
 
-  const lifestyle =
-    parsed.lifestyle[0];
+  const lifestyle = parsed.lifestyle[0];
 
   if (lifestyle) {
     generated.push({
-      question:
-        `Como é viver em ${parsed.name}?`,
-      answer: limitText(
-        lifestyle.description,
-        900,
-      ),
+      question: `Como é viver em ${parsed.name}?`,
+      answer: limitText(lifestyle.description, 900),
     });
   }
 
-  const mobility =
-    parsed.mobility[0];
+  const mobility = parsed.mobility[0];
 
   if (mobility) {
     generated.push({
-      question:
-        `Como é a mobilidade em ${parsed.name}?`,
-      answer: limitText(
-        mobility.description,
-        900,
-      ),
+      question: `Como é a mobilidade em ${parsed.name}?`,
+      answer: limitText(mobility.description, 900),
     });
   }
 
-  const investment =
-    parsed.investment[0];
+  const investment = parsed.investment[0];
 
   if (investment) {
     generated.push({
-      question:
-        `O que considerar ao avaliar um imóvel em ${parsed.name}?`,
-      answer: limitText(
-        investment.description,
-        900,
-      ),
+      question: `O que considerar ao avaliar um imóvel em ${parsed.name}?`,
+      answer: limitText(investment.description, 900),
     });
   }
 
@@ -406,21 +269,11 @@ function buildFaq(
 }
 
 function buildSeoTitle(name: string) {
-  return limitText(
-    `Imóveis de alto padrão em ${name} | Rio de Janeiro`,
-    70,
-  );
+  return limitText(`Imóveis de alto padrão em ${name} | Rio de Janeiro`, 70);
 }
 
-function buildSeoDescription(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-) {
-  const firstUsefulEvidence =
-    parsed.overview[0] ??
-    parsed.lifestyle[0] ??
-    parsed.architecture[0];
+function buildSeoDescription(parsed: z.infer<typeof neighborhoodEvidenceSchema>) {
+  const firstUsefulEvidence = parsed.overview[0] ?? parsed.lifestyle[0] ?? parsed.architecture[0];
 
   if (firstUsefulEvidence) {
     return limitText(
@@ -435,13 +288,8 @@ function buildSeoDescription(
   );
 }
 
-function buildCtaDescription(
-  parsed: z.infer<
-    typeof neighborhoodEvidenceSchema
-  >,
-) {
-  const audience =
-    parsed.audience[0];
+function buildCtaDescription(parsed: z.infer<typeof neighborhoodEvidenceSchema>) {
+  const audience = parsed.audience[0];
 
   if (audience) {
     return limitText(
@@ -460,16 +308,10 @@ function buildCtaDescription(
   );
 }
 
-export function enrichNeighborhood(
-  input: NeighborhoodEvidence,
-): NeighborhoodEnrichment {
-  const parsed =
-    neighborhoodEvidenceSchema.parse(
-      input,
-    );
+export function enrichNeighborhood(input: NeighborhoodEvidence): NeighborhoodEnrichment {
+  const parsed = neighborhoodEvidenceSchema.parse(input);
 
-  const sourceUrls =
-    collectSourceUrls(parsed);
+  const sourceUrls = collectSourceUrls(parsed);
 
   const evidenceCount =
     parsed.overview.length +
@@ -487,46 +329,29 @@ export function enrichNeighborhood(
   return {
     name: parsed.name,
 
-    description:
-      buildDescription(parsed),
+    description: buildDescription(parsed),
 
-    experienceTitle:
-      `Como é viver em ${parsed.name}`,
+    experienceTitle: `Como é viver em ${parsed.name}`,
 
-    experienceDescription:
-      buildExperienceDescription(
-        parsed,
-      ),
+    experienceDescription: buildExperienceDescription(parsed),
 
-    highlights:
-      buildHighlights(parsed),
+    highlights: buildHighlights(parsed),
 
-    videoUrl:
-      parsed.videoUrl ?? null,
+    videoUrl: parsed.videoUrl ?? null,
 
-    videoTitle:
-      parsed.videoTitle ??
-      (parsed.videoUrl
-        ? `Conheça ${parsed.name}`
-        : null),
+    videoTitle: parsed.videoTitle ?? (parsed.videoUrl ? `Conheça ${parsed.name}` : null),
 
-    ctaTitle:
-      `Encontre o imóvel certo em ${parsed.name}.`,
+    ctaTitle: `Encontre o imóvel certo em ${parsed.name}.`,
 
-    ctaDescription:
-      buildCtaDescription(parsed),
+    ctaDescription: buildCtaDescription(parsed),
 
-    faq:
-      buildFaq(parsed),
+    faq: buildFaq(parsed),
 
-    seoTitle:
-      buildSeoTitle(parsed.name),
+    seoTitle: buildSeoTitle(parsed.name),
 
-    seoDescription:
-      buildSeoDescription(parsed),
+    seoDescription: buildSeoDescription(parsed),
 
-    heroImage:
-      parsed.heroImage ?? null,
+    heroImage: parsed.heroImage ?? null,
 
     sourceUrls,
 
@@ -534,13 +359,10 @@ export function enrichNeighborhood(
   };
 }
 
-export function canPublishNeighborhoodEnrichment(
-  enrichment: NeighborhoodEnrichment,
-) {
+export function canPublishNeighborhoodEnrichment(enrichment: NeighborhoodEnrichment) {
   return (
     enrichment.evidenceCount >= 3 &&
     enrichment.description.length >= 80 &&
-    enrichment.experienceDescription
-      .length >= 120
+    enrichment.experienceDescription.length >= 120
   );
 }

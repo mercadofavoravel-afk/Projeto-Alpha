@@ -4,6 +4,8 @@
 
 O usuário entra no Alpha com seu próprio e-mail e senha. A matriz tem contas internas e administra a plataforma. Cada cliente deve pertencer a uma organização isolada, que pode ter membros e vários sites. O `CustomerSite` desta etapa pertence diretamente a um usuário e serve de começo para esse modelo; ainda não representa isolamento completo de organizações.
 
+Enquanto essa separação não estiver pronta, uma conta marcada `COMMERCIAL` é barrada das rotas de CRM, catálogo, artigos e indicadores compartilhados da matriz; ela só pode abrir o painel restrito, sua conta e seus sites. A criação comercial pela interface continua desativada. Esta é uma restrição preventiva, não a entrega final do produto.
+
 ## WordPress
 
 Em **Meus sites**, o usuário editorial informa a URL HTTPS, o nome do usuário WordPress e **uma senha de aplicativo do WordPress**, criada para o Alpha. Nunca se deve pedir ou armazenar a senha principal do painel. O Alpha verifica `users/me?context=edit` e a capacidade `edit_posts` na API REST antes de gravar a senha de aplicativo criptografada. A conexão é própria de quem a criou, admite até dez sites por conta e pode ser removida. O endereço é validado e a requisição HTTPS é fixada num IP público verificado, sem seguir redirecionamentos. Instalações sem um endereço IPv4 público ou API REST acessível não são aceitas nesta etapa.

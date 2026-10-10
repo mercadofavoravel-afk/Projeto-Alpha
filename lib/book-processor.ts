@@ -28,18 +28,9 @@ function cleanText(value: string) {
 function stripHtml(value: string) {
   return cleanText(
     value
-      .replace(
-        /<script[\s\S]*?<\/script>/gi,
-        ' ',
-      )
-      .replace(
-        /<style[\s\S]*?<\/style>/gi,
-        ' ',
-      )
-      .replace(
-        /<noscript[\s\S]*?<\/noscript>/gi,
-        ' ',
-      )
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/p>/gi, '\n')
       .replace(/<\/div>/gi, '\n')
@@ -54,9 +45,7 @@ function stripHtml(value: string) {
   );
 }
 
-function textFromUnknown(
-  value: unknown,
-): string[] {
+function textFromUnknown(value: unknown): string[] {
   if (value === null || value === undefined) {
     return [];
   }
@@ -67,70 +56,50 @@ function textFromUnknown(
     return text ? [text] : [];
   }
 
-  if (
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  ) {
+  if (typeof value === 'number' || typeof value === 'boolean') {
     return [String(value)];
   }
 
   if (Array.isArray(value)) {
-    return value.flatMap((item) =>
-      textFromUnknown(item),
-    );
+    return value.flatMap((item) => textFromUnknown(item));
   }
 
   if (typeof value === 'object') {
-    return Object.entries(value).flatMap(
-      ([key, item]) => {
-        const normalizedKey = key
-          .trim()
-          .toLocaleLowerCase('pt-BR');
+    return Object.entries(value).flatMap(([key, item]) => {
+      const normalizedKey = key.trim().toLocaleLowerCase('pt-BR');
 
-        const ignoredKeys = new Set([
-          'id',
-          'createdat',
-          'updatedat',
-          'checksum',
-          'progress',
-          'status',
-        ]);
+      const ignoredKeys = new Set([
+        'id',
+        'createdat',
+        'updatedat',
+        'checksum',
+        'progress',
+        'status',
+      ]);
 
-        if (ignoredKeys.has(normalizedKey)) {
-          return [];
-        }
+      if (ignoredKeys.has(normalizedKey)) {
+        return [];
+      }
 
-        return textFromUnknown(item);
-      },
-    );
+      return textFromUnknown(item);
+    });
   }
 
   return [];
 }
 
-function extractExistingText(
-  extracted: unknown,
-) {
-  if (
-    extracted === null ||
-    extracted === undefined
-  ) {
+function extractExistingText(extracted: unknown) {
+  if (extracted === null || extracted === undefined) {
     return '';
   }
 
-  const pieces =
-    textFromUnknown(extracted);
+  const pieces = textFromUnknown(extracted);
 
-  return cleanText(
-    pieces.join('\n\n'),
-  );
+  return cleanText(pieces.join('\n\n'));
 }
 
-function isTextMimeType(
-  mimeType: string,
-) {
-  const normalized =
-    mimeType.toLowerCase();
+function isTextMimeType(mimeType: string) {
+  const normalized = mimeType.toLowerCase();
 
   return (
     normalized.startsWith('text/') ||
@@ -141,70 +110,36 @@ function isTextMimeType(
   );
 }
 
-function isPdfMimeType(
-  mimeType: string,
-  fileName: string,
-) {
-  return (
-    mimeType
-      .toLowerCase()
-      .includes('pdf') ||
-    fileName
-      .toLowerCase()
-      .endsWith('.pdf')
-  );
+function isPdfMimeType(mimeType: string, fileName: string) {
+  return mimeType.toLowerCase().includes('pdf') || fileName.toLowerCase().endsWith('.pdf');
 }
 
-async function fetchRemoteText(
-  storageUrl: string,
-  mimeType: string,
-) {
-  const response = await fetch(
-    storageUrl,
-    {
-      cache: 'no-store',
+async function fetchRemoteText(storageUrl: string, mimeType: string) {
+  const response = await fetch(storageUrl, {
+    cache: 'no-store',
 
-      headers: {
-        Accept:
-          'text/plain,text/html,application/json,application/xml;q=0.9,*/*;q=0.1',
-      },
+    headers: {
+      Accept: 'text/plain,text/html,application/json,application/xml;q=0.9,*/*;q=0.1',
     },
-  );
+  });
 
   if (!response.ok) {
-    throw new Error(
-      `Não foi possível acessar o material. HTTP ${response.status}.`,
-    );
+    throw new Error(`Não foi possível acessar o material. HTTP ${response.status}.`);
   }
 
-  const responseType =
-    response.headers.get(
-      'content-type',
-    ) || mimeType;
+  const responseType = response.headers.get('content-type') || mimeType;
 
-  const raw =
-    await response.text();
+  const raw = await response.text();
 
-  if (
-    responseType
-      .toLowerCase()
-      .includes('html')
-  ) {
+  if (responseType.toLowerCase().includes('html')) {
     return stripHtml(raw);
   }
 
-  if (
-    responseType
-      .toLowerCase()
-      .includes('json')
-  ) {
+  if (responseType.toLowerCase().includes('json')) {
     try {
-      const parsed =
-        JSON.parse(raw);
+      const parsed = JSON.parse(raw);
 
-      return extractExistingText(
-        parsed,
-      );
+      return extractExistingText(parsed);
     } catch {
       return cleanText(raw);
     }
@@ -213,35 +148,21 @@ async function fetchRemoteText(
   return cleanText(raw);
 }
 
-export async function processBookContent(
-  input: BookProcessorInput,
-): Promise<BookProcessorResult> {
-  const existingText =
-    extractExistingText(
-      input.extracted,
-    );
+export async function processBookContent(input: BookProcessorInput): Promise<BookProcessorResult> {
+  const existingText = extractExistingText(input.extracted);
 
-  if (
-    existingText.length >= 80
-  ) {
+  if (existingText.length >= 80) {
     return {
       ok: true,
       text: existingText,
-      characterCount:
-        existingText.length,
+      characterCount: existingText.length,
       source: 'existing',
       mimeType: input.mimeType,
-      message:
-        'Conteúdo extraído existente reaproveitado com sucesso.',
+      message: 'Conteúdo extraído existente reaproveitado com sucesso.',
     };
   }
 
-  if (
-    isPdfMimeType(
-      input.mimeType,
-      input.fileName,
-    )
-  ) {
+  if (isPdfMimeType(input.mimeType, input.fileName)) {
     return {
       ok: false,
       text: '',
@@ -253,37 +174,25 @@ export async function processBookContent(
     };
   }
 
-  if (
-    !isTextMimeType(
-      input.mimeType,
-    )
-  ) {
+  if (!isTextMimeType(input.mimeType)) {
     return {
       ok: false,
       text: '',
       characterCount: 0,
       source: 'none',
       mimeType: input.mimeType,
-      message:
-        `Formato ainda não suportado para extração automática: ${input.mimeType}.`,
+      message: `Formato ainda não suportado para extração automática: ${input.mimeType}.`,
     };
   }
 
   try {
-    const remoteText =
-      await fetchRemoteText(
-        input.storageUrl,
-        input.mimeType,
-      );
+    const remoteText = await fetchRemoteText(input.storageUrl, input.mimeType);
 
-    if (
-      remoteText.length < 80
-    ) {
+    if (remoteText.length < 80) {
       return {
         ok: false,
         text: remoteText,
-        characterCount:
-          remoteText.length,
+        characterCount: remoteText.length,
         source: 'remote',
         mimeType: input.mimeType,
         message:
@@ -294,12 +203,10 @@ export async function processBookContent(
     return {
       ok: true,
       text: remoteText,
-      characterCount:
-        remoteText.length,
+      characterCount: remoteText.length,
       source: 'remote',
       mimeType: input.mimeType,
-      message:
-        'Conteúdo textual extraído com sucesso.',
+      message: 'Conteúdo textual extraído com sucesso.',
     };
   } catch (error) {
     return {
@@ -308,10 +215,7 @@ export async function processBookContent(
       characterCount: 0,
       source: 'none',
       mimeType: input.mimeType,
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível processar o material.',
+      message: error instanceof Error ? error.message : 'Não foi possível processar o material.',
     };
   }
 }

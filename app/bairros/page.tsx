@@ -51,28 +51,20 @@ export default async function BairrosPage() {
         <section className="projects-hero">
           <div className="wrap projects-hero-grid">
             <div>
-              <div className="eyebrow">
-                Inteligência local
-              </div>
+              <div className="eyebrow">Inteligência local</div>
 
-              <h1>
-                Os endereços que definem diferentes formas
-                de viver o Rio.
-              </h1>
+              <h1>Os endereços que definem diferentes formas de viver o Rio.</h1>
             </div>
 
             <div className="projects-hero-copy">
               <p>
-                Explore os bairros da nossa curadoria e
-                descubra os empreendimentos disponíveis em
+                Explore os bairros da nossa curadoria e descubra os empreendimentos disponíveis em
                 cada região.
               </p>
 
               <span>
                 {neighborhoods.length}{' '}
-                {neighborhoods.length === 1
-                  ? 'bairro selecionado'
-                  : 'bairros selecionados'}
+                {neighborhoods.length === 1 ? 'bairro selecionado' : 'bairros selecionados'}
               </span>
             </div>
           </div>
@@ -82,18 +74,13 @@ export default async function BairrosPage() {
           <div className="wrap">
             <div className="projects-intro">
               <div>
-                <div className="eyebrow">
-                  Rio de Janeiro
-                </div>
+                <div className="eyebrow">Rio de Janeiro</div>
 
-                <h2>
-                  Conheça o mercado por localização.
-                </h2>
+                <h2>Conheça o mercado por localização.</h2>
               </div>
 
               <p>
-                Cada bairro reúne uma seleção própria de
-                empreendimentos e características que
+                Cada bairro reúne uma seleção própria de empreendimentos e características que
                 ajudam a entender melhor cada endereço.
               </p>
             </div>
@@ -107,9 +94,7 @@ export default async function BairrosPage() {
                     className="card"
                   >
                     <div className="card-body">
-                      <div className="eyebrow">
-                        Bairro
-                      </div>
+                      <div className="eyebrow">Bairro</div>
 
                       <h2>{neighborhood.name}</h2>
 
@@ -120,18 +105,13 @@ export default async function BairrosPage() {
                           : 'empreendimentos publicados'}
                       </p>
 
-                      <span>
-                        Explorar {neighborhood.name} →
-                      </span>
+                      <span>Explorar {neighborhood.name} →</span>
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="notice">
-                Nenhum bairro com empreendimentos
-                publicados no momento.
-              </div>
+              <div className="notice">Nenhum bairro com empreendimentos publicados no momento.</div>
             )}
           </div>
         </section>

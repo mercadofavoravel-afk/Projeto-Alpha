@@ -9,14 +9,8 @@ type RouteContext = {
   }>;
 };
 
-export async function POST(
-  _request: Request,
-  context: RouteContext,
-) {
-  const auth =
-    await requireApiPermission(
-      'media:write',
-    );
+export async function POST(_request: Request, context: RouteContext) {
+  const auth = await requireApiPermission('media:write');
 
   if (!auth.ok) {
     return NextResponse.json(
@@ -31,12 +25,11 @@ export async function POST(
 
   const { id } = await context.params;
 
-  const book =
-    await db.bookIngestion.findUnique({
-      where: {
-        id,
-      },
-    });
+  const book = await db.bookIngestion.findUnique({
+    where: {
+      id,
+    },
+  });
 
   if (!book) {
     return NextResponse.json(
@@ -61,34 +54,31 @@ export async function POST(
   });
 
   try {
-    const result =
-      await processBookContent({
-        fileName: book.fileName,
-        storageUrl: book.storageUrl,
-        mimeType: book.mimeType,
-        extracted: book.extracted,
-      });
+    const result = await processBookContent({
+      fileName: book.fileName,
+      storageUrl: book.storageUrl,
+      mimeType: book.mimeType,
+      extracted: book.extracted,
+    });
 
     if (!result.ok) {
-      const failed =
-        await db.bookIngestion.update({
-          where: {
-            id,
-          },
-          data: {
-            status: 'FAILED',
-            progress: 100,
-            error: result.message,
-          },
-        });
+      const failed = await db.bookIngestion.update({
+        where: {
+          id,
+        },
+        data: {
+          status: 'FAILED',
+          progress: 100,
+          error: result.message,
+        },
+      });
 
       return NextResponse.json(
         {
           ok: false,
           book: failed,
           message: result.message,
-          characterCount:
-            result.characterCount,
+          characterCount: result.characterCount,
           source: result.source,
         },
         {
@@ -97,40 +87,34 @@ export async function POST(
       );
     }
 
-    const completed =
-      await db.bookIngestion.update({
-        where: {
-          id,
+    const completed = await db.bookIngestion.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'COMPLETED',
+        progress: 100,
+        error: null,
+        extracted: {
+          text: result.text,
+          characterCount: result.characterCount,
+          source: result.source,
+          mimeType: result.mimeType,
+          processedAt: new Date().toISOString(),
         },
-        data: {
-          status: 'COMPLETED',
-          progress: 100,
-          error: null,
-          extracted: {
-            text: result.text,
-            characterCount:
-              result.characterCount,
-            source: result.source,
-            mimeType: result.mimeType,
-            processedAt:
-              new Date().toISOString(),
-          },
-        },
-      });
+      },
+    });
 
     return NextResponse.json({
       ok: true,
       book: completed,
       message: result.message,
-      characterCount:
-        result.characterCount,
+      characterCount: result.characterCount,
       source: result.source,
     });
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : 'Erro inesperado ao processar o material.';
+      error instanceof Error ? error.message : 'Erro inesperado ao processar o material.';
 
     await db.bookIngestion.update({
       where: {
@@ -143,10 +127,7 @@ export async function POST(
       },
     });
 
-    console.error(
-      'Erro ao processar Book:',
-      error,
-    );
+    console.error('Erro ao processar Book:', error);
 
     return NextResponse.json(
       {

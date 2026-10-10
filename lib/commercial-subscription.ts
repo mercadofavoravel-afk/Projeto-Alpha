@@ -4,6 +4,17 @@ const dayMs = 24 * 60 * 60 * 1000;
 export const commercialTrialDays = 30;
 export const commercialGraceDays = 5;
 
+export function isCommercialCustomer(user: { billingMode: BillingMode; isPlatformOwner: boolean }) {
+  return user.billingMode === 'COMMERCIAL' && !user.isPlatformOwner;
+}
+
+export function canUseCommercialPermission(
+  user: { billingMode: BillingMode; isPlatformOwner: boolean },
+  permission: string,
+) {
+  return !isCommercialCustomer(user) || ['admin:access', 'sites:manage'].includes(permission);
+}
+
 export type SubscriptionDates = {
   trialEndsAt: Date;
   paidThroughAt: Date | null;

@@ -23,8 +23,7 @@ export async function POST() {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          'Somente administradores podem executar esta operação.',
+        error: 'Somente administradores podem executar esta operação.',
       },
       {
         status: 403,
@@ -152,12 +151,11 @@ export async function POST() {
         "DiscoveryCandidate"("lastSeenAt");
     `);
 
-    const tableCheck =
-      await db.$queryRaw<
-        Array<{
-          table_name: string;
-        }>
-      >`
+    const tableCheck = await db.$queryRaw<
+      Array<{
+        table_name: string;
+      }>
+    >`
         SELECT table_name
         FROM information_schema.tables
         WHERE
@@ -166,23 +164,16 @@ export async function POST() {
       `;
 
     if (tableCheck.length !== 1) {
-      throw new Error(
-        'A tabela DiscoveryCandidate não foi encontrada após a configuração.',
-      );
+      throw new Error('A tabela DiscoveryCandidate não foi encontrada após a configuração.');
     }
 
     return NextResponse.json({
       ok: true,
-      message:
-        'Estrutura DiscoveryCandidate criada e verificada com sucesso.',
-      table:
-        tableCheck[0].table_name,
+      message: 'Estrutura DiscoveryCandidate criada e verificada com sucesso.',
+      table: tableCheck[0].table_name,
     });
   } catch (error) {
-    console.error(
-      'Erro ao configurar DiscoveryCandidate:',
-      error,
-    );
+    console.error('Erro ao configurar DiscoveryCandidate:', error);
 
     return NextResponse.json(
       {

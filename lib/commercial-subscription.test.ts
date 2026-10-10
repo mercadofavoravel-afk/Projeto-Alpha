@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { paidThroughAfterPayment, subscriptionState } from './commercial-subscription';
+import {
+  canUseCommercialPermission,
+  paidThroughAfterPayment,
+  subscriptionState,
+} from './commercial-subscription';
 
 describe('commercial subscription access', () => {
   const trialEndsAt = new Date('2026-11-01T00:00:00Z');
@@ -27,6 +31,17 @@ describe('commercial subscription access', () => {
     expect(paidThroughAt.toISOString()).toBe('2026-12-07T00:00:00.000Z');
     expect(subscriptionState('COMMERCIAL', { trialEndsAt, paidThroughAt }, paidAt).status).toBe(
       'PAID',
+    );
+  });
+
+  it('keeps a commercial customer out of the shared matrix CRM and publishing tools', () => {
+    const customer = { billingMode: 'COMMERCIAL' as const, isPlatformOwner: false };
+    expect(canUseCommercialPermission(customer, 'sites:manage')).toBe(true);
+    expect(canUseCommercialPermission(customer, 'admin:access')).toBe(true);
+    expect(canUseCommercialPermission(customer, 'catalog:write')).toBe(false);
+    expect(canUseCommercialPermission(customer, 'crm:read')).toBe(false);
+    expect(canUseCommercialPermission({ ...customer, isPlatformOwner: true }, 'crm:read')).toBe(
+      true,
     );
   });
 });

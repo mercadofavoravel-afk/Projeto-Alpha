@@ -3,6 +3,7 @@ import type { UserRole } from '@prisma/client';
 export const permissions = {
   ADMIN: [
     'admin:access',
+    'sites:manage',
     'users:manage',
 
     'catalog:write',
@@ -20,6 +21,7 @@ export const permissions = {
 
   DIRECTOR: [
     'admin:access',
+    'sites:manage',
     'users:manage',
     'catalog:write',
     'catalog:publish',
@@ -32,14 +34,22 @@ export const permissions = {
     'media:write',
   ],
 
-  MANAGER: ['admin:access', 'crm:read', 'crm:write', 'crm:assign', 'crm:reports'],
+  MANAGER: ['admin:access', 'sites:manage', 'crm:read', 'crm:write', 'crm:assign', 'crm:reports'],
 
-  EDITOR: ['admin:access', 'catalog:write', 'catalog:publish', 'analytics:read', 'media:write'],
+  EDITOR: [
+    'admin:access',
+    'sites:manage',
+    'catalog:write',
+    'catalog:publish',
+    'analytics:read',
+    'media:write',
+  ],
 
   CONSULTANT: ['admin:access', 'crm:read', 'crm:write'],
 
   MARKETING: [
     'admin:access',
+    'sites:manage',
 
     'catalog:write',
     'media:write',

@@ -9,7 +9,7 @@ export default async function SitesPage({
 }: {
   searchParams: Promise<{ result?: string }>;
 }) {
-  const user = await requirePermission('catalog:write');
+  const user = await requirePermission('sites:manage');
   const sites = await db.customerSite.findMany({
     where: { ownerId: user.id },
     select: { id: true, siteUrl: true, wpUsername: true, wpDisplayName: true, verifiedAt: true },

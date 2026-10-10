@@ -15,7 +15,7 @@ function done(result: string): never {
 }
 
 export async function connectWordPressSite(formData: FormData) {
-  const user = await requirePermission('catalog:write');
+  const user = await requirePermission('sites:manage');
   const url = formData.get('siteUrl');
   const username = formData.get('username');
   const appPassword = formData.get('appPassword');
@@ -90,7 +90,7 @@ export async function connectWordPressSite(formData: FormData) {
 }
 
 export async function disconnectWordPressSite(formData: FormData) {
-  const user = await requirePermission('catalog:write');
+  const user = await requirePermission('sites:manage');
   const id = formData.get('siteId');
   if (typeof id !== 'string' || !/^[a-z0-9]{20,40}$/i.test(id)) done('invalid');
   await db.$transaction(async (tx) => {

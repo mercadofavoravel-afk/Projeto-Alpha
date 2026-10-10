@@ -13,6 +13,7 @@ import {
 } from '@/lib/marketing-oauth';
 import { selectableMarketingAccounts, unsubscribeMetaPage } from '@/lib/marketing-accounts';
 import { Prisma } from '@prisma/client';
+import { isCommercialCustomer } from '@/lib/commercial-subscription';
 
 export async function changeOwnPassword(formData: FormData) {
   const user = await requireUser();
@@ -74,6 +75,7 @@ export async function disconnectMarketingAccount(formData: FormData) {
 
 export async function selectMarketingAccount(formData: FormData) {
   const user = await requireUser();
+  if (isCommercialCustomer(user)) redirect('/admin/minha-conta?integracao=crm-pendente');
   const provider = formData.get('provider');
   const accountId = formData.get('accountId');
   if (

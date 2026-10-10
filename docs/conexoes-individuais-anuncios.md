@@ -1,5 +1,7 @@
 # Conexões individuais de anúncios
 
+Contas comerciais externas podem iniciar a autorização OAuth, mas a seleção de conta/Página e a captação automática ficam bloqueadas até que o CRM seja isolado por empresa. O webhook também recusa a escrita no CRM compartilhado caso uma conexão comercial preexistente esteja selecionada. Isso evita que um cliente receba um lead inacessível ou misturado à matriz.
+
 Cada usuário do Alpha pode autorizar ou desconectar sua própria conta em `/alpha/admin/minha-conta#contas-conectadas`. A função é opcional; o usuário entra com suas credenciais exclusivamente no Google ou na Meta. O Alpha não recebe a senha. O administrador cadastra, uma única vez, as credenciais **do aplicativo Alpha** no ambiente de produção, sem incluí-las no repositório.
 
 ## Configuração do aplicativo

@@ -140,6 +140,7 @@ describe('Meta Lead Ads webhook', () => {
     calls.personalConnection.mockResolvedValue({
       userId: 'broker-2',
       selectedTokenEncrypted: encryptMarketingToken('personal-page-token'),
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
     });
     calls.findUsers.mockResolvedValue([
       {
@@ -165,8 +166,20 @@ describe('Meta Lead Ads webhook', () => {
     calls.personalConnection.mockResolvedValue({
       userId: 'broker-2',
       selectedTokenEncrypted: encryptMarketingToken('personal-page-token'),
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
     });
     expect((await POST(notification(payload))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('never writes an external commercial customer lead into the matrix CRM', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      selectedTokenEncrypted: null,
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(notification(payload))).status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
     expect(calls.createLead).not.toHaveBeenCalled();
   });
 });

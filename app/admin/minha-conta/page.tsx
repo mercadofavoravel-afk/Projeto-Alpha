@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { selectableMarketingAccounts } from '@/lib/marketing-accounts';
 import { oauthConfig, personalGoogleWebhookKey } from '@/lib/marketing-oauth';
 import { alphaPath } from '@/lib/public-path';
+import { isCommercialCustomer } from '@/lib/commercial-subscription';
 import { changeOwnPassword, disconnectMarketingAccount, selectMarketingAccount } from './actions';
 
 export default async function AccountPage({
@@ -12,6 +13,7 @@ export default async function AccountPage({
   searchParams: Promise<{ result?: string; integracao?: string }>;
 }) {
   const user = await requireUser();
+  const commercial = isCommercialCustomer(user);
   const { result, integracao } = await searchParams;
   const connections = await db.marketingConnection.findMany({
     where: { userId: user.id },
@@ -49,6 +51,8 @@ export default async function AccountPage({
       'Conta selecionada. Confira a configuração do formulário e o primeiro recebimento real antes de considerar a captação ativa.',
     assinatura:
       'A Meta não aceitou a assinatura de leads da Página. Confira permissões e o aplicativo de webhooks.',
+    'crm-pendente':
+      'A captação por anúncios será habilitada quando o CRM desta empresa estiver isolado.',
   };
   return (
     <>
@@ -112,6 +116,12 @@ export default async function AccountPage({
           Google ou da Meta que será aberta após clicar em conectar. O Alpha guarda somente a
           autorização criptografada; sua senha nunca passa pelo Alpha.
         </p>
+        {commercial && (
+          <p>
+            O recebimento de leads desta conta ainda não está disponível. A seleção de conta de
+            anúncios e de Página ficará bloqueada até o CRM individual estar pronto.
+          </p>
+        )}
         {integracao && notices[integracao] && <p role="status">{notices[integracao]}</p>}
         <div className="form-grid">
           {(
@@ -151,7 +161,7 @@ export default async function AccountPage({
                     {account ? 'Reconectar conta' : `Conectar ${label}`}
                   </Link>
                 )}
-                {account && (accountOptions.get(provider)?.length || 0) > 0 && (
+                {account && !commercial && (accountOptions.get(provider)?.length || 0) > 0 && (
                   <form action={selectMarketingAccount}>
                     <input type="hidden" name="provider" value={provider} />
                     <label>
@@ -176,7 +186,7 @@ export default async function AccountPage({
                     <button type="submit">Usar esta conta no Alpha</button>
                   </form>
                 )}
-                {provider === 'google_ads' && account?.selectedAccountId && (
+                {provider === 'google_ads' && !commercial && account?.selectedAccountId && (
                   <div>
                     <p>
                       Para formulários nativos do Google Ads, configure no formulário desta conta:

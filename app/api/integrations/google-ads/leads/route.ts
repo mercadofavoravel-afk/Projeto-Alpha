@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
 import { hashOAuthState } from '@/lib/marketing-oauth';
-import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
+import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
 
 function sameKey(actual: string, expected: string) {
   const actualHash = createHash('sha256').update(actual).digest();
@@ -43,13 +43,21 @@ export async function POST(request: Request) {
     ? null
     : await db.marketingConnection.findUnique({
         where: { webhookKeyHash: hashOAuthState(lead.key) },
-        select: { userId: true, provider: true, selectedAccountId: true },
+        select: {
+          userId: true,
+          provider: true,
+          selectedAccountId: true,
+          user: { select: { billingMode: true, isPlatformOwner: true } },
+        },
       });
   if (!legacy && (!personal || personal.provider !== 'google_ads' || !personal.selectedAccountId)) {
     return NextResponse.json({ message: 'Não autorizado.' }, { status: 401 });
   }
   // The Google Ads form builder sends sample leads. A test must never enter the commercial queue.
   if (lead.isTest) return NextResponse.json({});
+  // A commercial lead must never be written to the shared matrix CRM.
+  if (personal && (!personal.user || isCommercialCustomer(personal.user)))
+    return NextResponse.json({ message: 'CRM individual indisponível.' }, { status: 503 });
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {

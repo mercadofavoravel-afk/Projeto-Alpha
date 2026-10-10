@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseMetaLeadDetail, parseMetaNotifications } from '@/lib/meta-lead-form';
 import { decryptMarketingToken } from '@/lib/marketing-oauth';
-import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
+import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
 
 const provider = 'META_LEAD_ADS';
 
@@ -212,13 +212,19 @@ export async function POST(request: Request) {
     if (notification.isTest) continue;
     const personal = await db.marketingConnection.findUnique({
       where: { provider_selectedAccountId: { provider, selectedAccountId: notification.pageId } },
-      select: { userId: true, selectedTokenEncrypted: true },
+      select: {
+        userId: true,
+        selectedTokenEncrypted: true,
+        user: { select: { billingMode: true, isPlatformOwner: true } },
+      },
     });
     const legacy = settings.pageIds.includes(notification.pageId)
       ? process.env.META_LEAD_ACCESS_TOKEN
       : null;
     if (!personal && !legacy)
       return NextResponse.json({ message: 'Página não autorizada.' }, { status: 403 });
+    if (personal && (!personal.user || isCommercialCustomer(personal.user)))
+      return NextResponse.json({ message: 'CRM individual indisponível.' }, { status: 503 });
     let accessToken: string;
     try {
       accessToken = personal?.selectedTokenEncrypted

@@ -103,6 +103,7 @@ describe('Google Ads lead form receiver', () => {
       userId: 'broker-2',
       provider: 'google_ads',
       selectedAccountId: '1234567890',
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
     });
     calls.users.mockResolvedValue([
       {
@@ -136,6 +137,18 @@ describe('Google Ads lead form receiver', () => {
       userId: 'broker-2',
       provider: 'google_ads',
       selectedAccountId: '1234567890',
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
+    });
+    expect((await POST(request('personal-key'))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('never puts an external commercial customer lead in the matrix CRM', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
     });
     expect((await POST(request('personal-key'))).status).toBe(503);
     expect(calls.createLead).not.toHaveBeenCalled();

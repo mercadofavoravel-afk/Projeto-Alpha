@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { contactTypes } from '@/lib/lead-risk';
 
 const statuses: LeadStatus[] = ['NEW', 'CONTACTED', 'QUALIFIED', 'VISIT_SCHEDULED', 'WON', 'LOST'];
 const validId = (value: string) => /^[a-z0-9]{20,40}$/u.test(value);
@@ -51,14 +52,39 @@ export async function addCustomerLeadNote(formData: FormData) {
   const siteId = String(formData.get('siteId') || '');
   const leadId = String(formData.get('leadId') || '');
   const note = String(formData.get('note') || '').trim();
-  if (!validId(siteId) || !validId(leadId) || note.length < 3 || note.length > 2000)
+  const type = String(formData.get('type') || 'NOTE');
+  if (
+    !validId(siteId) ||
+    !validId(leadId) ||
+    note.length < 3 ||
+    note.length > 2000 ||
+    !['NOTE', ...contactTypes].includes(type)
+  )
     done(siteId, leadId, 'invalido');
   const lead = await db.customerLead.findFirst({
     where: { id: leadId, siteId, site: { ownerId: user.id } },
     select: { id: true },
   });
   if (!lead) done(siteId, leadId, 'ausente');
-  await db.customerLeadActivity.create({ data: { leadId, type: 'NOTE', note } });
+  await db.$transaction([
+    db.customerLeadActivity.create({
+      data: {
+        leadId,
+        type,
+        note,
+        completedAt: contactTypes.includes(type) ? new Date() : null,
+      },
+    }),
+    db.auditLog.create({
+      data: {
+        action: 'customer_lead.activity_added',
+        entityType: 'CustomerLead',
+        entityId: leadId,
+        userId: user.id,
+        metadata: { siteId, type },
+      },
+    }),
+  ]);
   done(siteId, leadId, 'salvo');
 }
 

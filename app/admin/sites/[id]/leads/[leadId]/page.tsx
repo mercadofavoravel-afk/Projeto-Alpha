@@ -86,6 +86,16 @@ export default async function CustomerLeadDetails({
         <input type="hidden" name="siteId" value={id} />
         <input type="hidden" name="leadId" value={lead.id} />
         <label>
+          Tipo de registro
+          <select name="type" defaultValue="NOTE">
+            <option value="NOTE">Observação</option>
+            <option value="CALL">Ligação realizada</option>
+            <option value="WHATSAPP">Contato pelo WhatsApp</option>
+            <option value="EMAIL">E-mail enviado</option>
+            <option value="VISIT">Visita realizada</option>
+          </select>
+        </label>
+        <label>
           Nota
           <textarea name="note" minLength={3} maxLength={2000} rows={4} required />
         </label>

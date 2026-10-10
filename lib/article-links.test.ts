@@ -27,6 +27,14 @@ describe('article links', () => {
     ]);
   });
 
+  it('renders editorial bold markers as emphasis without interpreting HTML', () => {
+    expect(articleContentSegments('Custo: **preço anunciado + despesas**. <script>')).toEqual([
+      { text: 'Custo: ' },
+      { text: 'preço anunciado + despesas', strong: true },
+      { text: '. <script>' },
+    ]);
+  });
+
   it('accepts an official WordPress link on the apex domain', () => {
     expect(
       articleContentSegments('Veja https://imoveisdealtopadraorio.com.br/green-park/'),

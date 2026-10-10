@@ -1,6 +1,6 @@
 import { isPublicSiteUrl } from './public-destination';
 
-export type ArticleSegment = { text: string; href?: string };
+export type ArticleSegment = { text: string; href?: string; strong?: boolean };
 export type ArticleBlock = {
   kind: 'paragraph' | 'heading' | 'subheading' | 'list' | 'ordered-list';
   lines: string[];
@@ -56,5 +56,17 @@ export function articleContentSegments(paragraph: string): ArticleSegment[] {
   }
 
   if (cursor < paragraph.length) segments.push({ text: paragraph.slice(cursor) });
-  return segments;
+  return segments.flatMap((segment) => {
+    if (segment.href || !segment.text.includes('**')) return [segment];
+    const parts: ArticleSegment[] = [];
+    let start = 0;
+    for (const emphasis of segment.text.matchAll(/\*\*([^*\n]+)\*\*/gu)) {
+      const index = emphasis.index ?? 0;
+      if (index > start) parts.push({ text: segment.text.slice(start, index) });
+      parts.push({ text: emphasis[1], strong: true });
+      start = index + emphasis[0].length;
+    }
+    if (start < segment.text.length) parts.push({ text: segment.text.slice(start) });
+    return parts.length ? parts : [segment];
+  });
 }

@@ -93,7 +93,8 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/integracoes">Integrações de leads</Link>
         </>
       )}
-      <Link href="/admin/minha-conta">Senha e segurança</Link>
+      <Link href="/admin/minha-conta">Minha conta e conexões</Link>
+      {hasPermission(role, 'catalog:write') && <Link href="/admin/sites">Meus sites</Link>}
     </>
   );
 }

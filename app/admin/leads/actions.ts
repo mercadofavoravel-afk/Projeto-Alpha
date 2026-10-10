@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
 
 export async function distributeUnassignedLeadsAction() {
   const actor = await requireRole(['ADMIN', 'DIRECTOR']);
@@ -21,6 +22,7 @@ export async function distributeUnassignedLeadsAction() {
       where: {
         isActive: true,
         acceptsLeads: true,
+        ...assignableSubscriptionWhere(),
         role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
       },
       select: {

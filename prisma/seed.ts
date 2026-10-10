@@ -40,6 +40,7 @@ async function main() {
       name: 'Administrador ALPHA',
       passwordHash,
       role: 'ADMIN',
+      isPlatformOwner: true,
       isActive: true,
     },
     create: {
@@ -47,6 +48,7 @@ async function main() {
       name: 'Administrador ALPHA',
       passwordHash,
       role: 'ADMIN',
+      isPlatformOwner: true,
       isActive: true,
     },
   });

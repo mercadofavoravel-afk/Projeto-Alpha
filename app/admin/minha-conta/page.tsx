@@ -1,14 +1,55 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { changeOwnPassword } from './actions';
+import { db } from '@/lib/db';
+import { selectableMarketingAccounts } from '@/lib/marketing-accounts';
+import { oauthConfig, personalGoogleWebhookKey } from '@/lib/marketing-oauth';
+import { alphaPath } from '@/lib/public-path';
+import { changeOwnPassword, disconnectMarketingAccount, selectMarketingAccount } from './actions';
 
 export default async function AccountPage({
   searchParams,
 }: {
-  searchParams: Promise<{ result?: string }>;
+  searchParams: Promise<{ result?: string; integracao?: string }>;
 }) {
   const user = await requireUser();
-  const { result } = await searchParams;
+  const { result, integracao } = await searchParams;
+  const connections = await db.marketingConnection.findMany({
+    where: { userId: user.id },
+  });
+  const accountOptions = new Map(
+    await Promise.all(
+      connections.map(async (connection) => {
+        try {
+          const accounts = await selectableMarketingAccounts(connection);
+          return [
+            connection.provider,
+            accounts?.map(({ id, name }) => ({ id, name })) || [],
+          ] as const;
+        } catch {
+          return [connection.provider, [] as { id: string; name: string }[]] as const;
+        }
+      }),
+    ),
+  );
+  const notices: Record<string, string> = {
+    conectado:
+      'Conta autorizada. A entrega automática de leads exige a ativação da conta de anúncios e dos formulários.',
+    desconectado: 'Conexão removida deste usuário no Alpha.',
+    configuracao:
+      'O aplicativo comercial ainda não está configurado no servidor. O administrador precisa registrar as credenciais oficiais do aplicativo.',
+    cancelado: 'A autorização foi cancelada ou recusada na plataforma.',
+    expirado: 'O prazo da autorização terminou. Inicie a conexão novamente.',
+    falha: 'Não foi possível confirmar a autorização. Tente conectar novamente.',
+    sessao: 'Entre novamente no Alpha e retome a conexão.',
+    invalido: 'Plataforma inválida.',
+    'conta-inacessivel':
+      'A conta não está disponível para esse perfil. Atualize a autorização e tente novamente.',
+    'conta-em-uso': 'Esta conta ou Página já está vinculada a outro usuário do Alpha.',
+    'conta-selecionada':
+      'Conta selecionada. Confira a configuração do formulário e o primeiro recebimento real antes de considerar a captação ativa.',
+    assinatura:
+      'A Meta não aceitou a assinatura de leads da Página. Confira permissões e o aplicativo de webhooks.',
+  };
   return (
     <>
       <h1>Senha e segurança</h1>
@@ -63,6 +104,115 @@ export default async function AccountPage({
         <Link className="btn" href="/recuperar-senha">
           Recuperar senha por e-mail
         </Link>
+      </section>
+      <section className="admin-card" id="contas-conectadas">
+        <h2>Minhas contas de anúncios</h2>
+        <p>
+          Conexões opcionais e individuais. Entre com seu e-mail e senha apenas na página oficial do
+          Google ou da Meta que será aberta após clicar em conectar. O Alpha guarda somente a
+          autorização criptografada; sua senha nunca passa pelo Alpha.
+        </p>
+        {integracao && notices[integracao] && <p role="status">{notices[integracao]}</p>}
+        <div className="form-grid">
+          {(
+            [
+              ['google_ads', 'Google Ads'],
+              ['meta', 'Meta Ads e Instagram'],
+            ] as const
+          ).map(([provider, label]) => {
+            const account = connections.find((connection) => connection.provider === provider);
+            const ready = Boolean(oauthConfig(provider));
+            const expired = account?.expiresAt && account.expiresAt <= new Date();
+            return (
+              <div className="panel" key={provider}>
+                <h3>{label}</h3>
+                <p>
+                  {account
+                    ? `${account.displayName || account.email || 'Conta autorizada'}${account.email && account.displayName ? ` · ${account.email}` : ''}`
+                    : 'Nenhuma conta conectada a este usuário.'}
+                </p>
+                <p>
+                  {account
+                    ? expired
+                      ? 'A autorização venceu; reconecte para voltar a acessar a conta.'
+                      : 'Autorização registrada. Recebimento de leads ainda precisa ser ativado e validado.'
+                    : ready
+                      ? 'Pronta para iniciar a autorização.'
+                      : 'Aguardando configuração do aplicativo comercial pelo administrador.'}
+                </p>
+                {account?.selectedAccountId && (
+                  <p>
+                    Recurso selecionado: {account.selectedAccountName || account.selectedAccountId}{' '}
+                    ({account.selectedAccountId}).
+                  </p>
+                )}
+                {ready && (
+                  <Link className="btn" href={`/api/admin/integrations/${provider}/start`}>
+                    {account ? 'Reconectar conta' : `Conectar ${label}`}
+                  </Link>
+                )}
+                {account && (accountOptions.get(provider)?.length || 0) > 0 && (
+                  <form action={selectMarketingAccount}>
+                    <input type="hidden" name="provider" value={provider} />
+                    <label>
+                      {provider === 'google_ads'
+                        ? 'Conta de anúncios acessível'
+                        : 'Página que recebe os formulários'}
+                      <select
+                        name="accountId"
+                        defaultValue={account.selectedAccountId || ''}
+                        required
+                      >
+                        <option value="" disabled>
+                          Selecione uma conta
+                        </option>
+                        {accountOptions.get(provider)?.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button type="submit">Usar esta conta no Alpha</button>
+                  </form>
+                )}
+                {provider === 'google_ads' && account?.selectedAccountId && (
+                  <div>
+                    <p>
+                      Para formulários nativos do Google Ads, configure no formulário desta conta:
+                    </p>
+                    <label>
+                      URL do webhook
+                      <input
+                        readOnly
+                        value={`${new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').origin}${alphaPath('/api/integrations/google-ads/leads')}`}
+                      />
+                    </label>
+                    <label>
+                      Chave do webhook desta conexão
+                      <input readOnly value={personalGoogleWebhookKey(account.id)} />
+                    </label>
+                    <p>
+                      Esta chave é confidencial. Ela identifica a conta selecionada e encaminha seus
+                      leads ao usuário conectado.
+                    </p>
+                  </div>
+                )}
+                {account && (
+                  <form action={disconnectMarketingAccount}>
+                    <input type="hidden" name="provider" value={provider} />
+                    <button type="submit">Desconectar minha conta</button>
+                  </form>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p>
+          Autorizar o perfil é o primeiro passo. Selecione a conta de anúncios ou Página, ative o
+          formulário correspondente e verifique a entrega com um lead real autorizado. A conexão de
+          outro usuário não altera a sua.
+        </p>
       </section>
     </>
   );

@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseMetaLeadDetail, parseMetaNotifications } from '@/lib/meta-lead-form';
+import { decryptMarketingToken } from '@/lib/marketing-oauth';
+import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
 
 const provider = 'META_LEAD_ADS';
 
@@ -18,7 +20,6 @@ function equals(actual: string, expected: string) {
 function config() {
   const appSecret = process.env.META_LEAD_APP_SECRET;
   const verifyToken = process.env.META_LEAD_VERIFY_TOKEN;
-  const accessToken = process.env.META_LEAD_ACCESS_TOKEN;
   const graphVersion = process.env.META_GRAPH_VERSION;
   const pageIds = (process.env.META_LEAD_PAGE_IDS || '')
     .split(',')
@@ -27,14 +28,12 @@ function config() {
   if (
     !appSecret ||
     !verifyToken ||
-    !accessToken ||
-    [appSecret, verifyToken, accessToken].some((value) => value.startsWith('replace-')) ||
+    [appSecret, verifyToken].some((value) => value.startsWith('replace-')) ||
     !graphVersion?.match(/^v\d+\.\d+$/) ||
-    !pageIds.length ||
     pageIds.some((id) => !/^\d{1,40}$/.test(id))
   )
     return null;
-  return { appSecret, verifyToken, accessToken, graphVersion, pageIds };
+  return { appSecret, verifyToken, graphVersion, pageIds };
 }
 
 export async function GET(request: Request) {
@@ -55,7 +54,7 @@ export async function GET(request: Request) {
 
 async function receiveLead(
   notification: { externalId: string; pageId: string; formId: string | null },
-  settings: NonNullable<ReturnType<typeof config>>,
+  settings: { accessToken: string; graphVersion: string; ownerId: string | null },
 ) {
   const key = { provider_externalId: { provider, externalId: notification.externalId } };
   if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) return true;
@@ -90,6 +89,7 @@ async function receiveLead(
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+              ...assignableSubscriptionWhere(),
             },
             select: {
               id: true,
@@ -108,7 +108,12 @@ async function receiveLead(
             serviceRegions: user.serviceRegions,
             lastLeadAssignedAt: user.lastLeadAssignedAt,
           }));
-          const assignee = chooseAssignee(candidates, details.neighborhood);
+          const assignee = settings.ownerId
+            ? candidates.find((candidate) => candidate.id === settings.ownerId) || null
+            : chooseAssignee(candidates, details.neighborhood);
+          // Never place another customer's lead in the central unassigned queue.
+          if (settings.ownerId && !assignee)
+            throw new Error('Responsável individual indisponível.');
           const now = new Date();
           const created = await transaction.lead.create({
             data: {
@@ -147,6 +152,7 @@ async function receiveLead(
                 pageId: notification.pageId,
                 formId: details.formId || notification.formId,
                 assignedToId: assignee?.id || null,
+                ownerId: settings.ownerId,
               },
             },
           });
@@ -204,9 +210,31 @@ export async function POST(request: Request) {
   if (!notifications) return NextResponse.json({ message: 'Dados inválidos.' }, { status: 400 });
   for (const notification of notifications) {
     if (notification.isTest) continue;
-    if (!settings.pageIds.includes(notification.pageId))
+    const personal = await db.marketingConnection.findUnique({
+      where: { provider_selectedAccountId: { provider, selectedAccountId: notification.pageId } },
+      select: { userId: true, selectedTokenEncrypted: true },
+    });
+    const legacy = settings.pageIds.includes(notification.pageId)
+      ? process.env.META_LEAD_ACCESS_TOKEN
+      : null;
+    if (!personal && !legacy)
       return NextResponse.json({ message: 'Página não autorizada.' }, { status: 403 });
-    if (!(await receiveLead(notification, settings)))
+    let accessToken: string;
+    try {
+      accessToken = personal?.selectedTokenEncrypted
+        ? decryptMarketingToken(personal.selectedTokenEncrypted)
+        : legacy || '';
+    } catch {
+      return NextResponse.json({ message: 'Falha temporária. Tente novamente.' }, { status: 503 });
+    }
+    if (
+      !accessToken ||
+      !(await receiveLead(notification, {
+        accessToken,
+        graphVersion: settings.graphVersion,
+        ownerId: personal?.userId || null,
+      }))
+    )
       return NextResponse.json({ message: 'Falha temporária. Tente novamente.' }, { status: 503 });
   }
   return NextResponse.json({});

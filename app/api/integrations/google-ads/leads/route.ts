@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
+import { hashOAuthState } from '@/lib/marketing-oauth';
+import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
 
 function sameKey(actual: string, expected: string) {
   const actualHash = createHash('sha256').update(actual).digest();
@@ -15,9 +17,6 @@ function sameKey(actual: string, expected: string) {
 
 export async function POST(request: Request) {
   const expectedKey = process.env.GOOGLE_ADS_LEAD_WEBHOOK_KEY;
-  if (!expectedKey || expectedKey.startsWith('replace-')) {
-    return NextResponse.json({ message: 'Integração não configurada.' }, { status: 503 });
-  }
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
     return NextResponse.json({ message: 'Conteúdo inválido.' }, { status: 415 });
   }
@@ -37,7 +36,16 @@ export async function POST(request: Request) {
   }
   const lead = parseGoogleLeadForm(payload);
   if (!lead) return NextResponse.json({ message: 'Dados incompletos.' }, { status: 400 });
-  if (!sameKey(lead.key, expectedKey)) {
+  const legacy = Boolean(
+    expectedKey && !expectedKey.startsWith('replace-') && sameKey(lead.key, expectedKey),
+  );
+  const personal = legacy
+    ? null
+    : await db.marketingConnection.findUnique({
+        where: { webhookKeyHash: hashOAuthState(lead.key) },
+        select: { userId: true, provider: true, selectedAccountId: true },
+      });
+  if (!legacy && (!personal || personal.provider !== 'google_ads' || !personal.selectedAccountId)) {
     return NextResponse.json({ message: 'Não autorizado.' }, { status: 401 });
   }
   // The Google Ads form builder sends sample leads. A test must never enter the commercial queue.
@@ -52,6 +60,7 @@ export async function POST(request: Request) {
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+              ...assignableSubscriptionWhere(),
             },
             select: {
               id: true,
@@ -70,7 +79,11 @@ export async function POST(request: Request) {
             serviceRegions: user.serviceRegions,
             lastLeadAssignedAt: user.lastLeadAssignedAt,
           }));
-          const assignee = chooseAssignee(candidates, lead.neighborhood);
+          const assignee = personal
+            ? candidates.find((candidate) => candidate.id === personal.userId) || null
+            : chooseAssignee(candidates, lead.neighborhood);
+          // Never place another customer's lead in the central unassigned queue.
+          if (personal && !assignee) throw new Error('Responsável individual indisponível.');
           const receivedAt = new Date();
           const created = await transaction.lead.create({
             data: {
@@ -105,6 +118,8 @@ export async function POST(request: Request) {
               metadata: {
                 formId: lead.formId,
                 campaignId: lead.campaignId,
+                accountId: personal?.selectedAccountId || null,
+                ownerId: personal?.userId || null,
                 assignedToId: assignee?.id,
               },
             },

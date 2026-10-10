@@ -6,6 +6,7 @@ import { oauthConfig, personalGoogleWebhookKey } from '@/lib/marketing-oauth';
 import { alphaPath } from '@/lib/public-path';
 import { isCommercialCustomer } from '@/lib/commercial-subscription';
 import { changeOwnPassword, disconnectMarketingAccount, selectMarketingAccount } from './actions';
+import { InstallAlphaApp } from './InstallAlphaApp';
 
 export default async function AccountPage({
   searchParams,
@@ -115,6 +116,7 @@ export default async function AccountPage({
           Recuperar senha por e-mail
         </Link>
       </section>
+      <InstallAlphaApp />
       <section className="admin-card" id="contas-conectadas">
         <h2>Minhas contas de anúncios</h2>
         <p>

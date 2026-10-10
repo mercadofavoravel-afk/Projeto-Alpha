@@ -1,0 +1,36 @@
+# Sites de clientes no Alpha
+
+## Modelo de acesso
+
+O site oficial **imoveisdealtopadraorio.com.br** e seus artigos usam o CRM da matriz (`Lead`), inclusive quando chegam por formulário, Google Ads ou Meta vinculados à operação interna. O cliente licenciado conecta o próprio WordPress e suas contas de anúncios; os contatos ficam no CRM do site dele (`CustomerLead`). O domínio oficial é reservado e não pode ser conectado como site de cliente. Contas comerciais não integram a distribuição automática nem os seletores de corretores da matriz.
+
+O usuário entra no Alpha com seu próprio e-mail e senha. A matriz tem contas internas e administra a plataforma. Cada cliente deve pertencer a uma organização isolada, que pode ter membros e vários sites. O `CustomerSite` desta etapa pertence diretamente a um usuário e serve de começo para esse modelo; ainda não representa isolamento completo de organizações.
+
+Enquanto essa separação não estiver pronta, uma conta marcada `COMMERCIAL` é barrada das rotas de CRM, catálogo, artigos e indicadores compartilhados da matriz; ela só pode abrir o painel restrito, sua conta e seus sites. A criação comercial pela interface continua desativada. Esta é uma restrição preventiva, não a entrega final do produto.
+
+## WordPress
+
+Em **Meus sites**, o usuário editorial informa a URL HTTPS, o nome do usuário WordPress e **uma senha de aplicativo do WordPress**, criada para o Alpha. Nunca se deve pedir ou armazenar a senha principal do painel. O Alpha verifica `users/me?context=edit` e a capacidade `edit_posts` na API REST antes de gravar a senha de aplicativo criptografada. A conexão é própria de quem a criou, admite até dez sites por conta e pode ser removida. O endereço é validado e a requisição HTTPS é fixada num IP público verificado, sem seguir redirecionamentos. Instalações sem um endereço IPv4 público ou API REST acessível não são aceitas nesta etapa.
+
+Referência: [senhas de aplicativo na documentação oficial do WordPress](https://developer.wordpress.org/advanced-administration/security/application-passwords/).
+
+O editor de cada site salva artigos em rascunho isolado, permite marcar revisado, envia um rascunho à API REST e exige uma segunda ação explícita para publicar. Armazena o ID e a URL retornados pelo WordPress. Antes de publicar, o editor precisa conferir originalidade, fatos, links e renderização na prévia do próprio WordPress. Título e descrição SEO ficam armazenados no Alpha, mas **não são enviados ao plugin SEO**: metadados de plugins exigem integração compatível específica. Arquivos físicos, robots e sitemap dependem do CMS e da hospedagem do cliente. Erros de rede após uma escrita remota exigem conferência manual do post antes de repetir, pois a confirmação local pode não ter sido gravada.
+
+O post recebe um link individual para `/alpha/captacao/<id>` no domínio configurado do Alpha. O formulário fica disponível após a confirmação de publicação e exige consentimento. O contato, a origem do artigo, os parâmetros UTM recebidos e a tarefa de primeiro atendimento ficam em `CustomerLead`/`CustomerLeadActivity`, separados das tabelas de leads da matriz. O dono do site acompanha esses contatos em **Meus sites → Leads**, altera status e registra notas ou contatos realizados. O painel mostra alertas por site para primeiro contato pendente, tarefa vencida e atendimento parado. Esta etapa não instala um formulário dentro do WordPress; antes de comercializar, validar o percurso entre o post público, a página de cadastro e o CRM com autorização de teste, além de controles de abuso e privacidade por cliente.
+
+Contas Google Ads e Páginas Meta podem ser vinculadas pelo próprio usuário a um único site conectado. O receptor aceita o lead somente quando o titular e o site destinatário estão ativos e gravará um registro separado, com provedor, identificador externo e tarefa. Se a conexão não possui site destinatário, retorna erro temporário e não escreve no CRM da matriz. Cada conta/Página só pode ser selecionada por um usuário do Alpha nesta etapa. Isso ainda exige configuração oficial e ensaio real antes de ser ofertado.
+
+## WhatsApp
+
+O botão `wa.me` atual abre uma conversa individual e não é um disparador automatizado. O módulo comercial de envio deve associar uma conta WhatsApp Business Platform à organização, guardar os identificadores e tokens por cliente, registrar consentimento do destinatário e opt-out, usar modelos aprovados quando a empresa inicia a conversa, limitar envios, guardar tentativas/respostas e processar webhooks assinados. Nenhum envio em massa ou teste é ativado por esta migração.
+
+Referência: [Política de Negócios oficial do WhatsApp](https://business.whatsapp.com/policy/preview?lang=pt_BR).
+
+## Antes de oferecer a clientes externos
+
+1. Criar organizações e membros com papéis próprios, migrar a matriz e escopar **todas** as consultas e mutações de leads, equipe, artigos, catálogo, arquivos, fontes, analítica e integrações.
+2. Completar reconciliação de falhas remotas, renovação/revogação de credenciais e suporte a plugins SEO conhecidos; conferir formulário, anúncios e origem de cada lead no site conectado.
+3. Conectar Search Console por propriedade verificada e gerar recomendações e arquivos compatíveis com cada CMS, sem presumir acesso à hospedagem.
+4. Integrar oficialmente WhatsApp Business Platform por cliente, com consentimento, templates aprovados, webhook e auditoria.
+5. Concluir cobrança com valor configurável, boleto e confirmação autenticada, aplicar teste de 30 dias e tolerância de cinco apenas à organização inadimplente, além de validar reativação.
+6. Implantar as migrações, configurar a chave de criptografia, validar um WordPress de cada cliente e ensaiar separação entre dois clientes reais ou de homologação antes de abrir as inscrições.

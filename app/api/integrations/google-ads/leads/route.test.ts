@@ -7,10 +7,17 @@ const calls = vi.hoisted(() => ({
   activity: vi.fn(),
   audit: vi.fn(),
   updateUser: vi.fn(),
+  personalConnection: vi.fn(),
+  storeCustomerExternal: vi.fn(),
+}));
+
+vi.mock('@/lib/customer-external-lead', () => ({
+  storeCustomerExternalLead: calls.storeCustomerExternal,
 }));
 
 vi.mock('@/lib/db', () => ({
   db: {
+    marketingConnection: { findUnique: calls.personalConnection },
     $transaction: async (callback: (transaction: unknown) => Promise<unknown>) =>
       callback({
         user: { findMany: calls.users, update: calls.updateUser },
@@ -57,6 +64,8 @@ describe('Google Ads lead form receiver', () => {
       },
     ]);
     calls.createLead.mockResolvedValue({ id: 'lead-1' });
+    calls.personalConnection.mockResolvedValue(null);
+    calls.storeCustomerExternal.mockResolvedValue(true);
   });
   afterEach(() => {
     if (previousKey === undefined) delete process.env.GOOGLE_ADS_LEAD_WEBHOOK_KEY;
@@ -71,6 +80,9 @@ describe('Google Ads lead form receiver', () => {
 
   it('keeps campaign provenance, assigns an eligible professional and records a receipt', async () => {
     expect((await POST(request())).status).toBe(200);
+    expect(calls.users).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     expect(calls.createLead).toHaveBeenCalledWith({
       data: expect.objectContaining({
         source: 'Google Ads | formulário 123',
@@ -93,5 +105,82 @@ describe('Google Ads lead form receiver', () => {
         type: 'TASK',
       }),
     });
+  });
+
+  it('routes an individually configured webhook only to its account owner', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'broker-2',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
+    });
+    calls.users.mockResolvedValue([
+      {
+        id: 'broker-1',
+        leadCapacity: 30,
+        serviceRegions: [],
+        lastLeadAssignedAt: null,
+        _count: { assignedLeads: 0 },
+      },
+      {
+        id: 'broker-2',
+        leadCapacity: 30,
+        serviceRegions: [],
+        lastLeadAssignedAt: null,
+        _count: { assignedLeads: 0 },
+      },
+    ]);
+    expect((await POST(request('personal-key'))).status).toBe(200);
+    expect(calls.createLead).toHaveBeenCalledWith({
+      data: expect.objectContaining({ assignedToId: 'broker-2' }),
+    });
+    expect(calls.audit).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        metadata: expect.objectContaining({ accountId: '1234567890', ownerId: 'broker-2' }),
+      }),
+    });
+  });
+
+  it('never puts a personal lead in the global queue when its owner is unavailable', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'broker-2',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
+    });
+    expect((await POST(request('personal-key'))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('never puts an external commercial customer lead in the matrix CRM', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(request('personal-key'))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+    expect(calls.users).not.toHaveBeenCalled();
+  });
+
+  it('routes a commercial form to the site selected by its owner', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      provider: 'google_ads',
+      selectedAccountId: '1234567890',
+      leadSiteId: 'site-1',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(request('personal-key'))).status).toBe(200);
+    expect(calls.storeCustomerExternal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        siteId: 'site-1',
+        ownerId: 'customer-1',
+        provider: 'GOOGLE_ADS',
+        externalId: 'google-lead-001',
+      }),
+    );
+    expect(calls.createLead).not.toHaveBeenCalled();
   });
 });

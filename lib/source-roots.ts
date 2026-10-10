@@ -1,15 +1,8 @@
 import 'server-only';
 
-export type SourceRootKind =
-  | 'owned'
-  | 'developer'
-  | 'market';
+export type SourceRootKind = 'owned' | 'developer' | 'market';
 
-export type SourceAccessKind =
-  | 'website'
-  | 'link_hub'
-  | 'drive'
-  | 'portal';
+export type SourceAccessKind = 'website' | 'link_hub' | 'drive' | 'portal';
 
 export type SourceRoot = {
   id: string;
@@ -48,8 +41,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 95,
     city: 'Rio de Janeiro',
-    notes:
-      'Fonte oficial Mozak para empreendimentos, documentos e conteúdo.',
+    notes: 'Fonte oficial Mozak para empreendimentos, documentos e conteúdo.',
     followExternalLinks: false,
   },
 
@@ -62,8 +54,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 95,
     city: 'Rio de Janeiro',
-    notes:
-      'Fonte institucional para projetos imobiliários e lançamentos Opportunity.',
+    notes: 'Fonte institucional para projetos imobiliários e lançamentos Opportunity.',
     followExternalLinks: false,
   },
 
@@ -89,8 +80,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'website',
     enabled: true,
     priority: 95,
-    notes:
-      'Fonte oficial Tegra para empreendimentos, lançamentos, bairros, documentos e conteúdo.',
+    notes: 'Fonte oficial Tegra para empreendimentos, lançamentos, bairros, documentos e conteúdo.',
     followExternalLinks: false,
   },
 
@@ -115,8 +105,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'portal',
     enabled: true,
     priority: 95,
-    notes:
-      'Portal comercial Tegra fornecido como fonte adicional de materiais e empreendimentos.',
+    notes: 'Portal comercial Tegra fornecido como fonte adicional de materiais e empreendimentos.',
     followExternalLinks: true,
   },
 
@@ -129,8 +118,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 95,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub comercial Patrimar Rio.',
+    notes: 'Hub comercial Patrimar Rio.',
     followExternalLinks: true,
   },
 
@@ -155,8 +143,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 90,
-    notes:
-      'Hub comercial NewView.',
+    notes: 'Hub comercial NewView.',
     followExternalLinks: true,
   },
 
@@ -168,8 +155,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 92,
-    notes:
-      'Hub fornecido para descoberta de projetos e materiais da Progress.',
+    notes: 'Hub fornecido para descoberta de projetos e materiais da Progress.',
     followExternalLinks: true,
   },
 
@@ -182,8 +168,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 90,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub do projeto/comercial Sensia Barra.',
+    notes: 'Hub do projeto/comercial Sensia Barra.',
     followExternalLinks: true,
   },
 
@@ -195,8 +180,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'website',
     enabled: true,
     priority: 85,
-    notes:
-      'Site fornecido como fonte de links e materiais imobiliários.',
+    notes: 'Site fornecido como fonte de links e materiais imobiliários.',
     followExternalLinks: true,
   },
 
@@ -209,8 +193,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 92,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub comercial do empreendimento Niemeyer 360.',
+    notes: 'Hub comercial do empreendimento Niemeyer 360.',
     followExternalLinks: true,
   },
 
@@ -222,8 +205,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 88,
-    notes:
-      'Hub de materiais para corretores e descoberta de fontes imobiliárias.',
+    notes: 'Hub de materiais para corretores e descoberta de fontes imobiliárias.',
     followExternalLinks: true,
   },
 
@@ -236,8 +218,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 95,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub comercial da Riva no Rio de Janeiro.',
+    notes: 'Hub comercial da Riva no Rio de Janeiro.',
     followExternalLinks: true,
   },
 
@@ -250,8 +231,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 95,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub oficial/comercial Ilha Pura e seus empreendimentos.',
+    notes: 'Hub oficial/comercial Ilha Pura e seus empreendimentos.',
     followExternalLinks: true,
   },
 
@@ -263,8 +243,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte imobiliária.',
+    notes: 'Pasta Google Drive fornecida como fonte imobiliária.',
     followExternalLinks: true,
   },
 
@@ -276,8 +255,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'portal',
     enabled: true,
     priority: 90,
-    notes:
-      'Portal de links para corretores, usado como gateway para novas fontes.',
+    notes: 'Portal de links para corretores, usado como gateway para novas fontes.',
     followExternalLinks: true,
   },
 
@@ -289,8 +267,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 95,
-    notes:
-      'Hub TAO Empreendimentos.',
+    notes: 'Hub TAO Empreendimentos.',
     followExternalLinks: true,
   },
 
@@ -302,8 +279,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+    notes: 'Pasta Google Drive fornecida como fonte de materiais.',
     followExternalLinks: true,
   },
 
@@ -328,8 +304,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+    notes: 'Pasta Google Drive fornecida como fonte de materiais.',
     followExternalLinks: true,
   },
 
@@ -341,8 +316,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+    notes: 'Pasta Google Drive fornecida como fonte de materiais.',
     followExternalLinks: true,
   },
 
@@ -355,8 +329,7 @@ export const sourceRoots: SourceRoot[] = [
     enabled: true,
     priority: 92,
     city: 'Rio de Janeiro',
-    notes:
-      'Hub comercial de showroom em Botafogo.',
+    notes: 'Hub comercial de showroom em Botafogo.',
     followExternalLinks: true,
   },
 
@@ -394,8 +367,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+    notes: 'Pasta Google Drive fornecida como fonte de materiais.',
     followExternalLinks: true,
   },
 
@@ -407,8 +379,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'drive',
     enabled: true,
     priority: 85,
-    notes:
-      'Pasta Google Drive fornecida como fonte de materiais.',
+    notes: 'Pasta Google Drive fornecida como fonte de materiais.',
     followExternalLinks: true,
   },
 
@@ -420,8 +391,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 90,
-    notes:
-      'Hub de materiais comerciais Avanço.',
+    notes: 'Hub de materiais comerciais Avanço.',
     followExternalLinks: true,
   },
 
@@ -446,8 +416,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 95,
-    notes:
-      'Hub da ARKT Incorporadora.',
+    notes: 'Hub da ARKT Incorporadora.',
     followExternalLinks: true,
   },
 
@@ -459,8 +428,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 92,
-    notes:
-      'Hub comercial Balassiano.',
+    notes: 'Hub comercial Balassiano.',
     followExternalLinks: true,
   },
 
@@ -472,8 +440,7 @@ export const sourceRoots: SourceRoot[] = [
     access: 'link_hub',
     enabled: true,
     priority: 90,
-    notes:
-      'Hub PIIMO fornecido como fonte imobiliária.',
+    notes: 'Hub PIIMO fornecido como fonte imobiliária.',
     followExternalLinks: true,
   },
 
@@ -493,138 +460,69 @@ export const sourceRoots: SourceRoot[] = [
 ];
 
 export function getEnabledSourceRoots() {
-  return sourceRoots
-    .filter(
-      (source) =>
-        source.enabled,
-    )
-    .sort(
-      (a, b) =>
-        b.priority -
-        a.priority,
-    );
+  return sourceRoots.filter((source) => source.enabled).sort((a, b) => b.priority - a.priority);
 }
 
 export function getDeveloperSourceRoots() {
-  return getEnabledSourceRoots().filter(
-    (source) =>
-      source.kind ===
-      'developer',
-  );
+  return getEnabledSourceRoots().filter((source) => source.kind === 'developer');
 }
 
 export function getGatewaySourceRoots() {
-  return getEnabledSourceRoots().filter(
-    (source) =>
-      source.followExternalLinks ===
-      true,
-  );
+  return getEnabledSourceRoots().filter((source) => source.followExternalLinks === true);
 }
 
-export function getSourceRootById(
-  id: string,
-) {
-  return sourceRoots.find(
-    (source) =>
-      source.id === id,
-  );
+export function getSourceRootById(id: string) {
+  return sourceRoots.find((source) => source.id === id);
 }
 
-export function getSourceRootByUrl(
-  value: string,
-) {
+export function getSourceRootByUrl(value: string) {
   try {
-    const target =
-      new URL(value);
+    const target = new URL(value);
 
-    const targetHost =
-      target.hostname.replace(
-        /^www\./,
-        '',
-      );
+    const targetHost = target.hostname.replace(/^www\./, '');
 
-    return sourceRoots.find(
-      (source) => {
-        try {
-          const sourceHost =
-            new URL(
-              source.url,
-            ).hostname.replace(
-              /^www\./,
-              '',
-            );
+    return sourceRoots.find((source) => {
+      try {
+        const sourceHost = new URL(source.url).hostname.replace(/^www\./, '');
 
-          if (
-            sourceHost !==
-            targetHost
-          ) {
-            return false;
-          }
-
-          if (
-            source.access ===
-              'link_hub' ||
-            source.access ===
-              'drive'
-          ) {
-            return (
-              normalizeComparableUrl(
-                source.url,
-              ) ===
-              normalizeComparableUrl(
-                value,
-              )
-            );
-          }
-
-          return true;
-        } catch {
+        if (sourceHost !== targetHost) {
           return false;
         }
-      },
-    );
+
+        if (source.access === 'link_hub' || source.access === 'drive') {
+          return normalizeComparableUrl(source.url) === normalizeComparableUrl(value);
+        }
+
+        return true;
+      } catch {
+        return false;
+      }
+    });
   } catch {
     return undefined;
   }
 }
 
-function normalizeComparableUrl(
-  value: string,
-) {
-  const url =
-    new URL(value);
+function normalizeComparableUrl(value: string) {
+  const url = new URL(value);
 
   url.hash = '';
 
-  for (
-    const key of [
-      'utm_source',
-      'utm_medium',
-      'utm_campaign',
-      'utm_term',
-      'utm_content',
-      'usp',
-      'sort',
-      'direction',
-    ]
-  ) {
-    url.searchParams.delete(
-      key,
-    );
+  for (const key of [
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_term',
+    'utm_content',
+    'usp',
+    'sort',
+    'direction',
+  ]) {
+    url.searchParams.delete(key);
   }
 
-  if (
-    url.pathname.length >
-      1 &&
-    url.pathname.endsWith(
-      '/',
-    )
-  ) {
-    url.pathname =
-      url.pathname.slice(
-        0,
-        -1,
-      );
+  if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+    url.pathname = url.pathname.slice(0, -1);
   }
 
   return url.toString();

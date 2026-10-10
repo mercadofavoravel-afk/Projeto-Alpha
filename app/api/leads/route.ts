@@ -60,6 +60,7 @@ export async function POST(request: Request) {
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+              billingMode: 'INTERNAL',
             },
             select: {
               id: true,

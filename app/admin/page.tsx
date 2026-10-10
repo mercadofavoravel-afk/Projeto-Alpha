@@ -47,6 +47,26 @@ function statusLabel(status: string) {
 
 export default async function Page() {
   const user = await requireUser();
+  if (user.billingMode === 'COMMERCIAL' && !user.isPlatformOwner) {
+    return (
+      <>
+        <div className="eyebrow">Conta comercial</div>
+        <h1>Seus sites no Alpha</h1>
+        <p>
+          Conecte seu WordPress com uma senha de aplicativo individual e prepare artigos no blog
+          deste site. Antes de publicar, revise o texto e a prévia no WordPress. Cada artigo pode
+          direcionar ao seu formulário no Alpha, com contatos separados por site. A captação de
+          leads por anúncios exige conectar a conta ao site e fazer um ensaio autorizado. O
+          disparador de WhatsApp e os metadados de plugins SEO ainda dependem de integrações
+          específicas.
+        </p>
+        <div className="admin-shortcuts">
+          <Link href="/admin/sites">Meus sites</Link>
+          <Link href="/admin/minha-conta">Minha conta e conexões</Link>
+        </div>
+      </>
+    );
+  }
   const leadScope = leadAccessWhere(user);
   const { today, tomorrow } = crmDayWindow(new Date());
 

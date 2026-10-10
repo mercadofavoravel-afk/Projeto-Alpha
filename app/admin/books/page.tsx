@@ -6,9 +6,7 @@ import { processBookContent } from '@/lib/book-processor';
 export const dynamic = 'force-dynamic';
 
 function inferMimeType(url: string) {
-  const clean = url
-    .toLocaleLowerCase('pt-BR')
-    .split('?')[0];
+  const clean = url.toLocaleLowerCase('pt-BR').split('?')[0];
 
   if (clean.endsWith('.pdf')) {
     return 'application/pdf';
@@ -18,10 +16,7 @@ function inferMimeType(url: string) {
     return 'application/json';
   }
 
-  if (
-    clean.endsWith('.txt') ||
-    clean.endsWith('.md')
-  ) {
+  if (clean.endsWith('.txt') || clean.endsWith('.md')) {
     return 'text/plain';
   }
 
@@ -32,120 +27,81 @@ function inferFileName(url: string) {
   try {
     const parsed = new URL(url);
 
-    const lastPart =
-      parsed.pathname
-        .split('/')
-        .filter(Boolean)
-        .pop();
+    const lastPart = parsed.pathname.split('/').filter(Boolean).pop();
 
-    return lastPart
-      ? decodeURIComponent(lastPart)
-      : parsed.hostname;
+    return lastPart ? decodeURIComponent(lastPart) : parsed.hostname;
   } catch {
     return 'fonte-de-inteligencia';
   }
 }
 
-async function addSourceAction(
-  formData: FormData,
-) {
+async function addSourceAction(formData: FormData) {
   'use server';
 
-  await requirePermission(
-    'media:write',
-  );
+  await requirePermission('media:write');
 
-  const storageUrl = String(
-    formData.get('storageUrl') ?? '',
-  ).trim();
+  const storageUrl = String(formData.get('storageUrl') ?? '').trim();
 
-  const projectIdValue = String(
-    formData.get('projectId') ?? '',
-  ).trim();
+  const projectIdValue = String(formData.get('projectId') ?? '').trim();
 
-  const projectId =
-    projectIdValue || null;
+  const projectId = projectIdValue || null;
 
   if (!storageUrl) {
-    throw new Error(
-      'Informe a URL da fonte.',
-    );
+    throw new Error('Informe a URL da fonte.');
   }
 
   let parsedUrl: URL;
 
   try {
-    parsedUrl = new URL(
-      storageUrl,
-    );
+    parsedUrl = new URL(storageUrl);
   } catch {
-    throw new Error(
-      'A URL informada é inválida.',
-    );
+    throw new Error('A URL informada é inválida.');
   }
 
-  if (
-    ![
-      'http:',
-      'https:',
-    ].includes(parsedUrl.protocol)
-  ) {
-    throw new Error(
-      'A fonte precisa usar HTTP ou HTTPS.',
-    );
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    throw new Error('A fonte precisa usar HTTP ou HTTPS.');
   }
 
   if (projectId) {
-    const project =
-      await db.project.findUnique({
-        where: {
-          id: projectId,
-        },
+    const project = await db.project.findUnique({
+      where: {
+        id: projectId,
+      },
 
-        select: {
-          id: true,
-        },
-      });
-
-    if (!project) {
-      throw new Error(
-        'Empreendimento não encontrado.',
-      );
-    }
-  }
-
-  const fileName =
-    inferFileName(storageUrl);
-
-  const mimeType =
-    inferMimeType(storageUrl);
-
-  const book =
-    await db.bookIngestion.create({
-      data: {
-        fileName,
-        storageUrl,
-        mimeType,
-        projectId,
-        status: 'UPLOADED',
-        progress: 0,
+      select: {
+        id: true,
       },
     });
 
-  const result =
-    await processBookContent({
-      fileName:
-        book.fileName,
+    if (!project) {
+      throw new Error('Empreendimento não encontrado.');
+    }
+  }
 
-      storageUrl:
-        book.storageUrl,
+  const fileName = inferFileName(storageUrl);
 
-      mimeType:
-        book.mimeType,
+  const mimeType = inferMimeType(storageUrl);
 
-      extracted:
-        book.extracted,
-    });
+  const book = await db.bookIngestion.create({
+    data: {
+      fileName,
+      storageUrl,
+      mimeType,
+      projectId,
+      status: 'UPLOADED',
+      progress: 0,
+    },
+  });
+
+  const result = await processBookContent({
+    fileName: book.fileName,
+
+    storageUrl: book.storageUrl,
+
+    mimeType: book.mimeType,
+
+    extracted: book.extracted,
+  });
 
   if (!result.ok) {
     await db.bookIngestion.update({
@@ -156,14 +112,11 @@ async function addSourceAction(
       data: {
         status: 'FAILED',
         progress: 100,
-        error:
-          result.message,
+        error: result.message,
       },
     });
 
-    revalidatePath(
-      '/admin/books',
-    );
+    revalidatePath('/admin/books');
 
     return;
   }
@@ -179,155 +132,103 @@ async function addSourceAction(
       error: null,
 
       extracted: {
-        text:
-          result.text,
+        text: result.text,
 
-        characterCount:
-          result.characterCount,
+        characterCount: result.characterCount,
 
-        source:
-          result.source,
+        source: result.source,
 
-        mimeType:
-          result.mimeType,
+        mimeType: result.mimeType,
 
-        processedAt:
-          new Date()
-            .toISOString(),
+        processedAt: new Date().toISOString(),
       },
     },
   });
 
-  revalidatePath(
-    '/admin/books',
-  );
+  revalidatePath('/admin/books');
 }
 
 export default async function BooksPage() {
-  await requirePermission(
-    'media:write',
-  );
+  await requirePermission('media:write');
 
-  const [books, projects] =
-    await Promise.all([
-      db.bookIngestion.findMany({
-        include: {
-          project: {
-            select: {
-              name: true,
-            },
+  const [books, projects] = await Promise.all([
+    db.bookIngestion.findMany({
+      include: {
+        project: {
+          select: {
+            name: true,
           },
         },
+      },
 
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
 
-      db.project.findMany({
-        where: {
-          publishStatus:
-            'PUBLISHED',
-        },
+    db.project.findMany({
+      where: {
+        publishStatus: 'PUBLISHED',
+      },
 
-        select: {
-          id: true,
-          name: true,
-          neighborhood: {
-            select: {
-              name: true,
-            },
+      select: {
+        id: true,
+        name: true,
+        neighborhood: {
+          select: {
+            name: true,
           },
         },
+      },
 
-        orderBy: {
-          name: 'asc',
-        },
-      }),
-    ]);
+      orderBy: {
+        name: 'asc',
+      },
+    }),
+  ]);
 
   return (
     <>
-      <div className="eyebrow">
-        Ingestão documental
-      </div>
+      <div className="eyebrow">Ingestão documental</div>
 
       <h1>Books</h1>
 
       <div className="notice">
-        Cadastre fontes de inteligência
-        para que o Alpha possa processar
-        informações e reutilizá-las em
-        empreendimentos, bairros, busca
-        e SEO.
+        Cadastre fontes de inteligência para que o Alpha possa processar informações e reutilizá-las
+        em empreendimentos, bairros, busca e SEO.
       </div>
 
       <section className="source-card">
         <div>
-          <div className="eyebrow">
-            Inteligência de mercado
-          </div>
+          <div className="eyebrow">Inteligência de mercado</div>
 
-          <h2>
-            Adicionar fonte
-          </h2>
+          <h2>Adicionar fonte</h2>
 
-          <p>
-            Informe um link de material,
-            página oficial, documento ou
-            outra fonte autorizada.
-          </p>
+          <p>Informe um link de material, página oficial, documento ou outra fonte autorizada.</p>
         </div>
 
-        <form
-          action={addSourceAction}
-          className="source-form"
-        >
+        <form action={addSourceAction} className="source-form">
           <label>
             URL da fonte
-
-            <input
-              type="url"
-              name="storageUrl"
-              required
-              placeholder="https://..."
-            />
+            <input type="url" name="storageUrl" required placeholder="https://..." />
           </label>
 
           <label>
             Empreendimento relacionado
+            <select name="projectId" defaultValue="">
+              <option value="">Fonte geral / não associada</option>
 
-            <select
-              name="projectId"
-              defaultValue=""
-            >
-              <option value="">
-                Fonte geral / não associada
-              </option>
-
-              {projects.map(
-                (project) => (
-                  <option
-                    key={project.id}
-                    value={project.id}
-                  >
-                    {project.name}
-                    {' · '}
-                    {
-                      project
-                        .neighborhood
-                        .name
-                    }
-                  </option>
-                ),
-              )}
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                  {' · '}
+                  {project.neighborhood.name}
+                </option>
+              ))}
             </select>
           </label>
 
-          <button
-            type="submit"
-            className="source-button"
-          >
+          <button type="submit" className="source-button">
             Adicionar e processar
           </button>
         </form>
@@ -336,20 +237,13 @@ export default async function BooksPage() {
       <section className="books-section">
         <div className="books-head">
           <div>
-            <div className="eyebrow">
-              Base documental
-            </div>
+            <div className="eyebrow">Base documental</div>
 
-            <h2>
-              Fontes cadastradas
-            </h2>
+            <h2>Fontes cadastradas</h2>
           </div>
 
           <strong>
-            {books.length}{' '}
-            {books.length === 1
-              ? 'fonte'
-              : 'fontes'}
+            {books.length} {books.length === 1 ? 'fonte' : 'fontes'}
           </strong>
         </div>
 
@@ -359,9 +253,7 @@ export default async function BooksPage() {
               <thead>
                 <tr>
                   <th>Arquivo / fonte</th>
-                  <th>
-                    Empreendimento
-                  </th>
+                  <th>Empreendimento</th>
                   <th>Status</th>
                   <th>Progresso</th>
                   <th>Resultado</th>
@@ -369,83 +261,45 @@ export default async function BooksPage() {
               </thead>
 
               <tbody>
-                {books.map(
-                  (book) => (
-                    <tr key={book.id}>
-                      <td>
-                        <strong>
-                          {book.fileName}
-                        </strong>
+                {books.map((book) => (
+                  <tr key={book.id}>
+                    <td>
+                      <strong>{book.fileName}</strong>
 
-                        <small>
-                          {
-                            book.storageUrl
-                          }
-                        </small>
-                      </td>
+                      <small>{book.storageUrl}</small>
+                    </td>
 
-                      <td>
-                        {book.project
-                          ?.name ??
-                          'Fonte geral'}
-                      </td>
+                    <td>{book.project?.name ?? 'Fonte geral'}</td>
 
-                      <td>
-                        <span
-                          className={`status status-${book.status.toLowerCase()}`}
-                        >
-                          {
-                            book.status
-                          }
-                        </span>
-                      </td>
+                    <td>
+                      <span className={`status status-${book.status.toLowerCase()}`}>
+                        {book.status}
+                      </span>
+                    </td>
 
-                      <td>
-                        {
-                          book.progress
-                        }
-                        %
-                      </td>
+                    <td>{book.progress}%</td>
 
-                      <td>
-                        {book.error ? (
-                          <span className="error-text">
-                            {
-                              book.error
-                            }
-                          </span>
-                        ) : book.status ===
-                          'COMPLETED' ? (
-                          <span className="success-text">
-                            Conteúdo
-                            disponível
-                          </span>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                    </tr>
-                  ),
-                )}
+                    <td>
+                      {book.error ? (
+                        <span className="error-text">{book.error}</span>
+                      ) : book.status === 'COMPLETED' ? (
+                        <span className="success-text">Conteúdo disponível</span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         ) : (
           <div className="books-empty">
-            <div className="eyebrow">
-              Base vazia
-            </div>
+            <div className="eyebrow">Base vazia</div>
 
-            <h3>
-              Nenhuma fonte cadastrada
-              ainda.
-            </h3>
+            <h3>Nenhuma fonte cadastrada ainda.</h3>
 
-            <p>
-              Use o formulário acima
-              para iniciar a base de
-              inteligência do Alpha.
-            </p>
+            <p>Use o formulário acima para iniciar a base de inteligência do Alpha.</p>
           </div>
         )}
       </section>

@@ -23,61 +23,44 @@ export async function enrichAndStoreNeighborhood(
   neighborhoodId: string,
   evidence: NeighborhoodEvidence,
 ): Promise<NeighborhoodEnrichmentStoreResult> {
-  const neighborhood =
-    await db.neighborhood.findUnique({
-      where: {
-        id: neighborhoodId,
-      },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        heroImage: true,
-        videoUrl: true,
-        videoTitle: true,
-      },
-    });
+  const neighborhood = await db.neighborhood.findUnique({
+    where: {
+      id: neighborhoodId,
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      heroImage: true,
+      videoUrl: true,
+      videoTitle: true,
+    },
+  });
 
   if (!neighborhood) {
-    throw new Error(
-      'Bairro não encontrado.',
-    );
+    throw new Error('Bairro não encontrado.');
   }
 
-  const enrichment =
-    enrichNeighborhood({
-      ...evidence,
-      name: neighborhood.name,
+  const enrichment = enrichNeighborhood({
+    ...evidence,
+    name: neighborhood.name,
 
-      heroImage:
-        evidence.heroImage ??
-        neighborhood.heroImage,
+    heroImage: evidence.heroImage ?? neighborhood.heroImage,
 
-      videoUrl:
-        evidence.videoUrl ??
-        neighborhood.videoUrl,
+    videoUrl: evidence.videoUrl ?? neighborhood.videoUrl,
 
-      videoTitle:
-        evidence.videoTitle ??
-        neighborhood.videoTitle,
-    });
+    videoTitle: evidence.videoTitle ?? neighborhood.videoTitle,
+  });
 
-  const publishable =
-    canPublishNeighborhoodEnrichment(
-      enrichment,
-    );
+  const publishable = canPublishNeighborhoodEnrichment(enrichment);
 
   if (!publishable) {
     return {
       ok: false,
-      neighborhoodId:
-        neighborhood.id,
-      neighborhoodSlug:
-        neighborhood.slug,
-      evidenceCount:
-        enrichment.evidenceCount,
-      sourceUrls:
-        enrichment.sourceUrls,
+      neighborhoodId: neighborhood.id,
+      neighborhoodSlug: neighborhood.slug,
+      evidenceCount: enrichment.evidenceCount,
+      sourceUrls: enrichment.sourceUrls,
       published: false,
       message:
         'As fontes ainda não possuem evidências suficientes para atualizar automaticamente este bairro.',
@@ -90,69 +73,47 @@ export async function enrichAndStoreNeighborhood(
     },
 
     data: {
-      description:
-        enrichment.description,
+      description: enrichment.description,
 
-      experienceTitle:
-        enrichment.experienceTitle,
+      experienceTitle: enrichment.experienceTitle,
 
-      experienceDescription:
-        enrichment.experienceDescription,
+      experienceDescription: enrichment.experienceDescription,
 
-      highlights:
-        enrichment.highlights,
+      highlights: enrichment.highlights,
 
-      videoUrl:
-        enrichment.videoUrl,
+      videoUrl: enrichment.videoUrl,
 
-      videoTitle:
-        enrichment.videoTitle,
+      videoTitle: enrichment.videoTitle,
 
-      ctaTitle:
-        enrichment.ctaTitle,
+      ctaTitle: enrichment.ctaTitle,
 
-      ctaDescription:
-        enrichment.ctaDescription,
+      ctaDescription: enrichment.ctaDescription,
 
-      faq:
-        enrichment.faq,
+      faq: enrichment.faq,
 
-      seoTitle:
-        enrichment.seoTitle,
+      seoTitle: enrichment.seoTitle,
 
-      seoDescription:
-        enrichment.seoDescription,
+      seoDescription: enrichment.seoDescription,
 
-      heroImage:
-        enrichment.heroImage ??
-        neighborhood.heroImage,
+      heroImage: enrichment.heroImage ?? neighborhood.heroImage,
     },
   });
 
   revalidatePath('/bairros');
 
-  revalidatePath(
-    `/bairros/${neighborhood.slug}`,
-  );
+  revalidatePath(`/bairros/${neighborhood.slug}`);
 
   revalidatePath('/admin/bairros');
 
-  revalidatePath(
-    `/admin/bairros/${neighborhood.id}`,
-  );
+  revalidatePath(`/admin/bairros/${neighborhood.id}`);
 
   return {
     ok: true,
-    neighborhoodId:
-      neighborhood.id,
-    neighborhoodSlug:
-      neighborhood.slug,
-    evidenceCount:
-      enrichment.evidenceCount,
-    sourceUrls:
-      enrichment.sourceUrls,
+    neighborhoodId: neighborhood.id,
+    neighborhoodSlug: neighborhood.slug,
+    evidenceCount: enrichment.evidenceCount,
+    sourceUrls: enrichment.sourceUrls,
     published: true,
-    message:
-      'Conteúdo editorial do bairro atualizado com sucesso.',
+    message: 'Conteúdo editorial do bairro atualizado com sucesso.',
   };
 }

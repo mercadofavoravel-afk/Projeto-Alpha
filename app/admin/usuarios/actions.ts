@@ -41,7 +41,7 @@ async function validManager(id: string | null) {
   if (!id) return true;
   return Boolean(
     await db.user.findFirst({
-      where: { id, role: 'MANAGER', isActive: true },
+      where: { id, billingMode: 'INTERNAL', role: 'MANAGER', isActive: true },
       select: { id: true },
     }),
   );
@@ -79,6 +79,7 @@ export async function createEmployee(formData: FormData) {
           name,
           email,
           role,
+          billingMode: 'INTERNAL',
           passwordHash,
           acceptsLeads,
           leadCapacity,
@@ -122,7 +123,10 @@ export async function updateEmployee(formData: FormData) {
   if (id === actor.id) done('self');
   if (!canManageEmployeeRole(actor.role, role as UserRole)) done('invalid');
 
-  const target = await db.user.findUnique({ where: { id }, select: { role: true } });
+  const target = await db.user.findFirst({
+    where: { id, billingMode: 'INTERNAL' },
+    select: { role: true },
+  });
   if (!target || !canManageEmployeeRole(actor.role, target.role)) done('invalid');
   if (managerId && !z.string().cuid().safeParse(managerId).success) done('invalid');
   if (managerId === id) done('invalid');

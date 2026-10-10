@@ -6,6 +6,11 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { hasPermission } from '@/lib/permissions';
+import {
+  canUseCommercialPermission,
+  isCommercialCustomer,
+  subscriptionState,
+} from '@/lib/commercial-subscription';
 
 const cookieName = process.env.SESSION_COOKIE_NAME ?? 'alpha_session';
 const ttlDays = Number(process.env.SESSION_TTL_DAYS ?? 14);
@@ -183,11 +188,30 @@ export async function requireUser() {
     redirect('/login');
   }
 
+  if (await isCommercialAccessBlocked(user)) redirect('/assinatura');
+
   return user;
+}
+
+export async function isCommercialAccessBlocked(user: {
+  id: string;
+  billingMode: 'INTERNAL' | 'COMMERCIAL';
+  isPlatformOwner: boolean;
+}) {
+  if (user.isPlatformOwner || user.billingMode !== 'COMMERCIAL') return false;
+  const subscription = await db.commercialSubscription.findUnique({
+    where: { userId: user.id },
+    select: { trialEndsAt: true, paidThroughAt: true, suspendedAt: true },
+  });
+  return subscriptionState(user.billingMode, subscription).status === 'BLOCKED';
 }
 
 export async function requireRole(roles: UserRole[]) {
   const user = await requireUser();
+
+  if (isCommercialCustomer(user)) {
+    redirect('/admin/sem-acesso');
+  }
 
   if (!roles.includes(user.role)) {
     redirect('/admin/sem-acesso');
@@ -199,6 +223,10 @@ export async function requireRole(roles: UserRole[]) {
 export async function requirePermission(permission: string) {
   const user = await requireUser();
 
+  if (!canUseCommercialPermission(user, permission)) {
+    redirect('/admin/sem-acesso');
+  }
+
   if (!hasPermission(user.role, permission)) {
     redirect('/admin/sem-acesso');
   }
@@ -207,7 +235,10 @@ export async function requirePermission(permission: string) {
 }
 
 export async function requireApiUser() {
-  return getCurrentUser();
+  const user = await getCurrentUser();
+  return user && !(await isCommercialAccessBlocked(user)) && !isCommercialCustomer(user)
+    ? user
+    : null;
 }
 
 export async function requireApiPermission(permission: string) {
@@ -218,6 +249,18 @@ export async function requireApiPermission(permission: string) {
       ok: false as const,
       status: 401,
       error: 'Não autenticado',
+    };
+  }
+
+  if (await isCommercialAccessBlocked(user)) {
+    return { ok: false as const, status: 402, error: 'Assinatura suspensa' };
+  }
+
+  if (!canUseCommercialPermission(user, permission)) {
+    return {
+      ok: false as const,
+      status: 403,
+      error: 'Área da matriz indisponível para esta conta',
     };
   }
 

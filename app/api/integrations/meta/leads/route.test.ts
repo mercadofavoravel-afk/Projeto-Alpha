@@ -10,10 +10,17 @@ const calls = vi.hoisted(() => ({
   createActivity: vi.fn(),
   createAudit: vi.fn(),
   updateUser: vi.fn(),
+  personalConnection: vi.fn(),
+  storeCustomerExternal: vi.fn(),
+}));
+
+vi.mock('@/lib/customer-external-lead', () => ({
+  storeCustomerExternalLead: calls.storeCustomerExternal,
 }));
 
 vi.mock('@/lib/db', () => ({
   db: {
+    marketingConnection: { findUnique: calls.personalConnection },
     externalLeadReceipt: { findUnique: calls.findReceipt },
     $transaction: async (callback: (tx: unknown) => Promise<unknown>) =>
       callback({
@@ -27,6 +34,7 @@ vi.mock('@/lib/db', () => ({
 }));
 
 import { GET, POST } from './route';
+import { encryptMarketingToken } from '@/lib/marketing-oauth';
 
 const payload = {
   object: 'page',
@@ -58,6 +66,8 @@ describe('Meta Lead Ads webhook', () => {
     vi.stubEnv('META_GRAPH_VERSION', 'v24.0');
     vi.stubEnv('META_LEAD_PAGE_IDS', '123');
     calls.findReceipt.mockResolvedValue(null);
+    calls.personalConnection.mockResolvedValue(null);
+    calls.storeCustomerExternal.mockResolvedValue(true);
     calls.findUsers.mockResolvedValue([]);
     calls.createLead.mockResolvedValue({ id: 'new-lead' });
     vi.stubGlobal(
@@ -104,6 +114,9 @@ describe('Meta Lead Ads webhook', () => {
 
   it('fetches the verified lead and stores it once in the management queue', async () => {
     expect((await POST(notification(payload))).status).toBe(200);
+    expect(calls.findUsers).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     expect(fetch).toHaveBeenCalledWith(
       expect.objectContaining({ hostname: 'graph.facebook.com', pathname: '/v24.0/456' }),
       expect.objectContaining({ headers: { Authorization: 'Bearer page-access-token' } }),
@@ -127,5 +140,80 @@ describe('Meta Lead Ads webhook', () => {
     calls.findReceipt.mockResolvedValueOnce({ id: 'existing' });
     expect((await POST(notification(payload))).status).toBe(200);
     expect(calls.createLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the selected Page token and assigns a lead to the connecting user', async () => {
+    vi.stubEnv('MARKETING_TOKEN_ENCRYPTION_KEY', Buffer.alloc(32, 7).toString('base64url'));
+    vi.stubEnv('META_LEAD_PAGE_IDS', '');
+    vi.stubEnv('META_LEAD_ACCESS_TOKEN', '');
+    calls.personalConnection.mockResolvedValue({
+      userId: 'broker-2',
+      selectedTokenEncrypted: encryptMarketingToken('personal-page-token'),
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
+    });
+    calls.findUsers.mockResolvedValue([
+      {
+        id: 'broker-2',
+        leadCapacity: 30,
+        serviceRegions: [],
+        lastLeadAssignedAt: null,
+        _count: { assignedLeads: 0 },
+      },
+    ]);
+    expect((await POST(notification(payload))).status).toBe(200);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ headers: { Authorization: 'Bearer personal-page-token' } }),
+    );
+    expect(calls.createLead).toHaveBeenCalledWith({
+      data: expect.objectContaining({ assignedToId: 'broker-2' }),
+    });
+  });
+
+  it('never puts a personal Page lead in the global queue when its owner is unavailable', async () => {
+    vi.stubEnv('MARKETING_TOKEN_ENCRYPTION_KEY', Buffer.alloc(32, 7).toString('base64url'));
+    calls.personalConnection.mockResolvedValue({
+      userId: 'broker-2',
+      selectedTokenEncrypted: encryptMarketingToken('personal-page-token'),
+      user: { billingMode: 'INTERNAL', isPlatformOwner: false },
+    });
+    expect((await POST(notification(payload))).status).toBe(503);
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('never writes an external commercial customer lead into the matrix CRM', async () => {
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      selectedTokenEncrypted: null,
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(notification(payload))).status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(calls.createLead).not.toHaveBeenCalled();
+  });
+
+  it('routes a commercial Page to the site selected by its owner', async () => {
+    vi.stubEnv('MARKETING_TOKEN_ENCRYPTION_KEY', Buffer.alloc(32, 7).toString('base64url'));
+    vi.stubEnv('META_LEAD_PAGE_IDS', '');
+    calls.personalConnection.mockResolvedValue({
+      userId: 'customer-1',
+      selectedTokenEncrypted: encryptMarketingToken('page-token'),
+      leadSiteId: 'site-1',
+      user: { billingMode: 'COMMERCIAL', isPlatformOwner: false },
+    });
+    expect((await POST(notification(payload))).status).toBe(200);
+    expect(calls.personalConnection).toHaveBeenCalledWith({
+      where: { provider_selectedAccountId: { provider: 'meta', selectedAccountId: '123' } },
+      select: expect.objectContaining({ leadSiteId: true, userId: true }),
+    });
+    expect(calls.storeCustomerExternal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        siteId: 'site-1',
+        ownerId: 'customer-1',
+        provider: 'META_LEAD_ADS',
+        externalId: '456',
+      }),
+    );
+    expect(calls.createLead).not.toHaveBeenCalled();
   });
 });

@@ -21,6 +21,7 @@ export async function distributeUnassignedLeadsAction() {
       where: {
         isActive: true,
         acceptsLeads: true,
+        billingMode: 'INTERNAL',
         role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
       },
       select: {

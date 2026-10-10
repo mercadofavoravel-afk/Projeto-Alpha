@@ -22,26 +22,16 @@ type SearchProps = {
   initialNeighborhood?: string;
 };
 
-export function Search({
-  projects,
-  initialQuery = '',
-  initialNeighborhood = '',
-}: SearchProps) {
+export function Search({ projects, initialQuery = '', initialNeighborhood = '' }: SearchProps) {
   const [query, setQuery] = useState(initialQuery);
-  const [neighborhood, setNeighborhood] = useState(
-    initialNeighborhood,
+  const [neighborhood, setNeighborhood] = useState(initialNeighborhood);
+
+  const neighborhoods = [...new Set(projects.map((project) => project.neighborhood))].sort((a, b) =>
+    a.localeCompare(b, 'pt-BR'),
   );
 
-  const neighborhoods = [
-    ...new Set(
-      projects.map((project) => project.neighborhood),
-    ),
-  ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-
   const list = useMemo(() => {
-    const normalizedQuery = query
-      .trim()
-      .toLocaleLowerCase('pt-BR');
+    const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');
 
     return projects.filter((project) => {
       const searchableText = [
@@ -55,13 +45,9 @@ export function Search({
         .join(' ')
         .toLocaleLowerCase('pt-BR');
 
-      const matchesQuery =
-        !normalizedQuery ||
-        searchableText.includes(normalizedQuery);
+      const matchesQuery = !normalizedQuery || searchableText.includes(normalizedQuery);
 
-      const matchesNeighborhood =
-        !neighborhood ||
-        project.neighborhood === neighborhood;
+      const matchesNeighborhood = !neighborhood || project.neighborhood === neighborhood;
 
       return matchesQuery && matchesNeighborhood;
     });
@@ -70,65 +56,43 @@ export function Search({
   return (
     <>
       <div className="filters">
-        <label htmlFor="search-query">
-          Buscar imóvel
-        </label>
+        <label htmlFor="search-query">Buscar imóvel</label>
 
         <input
           id="search-query"
           type="search"
           placeholder="Nome, bairro ou palavra-chave"
           value={query}
-          onChange={(event) =>
-            setQuery(event.target.value)
-          }
+          onChange={(event) => setQuery(event.target.value)}
         />
 
-        <label htmlFor="search-neighborhood">
-          Bairro
-        </label>
+        <label htmlFor="search-neighborhood">Bairro</label>
 
         <select
           id="search-neighborhood"
           value={neighborhood}
-          onChange={(event) =>
-            setNeighborhood(event.target.value)
-          }
+          onChange={(event) => setNeighborhood(event.target.value)}
         >
-          <option value="">
-            Todos os bairros
-          </option>
+          <option value="">Todos os bairros</option>
 
           {neighborhoods.map((item) => (
-            <option
-              key={item}
-              value={item}
-            >
+            <option key={item} value={item}>
               {item}
             </option>
           ))}
         </select>
 
         <div aria-live="polite">
-          {list.length}{' '}
-          {list.length === 1
-            ? 'resultado'
-            : 'resultados'}
+          {list.length} {list.length === 1 ? 'resultado' : 'resultados'}
         </div>
       </div>
 
       {list.length === 0 ? (
-        <div className="notice">
-          Nenhum empreendimento encontrado com esses
-          filtros.
-        </div>
+        <div className="notice">Nenhum empreendimento encontrado com esses filtros.</div>
       ) : (
         <div className="grid">
           {list.map((project) => (
-            <Card
-              key={project.slug}
-              p={project}
-            />
+            <Card key={project.slug} p={project} />
           ))}
         </div>
       )}

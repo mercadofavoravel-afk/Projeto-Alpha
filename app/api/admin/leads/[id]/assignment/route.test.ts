@@ -51,11 +51,16 @@ describe('atribuição de leads pelo gerente', () => {
     expect(response.status).toBe(400);
     expect(mocks.findUser).toHaveBeenCalledWith({
       where: {
-        id: consultantId,
-        isActive: true,
-        OR: [
-          { id: managerId, role: 'MANAGER' },
-          { role: 'CONSULTANT', managerId },
+        AND: [
+          { billingMode: 'INTERNAL' },
+          {
+            id: consultantId,
+            isActive: true,
+            OR: [
+              { id: managerId, role: 'MANAGER' },
+              { role: 'CONSULTANT', managerId },
+            ],
+          },
         ],
       },
       select: { id: true },

@@ -78,6 +78,9 @@ describe('POST /api/leads', () => {
     );
 
     expect(response.status).toBe(201);
+    expect(database.findUsers).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     await expect(response.json()).resolves.toEqual({
       ok: true,
       leadId: 'lead_organic_01',

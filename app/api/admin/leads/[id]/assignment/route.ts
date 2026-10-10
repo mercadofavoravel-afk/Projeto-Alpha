@@ -24,17 +24,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     );
   if (targetId) {
     const target = await db.user.findFirst({
-      where:
-        auth.user.role === 'MANAGER'
-          ? {
-              id: targetId,
-              isActive: true,
-              OR: [
-                { id: auth.user.id, role: 'MANAGER' },
-                { role: 'CONSULTANT', managerId: auth.user.id },
-              ],
-            }
-          : { id: targetId, isActive: true, role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+      where: {
+        AND: [
+          { billingMode: 'INTERNAL' },
+          auth.user.role === 'MANAGER'
+            ? {
+                id: targetId,
+                isActive: true,
+                OR: [
+                  { id: auth.user.id, role: 'MANAGER' },
+                  { role: 'CONSULTANT', managerId: auth.user.id },
+                ],
+              }
+            : { id: targetId, isActive: true, role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+        ],
+      },
       select: { id: true },
     });
     if (!target) return NextResponse.json({ error: 'Profissional indisponível.' }, { status: 400 });

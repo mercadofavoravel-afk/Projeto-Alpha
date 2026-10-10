@@ -12,11 +12,7 @@ export const metadata = createMetadata({
 });
 
 export default function Page() {
-  const collections = [
-    ...new Set(
-      projects.flatMap((project) => project.collections),
-    ),
-  ].sort();
+  const collections = [...new Set(projects.flatMap((project) => project.collections))].sort();
 
   return (
     <>
@@ -28,20 +24,16 @@ export default function Page() {
             <div>
               <div className="eyebrow">Navegação editorial</div>
 
-              <h1>
-                Coleções para diferentes formas de viver o Rio.
-              </h1>
+              <h1>Coleções para diferentes formas de viver o Rio.</h1>
             </div>
 
             <div className="collections-hero-copy">
               <p>
-                Uma leitura curada do portfólio por estilo de vida,
-                localização, arquitetura e intenção patrimonial.
+                Uma leitura curada do portfólio por estilo de vida, localização, arquitetura e
+                intenção patrimonial.
               </p>
 
-              <span>
-                Menos volume. Mais contexto para escolher melhor.
-              </span>
+              <span>Menos volume. Mais contexto para escolher melhor.</span>
             </div>
           </div>
         </section>
@@ -57,13 +49,8 @@ export default function Page() {
                 const featuredProject = relatedProjects[0];
 
                 return (
-                  <article
-                    className="collection-card"
-                    key={collection}
-                  >
-                    <div className="collection-number">
-                      {String(index + 1).padStart(2, '0')}
-                    </div>
+                  <article className="collection-card" key={collection}>
+                    <div className="collection-number">{String(index + 1).padStart(2, '0')}</div>
 
                     <div className="collection-card-content">
                       <div className="eyebrow">Coleção</div>
@@ -82,9 +69,7 @@ export default function Page() {
                         <div className="collection-preview">
                           <span>Em destaque</span>
                           <strong>{featuredProject.name}</strong>
-                          <small>
-                            {featuredProject.neighborhood}
-                          </small>
+                          <small>{featuredProject.neighborhood}</small>
                         </div>
                       )}
 

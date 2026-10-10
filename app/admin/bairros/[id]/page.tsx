@@ -1,8 +1,5 @@
 import Link from 'next/link';
-import {
-  notFound,
-  redirect,
-} from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { requirePermission } from '@/lib/auth';
@@ -21,9 +18,7 @@ type FaqItem = {
   answer: string;
 };
 
-function highlightsToText(
-  value: unknown,
-) {
+function highlightsToText(value: unknown) {
   if (!Array.isArray(value)) {
     return '';
   }
@@ -41,15 +36,9 @@ function highlightsToText(
         typeof item.title === 'string'
       ) {
         const description =
-          'description' in item &&
-          typeof item.description ===
-            'string'
-            ? item.description
-            : '';
+          'description' in item && typeof item.description === 'string' ? item.description : '';
 
-        return description
-          ? `${item.title} | ${description}`
-          : item.title;
+        return description ? `${item.title} | ${description}` : item.title;
       }
 
       return '';
@@ -70,10 +59,8 @@ function faqToText(value: unknown) {
         item !== null &&
         'question' in item &&
         'answer' in item &&
-        typeof item.question ===
-          'string' &&
-        typeof item.answer ===
-          'string'
+        typeof item.question === 'string' &&
+        typeof item.answer === 'string'
       ) {
         return `${item.question} | ${item.answer}`;
       }
@@ -84,23 +71,15 @@ function faqToText(value: unknown) {
     .join('\n');
 }
 
-function parseHighlights(
-  value: string,
-): HighlightItem[] {
+function parseHighlights(value: string): HighlightItem[] {
   return value
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [
-        title,
-        ...descriptionParts
-      ] = line.split('|');
+      const [title, ...descriptionParts] = line.split('|');
 
-      const description =
-        descriptionParts
-          .join('|')
-          .trim();
+      const description = descriptionParts.join('|').trim();
 
       return {
         title: title.trim(),
@@ -112,92 +91,50 @@ function parseHighlights(
           : {}),
       };
     })
-    .filter(
-      (item) =>
-        item.title.length > 0,
-    );
+    .filter((item) => item.title.length > 0);
 }
 
-function parseFaq(
-  value: string,
-): FaqItem[] {
+function parseFaq(value: string): FaqItem[] {
   return value
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [
-        question,
-        ...answerParts
-      ] = line.split('|');
+      const [question, ...answerParts] = line.split('|');
 
       return {
         question: question.trim(),
 
-        answer: answerParts
-          .join('|')
-          .trim(),
+        answer: answerParts.join('|').trim(),
       };
     })
-    .filter(
-      (item) =>
-        item.question.length > 0 &&
-        item.answer.length > 0,
-    );
+    .filter((item) => item.question.length > 0 && item.answer.length > 0);
 }
 
-function optionalString(
-  formData: FormData,
-  field: string,
-) {
-  const value = String(
-    formData.get(field) ?? '',
-  ).trim();
+function optionalString(formData: FormData, field: string) {
+  const value = String(formData.get(field) ?? '').trim();
 
   return value || null;
 }
 
-async function updateNeighborhoodAction(
-  formData: FormData,
-) {
+async function updateNeighborhoodAction(formData: FormData) {
   'use server';
 
-  await requirePermission(
-    'catalog:write',
-  );
+  await requirePermission('catalog:write');
 
-  const id = String(
-    formData.get('id') ?? '',
-  );
+  const id = String(formData.get('id') ?? '');
 
-  const slug = String(
-    formData.get('slug') ?? '',
-  ).trim();
+  const slug = String(formData.get('slug') ?? '').trim();
 
-  const name = String(
-    formData.get('name') ?? '',
-  ).trim();
+  const name = String(formData.get('name') ?? '').trim();
 
   if (!id || !slug || !name) {
-    throw new Error(
-      'ID, nome e slug são obrigatórios.',
-    );
+    throw new Error('ID, nome e slug são obrigatórios.');
   }
 
-  const highlights =
-    parseHighlights(
-      String(
-        formData.get(
-          'highlights',
-        ) ?? '',
-      ),
-    );
+  const highlights = parseHighlights(String(formData.get('highlights') ?? ''));
 
-  const faq = parseFaq(
-    String(
-      formData.get('faq') ?? '',
-    ),
-  );
+  const faq = parseFaq(String(formData.get('faq') ?? ''));
 
   await db.neighborhood.update({
     where: {
@@ -208,134 +145,65 @@ async function updateNeighborhoodAction(
       name,
       slug,
 
-      heroImage: optionalString(
-        formData,
-        'heroImage',
-      ),
+      heroImage: optionalString(formData, 'heroImage'),
 
-      description: optionalString(
-        formData,
-        'description',
-      ),
+      description: optionalString(formData, 'description'),
 
-      experienceTitle:
-        optionalString(
-          formData,
-          'experienceTitle',
-        ),
+      experienceTitle: optionalString(formData, 'experienceTitle'),
 
-      experienceDescription:
-        optionalString(
-          formData,
-          'experienceDescription',
-        ),
+      experienceDescription: optionalString(formData, 'experienceDescription'),
 
-      highlights:
-        highlights.length > 0
-          ? highlights
-          : undefined,
+      highlights: highlights.length > 0 ? highlights : undefined,
 
-      videoUrl: optionalString(
-        formData,
-        'videoUrl',
-      ),
+      videoUrl: optionalString(formData, 'videoUrl'),
 
-      videoTitle: optionalString(
-        formData,
-        'videoTitle',
-      ),
+      videoTitle: optionalString(formData, 'videoTitle'),
 
-      ctaTitle: optionalString(
-        formData,
-        'ctaTitle',
-      ),
+      ctaTitle: optionalString(formData, 'ctaTitle'),
 
-      ctaDescription:
-        optionalString(
-          formData,
-          'ctaDescription',
-        ),
+      ctaDescription: optionalString(formData, 'ctaDescription'),
 
-      faq:
-        faq.length > 0
-          ? faq
-          : undefined,
+      faq: faq.length > 0 ? faq : undefined,
 
-      seoTitle: optionalString(
-        formData,
-        'seoTitle',
-      ),
+      seoTitle: optionalString(formData, 'seoTitle'),
 
-      seoDescription:
-        optionalString(
-          formData,
-          'seoDescription',
-        ),
+      seoDescription: optionalString(formData, 'seoDescription'),
     },
   });
 
-  revalidatePath(
-    '/admin/bairros',
-  );
+  revalidatePath('/admin/bairros');
 
-  revalidatePath(
-    `/admin/bairros/${id}`,
-  );
+  revalidatePath(`/admin/bairros/${id}`);
 
   revalidatePath('/bairros');
 
-  revalidatePath(
-    `/bairros/${slug}`,
-  );
+  revalidatePath(`/bairros/${slug}`);
 }
 
-async function generateNeighborhoodEnrichmentAction(
-  formData: FormData,
-) {
+async function generateNeighborhoodEnrichmentAction(formData: FormData) {
   'use server';
 
-  await requirePermission(
-    'catalog:write',
-  );
+  await requirePermission('catalog:write');
 
-  const id = String(
-    formData.get('id') ?? '',
-  );
+  const id = String(formData.get('id') ?? '');
 
   if (!id) {
-    throw new Error(
-      'ID do bairro não informado.',
-    );
+    throw new Error('ID do bairro não informado.');
   }
 
-  const evidence =
-    await collectNeighborhoodEvidence(
-      id,
-    );
+  const evidence = await collectNeighborhoodEvidence(id);
 
-  const result =
-    await enrichAndStoreNeighborhood(
-      id,
-      evidence,
-    );
+  const result = await enrichAndStoreNeighborhood(id, evidence);
 
-  revalidatePath(
-    `/admin/bairros/${id}`,
-  );
+  revalidatePath(`/admin/bairros/${id}`);
 
-  revalidatePath(
-    `/bairros/${result.neighborhoodSlug}`,
-  );
+  revalidatePath(`/bairros/${result.neighborhoodSlug}`);
 
   if (!result.ok) {
-    redirect(
-      `/admin/bairros/${id}?enrich=insufficient&evidenceCount=${result.evidenceCount}`,
-    );
+    redirect(`/admin/bairros/${id}?enrich=insufficient&evidenceCount=${result.evidenceCount}`);
   }
 
-  redirect(
-    `/admin/bairros/${id}?enrich=success&evidenceCount=${result.evidenceCount}`,
-  );
+  redirect(`/admin/bairros/${id}?enrich=success&evidenceCount=${result.evidenceCount}`);
 }
 
 export default async function NeighborhoodEditorPage({
@@ -351,264 +219,148 @@ export default async function NeighborhoodEditorPage({
     evidenceCount?: string;
   }>;
 }) {
-  await requirePermission(
-    'catalog:write',
-  );
+  await requirePermission('catalog:write');
 
   const { id } = await params;
 
-  const query =
-    await searchParams;
+  const query = await searchParams;
 
-  const neighborhood =
-    await db.neighborhood.findUnique({
-      where: {
-        id,
-      },
+  const neighborhood = await db.neighborhood.findUnique({
+    where: {
+      id,
+    },
 
-      include: {
-        _count: {
-          select: {
-            projects: true,
-          },
+    include: {
+      _count: {
+        select: {
+          projects: true,
         },
       },
-    });
+    },
+  });
 
   if (!neighborhood) {
     notFound();
   }
 
-  const highlightsText =
-    highlightsToText(
-      neighborhood.highlights,
-    );
+  const highlightsText = highlightsToText(neighborhood.highlights);
 
-  const faqText =
-    faqToText(
-      neighborhood.faq,
-    );
+  const faqText = faqToText(neighborhood.faq);
 
-  const evidenceCount =
-    Number(
-      query.evidenceCount ?? 0,
-    );
+  const evidenceCount = Number(query.evidenceCount ?? 0);
 
   return (
     <>
-      <div className="eyebrow">
-        Inteligência territorial
-      </div>
+      <div className="eyebrow">Inteligência territorial</div>
 
       <div className="head">
         <div>
-          <h1>
-            {neighborhood.name}
-          </h1>
+          <h1>{neighborhood.name}</h1>
 
-          <p>
-            Construa a experiência
-            editorial, comercial e de
-            SEO desta localização.
-          </p>
+          <p>Construa a experiência editorial, comercial e de SEO desta localização.</p>
         </div>
 
-        <div>
-          {
-            neighborhood._count
-              .projects
-          }{' '}
-          empreendimentos vinculados
-        </div>
+        <div>{neighborhood._count.projects} empreendimentos vinculados</div>
       </div>
 
       <p>
-        <Link href="/admin/bairros">
-          ← Voltar aos bairros
-        </Link>
+        <Link href="/admin/bairros">← Voltar aos bairros</Link>
       </p>
 
       <section className="intelligence-card">
         <div>
-          <div className="eyebrow">
-            Automação editorial
-          </div>
+          <div className="eyebrow">Automação editorial</div>
 
-          <h2>
-            Inteligência de mercado
-          </h2>
+          <h2>Inteligência de mercado</h2>
 
           <p>
-            O Alpha pode reunir
-            automaticamente as
-            informações confiáveis que
-            já possui sobre este bairro,
-            analisar os empreendimentos
-            publicados e preencher a
-            estrutura editorial da
+            O Alpha pode reunir automaticamente as informações confiáveis que já possui sobre este
+            bairro, analisar os empreendimentos publicados e preencher a estrutura editorial da
             página.
           </p>
 
           <div className="intelligence-points">
-            <span>
-              Empreendimentos
-            </span>
+            <span>Empreendimentos</span>
 
-            <span>
-              Tipologias
-            </span>
+            <span>Tipologias</span>
 
-            <span>
-              Incorporadoras
-            </span>
+            <span>Incorporadoras</span>
 
-            <span>
-              Características
-            </span>
+            <span>Características</span>
 
-            <span>
-              Materiais de origem
-            </span>
+            <span>Materiais de origem</span>
 
-            <span>
-              SEO
-            </span>
+            <span>SEO</span>
           </div>
         </div>
 
-        <form
-          action={
-            generateNeighborhoodEnrichmentAction
-          }
-        >
-          <input
-            type="hidden"
-            name="id"
-            value={neighborhood.id}
-          />
+        <form action={generateNeighborhoodEnrichmentAction}>
+          <input type="hidden" name="id" value={neighborhood.id} />
 
-          <button
-            className="intelligence-button"
-            type="submit"
-          >
-            Gerar com inteligência
-            de mercado
+          <button className="intelligence-button" type="submit">
+            Gerar com inteligência de mercado
           </button>
 
-          <small>
-            O Alpha só atualiza
-            automaticamente quando
-            encontra evidências
-            suficientes.
-          </small>
+          <small>O Alpha só atualiza automaticamente quando encontra evidências suficientes.</small>
         </form>
       </section>
 
-      {query.enrich ===
-        'success' && (
+      {query.enrich === 'success' && (
         <div className="automation-message success">
-          <strong>
-            Conteúdo atualizado.
-          </strong>
+          <strong>Conteúdo atualizado.</strong>
 
           <span>
-            O Alpha encontrou{' '}
-            {evidenceCount}{' '}
-            evidências e atualizou
-            automaticamente a ficha
+            O Alpha encontrou {evidenceCount} evidências e atualizou automaticamente a ficha
             editorial deste bairro.
           </span>
         </div>
       )}
 
-      {query.enrich ===
-        'insufficient' && (
+      {query.enrich === 'insufficient' && (
         <div className="automation-message warning">
-          <strong>
-            Ainda faltam evidências.
-          </strong>
+          <strong>Ainda faltam evidências.</strong>
 
           <span>
-            Foram encontradas{' '}
-            {evidenceCount}{' '}
-            evidências. O Alpha não
-            publicou conteúdo genérico
-            ou inventado. Precisamos
-            ampliar as fontes de
-            inteligência deste bairro.
+            Foram encontradas {evidenceCount} evidências. O Alpha não publicou conteúdo genérico ou
+            inventado. Precisamos ampliar as fontes de inteligência deste bairro.
           </span>
         </div>
       )}
 
-      <form
-        action={
-          updateNeighborhoodAction
-        }
-        className="editor-form"
-      >
-        <input
-          type="hidden"
-          name="id"
-          value={neighborhood.id}
-        />
+      <form action={updateNeighborhoodAction} className="editor-form">
+        <input type="hidden" name="id" value={neighborhood.id} />
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Identidade
-          </div>
+          <div className="eyebrow">Identidade</div>
 
-          <h2>
-            Informações principais
-          </h2>
+          <h2>Informações principais</h2>
 
           <div className="editor-grid">
             <label>
               Nome do bairro
-
-              <input
-                name="name"
-                defaultValue={
-                  neighborhood.name
-                }
-                required
-              />
+              <input name="name" defaultValue={neighborhood.name} required />
             </label>
 
             <label>
               Slug
-
-              <input
-                name="slug"
-                defaultValue={
-                  neighborhood.slug
-                }
-                required
-              />
+              <input name="slug" defaultValue={neighborhood.slug} required />
             </label>
 
             <label className="editor-wide">
               Imagem principal
-
               <input
                 name="heroImage"
-                defaultValue={
-                  neighborhood.heroImage ??
-                  ''
-                }
+                defaultValue={neighborhood.heroImage ?? ''}
                 placeholder="/images/leblon.webp ou URL autorizada"
               />
             </label>
 
             <label className="editor-wide">
               Descrição principal
-
               <textarea
                 name="description"
                 rows={6}
-                defaultValue={
-                  neighborhood.description ??
-                  ''
-                }
+                defaultValue={neighborhood.description ?? ''}
                 placeholder="Introdução editorial sobre o bairro."
               />
             </label>
@@ -616,38 +368,26 @@ export default async function NeighborhoodEditorPage({
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Lifestyle
-          </div>
+          <div className="eyebrow">Lifestyle</div>
 
-          <h2>
-            Como é viver aqui
-          </h2>
+          <h2>Como é viver aqui</h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título da experiência
-
               <input
                 name="experienceTitle"
-                defaultValue={
-                  neighborhood.experienceTitle ??
-                  ''
-                }
+                defaultValue={neighborhood.experienceTitle ?? ''}
                 placeholder={`Como é viver em ${neighborhood.name}`}
               />
             </label>
 
             <label className="editor-wide">
               Experiência do bairro
-
               <textarea
                 name="experienceDescription"
                 rows={9}
-                defaultValue={
-                  neighborhood.experienceDescription ??
-                  ''
-                }
+                defaultValue={neighborhood.experienceDescription ?? ''}
                 placeholder="Descreva rotina, lifestyle, mobilidade, gastronomia, praia, serviços e perfil de quem procura a região."
               />
             </label>
@@ -655,28 +395,18 @@ export default async function NeighborhoodEditorPage({
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Diferenciais
-          </div>
+          <div className="eyebrow">Diferenciais</div>
 
-          <h2>
-            Pontos positivos do
-            bairro
-          </h2>
+          <h2>Pontos positivos do bairro</h2>
 
           <p>
-            Use uma linha para cada
-            destaque. Escreva o título,
-            depois <b>|</b>, depois a
-            descrição.
+            Use uma linha para cada destaque. Escreva o título, depois <b>|</b>, depois a descrição.
           </p>
 
           <textarea
             name="highlights"
             rows={10}
-            defaultValue={
-              highlightsText
-            }
+            defaultValue={highlightsText}
             placeholder={`Praia e orla | Acesso a uma das experiências costeiras mais desejadas do Rio.
 Gastronomia | Restaurantes, cafés e serviços de alto nível próximos de casa.
 Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
@@ -684,37 +414,25 @@ Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Conteúdo audiovisual
-          </div>
+          <div className="eyebrow">Conteúdo audiovisual</div>
 
-          <h2>
-            Vídeo do bairro
-          </h2>
+          <h2>Vídeo do bairro</h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               URL do vídeo
-
               <input
                 name="videoUrl"
-                defaultValue={
-                  neighborhood.videoUrl ??
-                  ''
-                }
+                defaultValue={neighborhood.videoUrl ?? ''}
                 placeholder="YouTube, Vimeo ou arquivo autorizado"
               />
             </label>
 
             <label className="editor-wide">
               Título do vídeo
-
               <input
                 name="videoTitle"
-                defaultValue={
-                  neighborhood.videoTitle ??
-                  ''
-                }
+                defaultValue={neighborhood.videoTitle ?? ''}
                 placeholder={`Conheça ${neighborhood.name}`}
               />
             </label>
@@ -722,38 +440,26 @@ Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Conversão
-          </div>
+          <div className="eyebrow">Conversão</div>
 
-          <h2>
-            Chamada comercial
-          </h2>
+          <h2>Chamada comercial</h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título da chamada
-
               <input
                 name="ctaTitle"
-                defaultValue={
-                  neighborhood.ctaTitle ??
-                  ''
-                }
+                defaultValue={neighborhood.ctaTitle ?? ''}
                 placeholder={`Encontre o imóvel certo em ${neighborhood.name}.`}
               />
             </label>
 
             <label className="editor-wide">
               Texto da chamada
-
               <textarea
                 name="ctaDescription"
                 rows={5}
-                defaultValue={
-                  neighborhood.ctaDescription ??
-                  ''
-                }
+                defaultValue={neighborhood.ctaDescription ?? ''}
                 placeholder="Explique por que o cliente deve solicitar uma curadoria personalizada."
               />
             </label>
@@ -761,18 +467,12 @@ Mobilidade | Conexão conveniente com outras regiões estratégicas da cidade.`}
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            SEO e intenção de busca
-          </div>
+          <div className="eyebrow">SEO e intenção de busca</div>
 
-          <h2>
-            Perguntas frequentes
-          </h2>
+          <h2>Perguntas frequentes</h2>
 
           <p>
-            Uma pergunta por linha.
-            Use <b>|</b> entre a
-            pergunta e a resposta.
+            Uma pergunta por linha. Use <b>|</b> entre a pergunta e a resposta.
           </p>
 
           <textarea
@@ -785,40 +485,28 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
         </section>
 
         <section className="admin-card">
-          <div className="eyebrow">
-            Google
-          </div>
+          <div className="eyebrow">Google</div>
 
-          <h2>
-            SEO da página
-          </h2>
+          <h2>SEO da página</h2>
 
           <div className="editor-grid">
             <label className="editor-wide">
               Título SEO
-
               <input
                 name="seoTitle"
                 maxLength={70}
-                defaultValue={
-                  neighborhood.seoTitle ??
-                  ''
-                }
+                defaultValue={neighborhood.seoTitle ?? ''}
                 placeholder={`Imóveis de alto padrão em ${neighborhood.name}`}
               />
             </label>
 
             <label className="editor-wide">
               Descrição SEO
-
               <textarea
                 name="seoDescription"
                 maxLength={180}
                 rows={4}
-                defaultValue={
-                  neighborhood.seoDescription ??
-                  ''
-                }
+                defaultValue={neighborhood.seoDescription ?? ''}
                 placeholder={`Conheça imóveis, lançamentos e a experiência de viver em ${neighborhood.name}, Rio de Janeiro.`}
               />
             </label>
@@ -826,18 +514,11 @@ Quais tipos de imóveis existem em ${neighborhood.name}? | Explique as tipologia
         </section>
 
         <div className="editor-save">
-          <button
-            className="btn"
-            type="submit"
-          >
+          <button className="btn" type="submit">
             Salvar bairro
           </button>
 
-          <Link
-            href={`/bairros/${neighborhood.slug}`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link href={`/bairros/${neighborhood.slug}`} target="_blank" rel="noreferrer">
             Ver página pública →
           </Link>
         </div>

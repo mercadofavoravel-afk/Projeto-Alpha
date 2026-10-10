@@ -27,7 +27,15 @@ export const metadata: Metadata = {
   },
 };
 
-function AdminLinks({ role }: { role: UserRole }) {
+function AdminLinks({ role, commercial = false }: { role: UserRole; commercial?: boolean }) {
+  if (commercial)
+    return (
+      <>
+        <Link href="/admin">Visão geral</Link>
+        {hasPermission(role, 'sites:manage') && <Link href="/admin/sites">Meus sites</Link>}
+        <Link href="/admin/minha-conta">Minha conta e conexões</Link>
+      </>
+    );
   return (
     <>
       <Link href="/admin">Visão geral</Link>
@@ -93,13 +101,15 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/integracoes">Integrações de leads</Link>
         </>
       )}
-      <Link href="/admin/minha-conta">Senha e segurança</Link>
+      <Link href="/admin/minha-conta">Minha conta e conexões</Link>
+      {hasPermission(role, 'sites:manage') && <Link href="/admin/sites">Meus sites</Link>}
     </>
   );
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const commercial = user.billingMode === 'COMMERCIAL' && !user.isPlatformOwner;
 
   return (
     <div className="admin">
@@ -110,13 +120,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
 
         <nav className="admin-desktop-links" aria-label="Navegação administrativa">
-          <AdminLinks role={user.role} />
+          <AdminLinks role={user.role} commercial={commercial} />
         </nav>
 
         <details className="admin-mobile-links">
           <summary>Menu do painel</summary>
           <nav aria-label="Navegação administrativa no celular">
-            <AdminLinks role={user.role} />
+            <AdminLinks role={user.role} commercial={commercial} />
           </nav>
         </details>
 
@@ -126,7 +136,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
 
       <main className="main">
-        {hasPermission(user.role, 'crm:read') && <LeadAttention />}
+        {!commercial && hasPermission(user.role, 'crm:read') && <LeadAttention />}
         {children}
       </main>
     </div>

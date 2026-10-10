@@ -42,6 +42,24 @@ enum UserRole {
   VIEWER
 }
 
+enum BillingMode {
+  INTERNAL
+  COMMERCIAL
+}
+
+enum BillingPaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum CustomerArticleStatus {
+  DRAFT
+  REVIEW
+  REMOTE_DRAFT
+  PUBLISHED
+}
+
 enum BrokerStatus {
   ACTIVE
   INACTIVE
@@ -158,6 +176,9 @@ model User {
   passwordHash        String
   role                UserRole             @default(EDITOR)
   isActive            Boolean              @default(true)
+  isPlatformOwner     Boolean              @default(false)
+  billingMode         BillingMode          @default(INTERNAL)
+  subscription        CommercialSubscription?
   acceptsLeads        Boolean              @default(false)
   leadCapacity        Int                  @default(30)
   serviceRegions      String[]
@@ -170,6 +191,9 @@ model User {
   passwordResetTokens PasswordResetToken[]
   assignedLeads       Lead[]               @relation("AssignedLeads")
   contentPlans        ContentPlan[]         @relation("ContentPlanCreator")
+  marketingConnections MarketingConnection[]
+  marketingAuthStates MarketingAuthState[]
+  customerSites       CustomerSite[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -177,6 +201,93 @@ model User {
   @@index([isActive])
   @@index([acceptsLeads, isActive])
   @@index([managerId])
+}
+
+model CustomerSite {
+  id                           String   @id @default(cuid())
+  ownerId                      String
+  owner                        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  siteUrl                      String   @unique
+  wpUsername                   String
+  applicationPasswordEncrypted String
+  wpUserId                     Int
+  wpDisplayName                String
+  verifiedAt                   DateTime
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+  articles                     CustomerArticle[]
+  leads                        CustomerLead[]
+  marketingConnections         MarketingConnection[]
+
+  @@index([ownerId])
+}
+
+model CustomerArticle {
+  id             String                @id @default(cuid())
+  siteId         String
+  site           CustomerSite          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String
+  excerpt        String
+  content        String
+  seoTitle       String
+  seoDescription String
+  status         CustomerArticleStatus @default(DRAFT)
+  wpPostId       Int?
+  publicUrl      String?
+  publishedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  leads          CustomerLead[]
+
+  @@unique([siteId, slug])
+  @@index([siteId, status])
+}
+
+// Customer contacts are separate from the matrix Lead/LeadActivity tables.
+model CustomerLead {
+  id           String                 @id @default(cuid())
+  siteId       String
+  site         CustomerSite           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  articleId    String?
+  article      CustomerArticle?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  name         String
+  phone        String
+  email        String?
+  objective    LeadObjective          @default(OTHER)
+  typology     String?
+  message      String?
+  consent      Boolean
+  source       String
+  externalProvider String?
+  externalId       String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  status       LeadStatus             @default(NEW)
+  activities   CustomerLeadActivity[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([siteId, createdAt])
+  @@index([siteId, status])
+  @@index([articleId])
+  @@index([siteId, phone, createdAt])
+  @@unique([siteId, externalProvider, externalId])
+}
+
+model CustomerLeadActivity {
+  id          String       @id @default(cuid())
+  leadId      String
+  lead        CustomerLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type        String
+  note        String?
+  dueAt       DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([dueAt, completedAt])
 }
 
 model Neighborhood {
@@ -417,6 +528,82 @@ model ExternalLeadReceipt {
 
   @@unique([provider, externalId])
   @@index([leadId])
+}
+
+// The provider credentials belong to the Alpha user, not to the whole organization.
+model MarketingConnection {
+  id                    String   @id @default(cuid())
+  userId                String
+  provider              String
+  providerUserId        String
+  displayName           String?
+  email                 String?
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String?
+  expiresAt             DateTime?
+  scopes                String?
+  selectedAccountId     String?
+  selectedAccountName   String?
+  leadSiteId            String?
+  leadSite              CustomerSite? @relation(fields: [leadSiteId], references: [id], onDelete: SetNull)
+  selectedTokenEncrypted String?
+  webhookKeyHash        String?  @unique
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@unique([provider, selectedAccountId])
+  @@index([provider, providerUserId])
+  @@index([leadSiteId])
+}
+
+model MarketingAuthState {
+  id        String   @id @default(cuid())
+  userId    String
+  provider  String
+  stateHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, provider])
+  @@index([expiresAt])
+}
+
+model CommercialSubscription {
+  id             String           @id @default(cuid())
+  userId         String           @unique
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trialStartsAt  DateTime         @default(now())
+  trialEndsAt    DateTime
+  paidThroughAt  DateTime?
+  suspendedAt    DateTime?
+  amountCents    Int?
+  payments       BillingPayment[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([trialEndsAt])
+  @@index([paidThroughAt])
+}
+
+model BillingPayment {
+  id             String               @id @default(cuid())
+  subscriptionId String
+  subscription   CommercialSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amountCents    Int
+  dueAt          DateTime
+  status         BillingPaymentStatus @default(PENDING)
+  provider       String?
+  providerRef    String?              @unique
+  boletoUrl      String?
+  paidAt         DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([subscriptionId, dueAt])
+  @@index([status, dueAt])
 }
 
 model Article {

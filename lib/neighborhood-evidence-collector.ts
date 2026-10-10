@@ -9,9 +9,7 @@ type EvidenceItem = {
   sourceUrl?: string;
 };
 
-function safeSourceUrl(
-  value?: string | null,
-) {
+function safeSourceUrl(value?: string | null) {
   if (!value) {
     return undefined;
   }
@@ -19,10 +17,7 @@ function safeSourceUrl(
   try {
     const url = new URL(value);
 
-    if (
-      url.protocol === 'http:' ||
-      url.protocol === 'https:'
-    ) {
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
       return url.toString();
     }
   } catch {
@@ -32,15 +27,11 @@ function safeSourceUrl(
   return undefined;
 }
 
-function uniqueEvidence(
-  items: EvidenceItem[],
-) {
+function uniqueEvidence(items: EvidenceItem[]) {
   const seen = new Set<string>();
 
   return items.filter((item) => {
-    const key = `${item.label}|${item.description}`
-      .trim()
-      .toLocaleLowerCase('pt-BR');
+    const key = `${item.label}|${item.description}`.trim().toLocaleLowerCase('pt-BR');
 
     if (seen.has(key)) {
       return false;
@@ -52,17 +43,12 @@ function uniqueEvidence(
   });
 }
 
-function compactDescription(
-  value?: string | null,
-  maxLength = 760,
-) {
+function compactDescription(value?: string | null, maxLength = 760) {
   if (!value) {
     return null;
   }
 
-  const cleaned = value
-    .replace(/\s+/g, ' ')
-    .trim();
+  const cleaned = value.replace(/\s+/g, ' ').trim();
 
   if (!cleaned) {
     return null;
@@ -72,25 +58,15 @@ function compactDescription(
     return cleaned;
   }
 
-  return `${cleaned
-    .slice(0, maxLength - 1)
-    .trim()}…`;
+  return `${cleaned.slice(0, maxLength - 1).trim()}…`;
 }
 
-function extractedText(
-  value: unknown,
-) {
-  if (
-    !value ||
-    typeof value !== 'object'
-  ) {
+function extractedText(value: unknown) {
+  if (!value || typeof value !== 'object') {
     return '';
   }
 
-  if (
-    'text' in value &&
-    typeof value.text === 'string'
-  ) {
+  if ('text' in value && typeof value.text === 'string') {
     return value.text
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
@@ -102,31 +78,18 @@ function extractedText(
   return '';
 }
 
-function normalizeForSearch(
-  value: string,
-) {
+function normalizeForSearch(value: string) {
   return value
     .normalize('NFD')
-    .replace(
-      /[\u0300-\u036f]/g,
-      '',
-    )
+    .replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('pt-BR');
 }
 
-function splitIntoEvidenceChunks(
-  text: string,
-) {
+function splitIntoEvidenceChunks(text: string) {
   const paragraphs = text
     .split(/\n{2,}/)
-    .map((part) =>
-      part
-        .replace(/\s+/g, ' ')
-        .trim(),
-    )
-    .filter(
-      (part) => part.length >= 60,
-    );
+    .map((part) => part.replace(/\s+/g, ' ').trim())
+    .filter((part) => part.length >= 60);
 
   const chunks: string[] = [];
 
@@ -136,28 +99,17 @@ function splitIntoEvidenceChunks(
       continue;
     }
 
-    const sentences =
-      paragraph
-        .split(
-          /(?<=[.!?])\s+/,
-        )
-        .map((part) =>
-          part.trim(),
-        )
-        .filter(Boolean);
+    const sentences = paragraph
+      .split(/(?<=[.!?])\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
 
     let current = '';
 
     for (const sentence of sentences) {
-      const candidate =
-        current
-          ? `${current} ${sentence}`
-          : sentence;
+      const candidate = current ? `${current} ${sentence}` : sentence;
 
-      if (
-        candidate.length > 700 &&
-        current
-      ) {
+      if (candidate.length > 700 && current) {
         chunks.push(current);
         current = sentence;
       } else {
@@ -173,18 +125,10 @@ function splitIntoEvidenceChunks(
   return chunks.slice(0, 120);
 }
 
-function containsAny(
-  text: string,
-  terms: string[],
-) {
-  const normalized =
-    normalizeForSearch(text);
+function containsAny(text: string, terms: string[]) {
+  const normalized = normalizeForSearch(text);
 
-  return terms.some((term) =>
-    normalized.includes(
-      normalizeForSearch(term),
-    ),
-  );
+  return terms.some((term) => normalized.includes(normalizeForSearch(term)));
 }
 
 function pushBookEvidence(
@@ -205,49 +149,27 @@ function pushBookEvidence(
     audience: EvidenceItem[];
   },
 ) {
-  const neighborhoodMention =
-    containsAny(chunk, [
-      neighborhoodName,
-    ]);
+  const neighborhoodMention = containsAny(chunk, [neighborhoodName]);
 
-  const projectMention =
-    containsAny(chunk, [
-      projectName,
-    ]);
+  const projectMention = containsAny(chunk, [projectName]);
 
   /*
    * Só aproveitamos um trecho quando ele menciona
    * explicitamente o bairro ou o empreendimento
    * ao qual o material está vinculado.
    */
-  if (
-    !neighborhoodMention &&
-    !projectMention
-  ) {
+  if (!neighborhoodMention && !projectMention) {
     return;
   }
 
   const evidence = {
     description: chunk,
-    ...(sourceUrl
-      ? { sourceUrl }
-      : {}),
+    ...(sourceUrl ? { sourceUrl } : {}),
   };
 
-  const classified: Array<
-    keyof typeof groups
-  > = [];
+  const classified: Array<keyof typeof groups> = [];
 
-  if (
-    containsAny(chunk, [
-      'praia',
-      'orla',
-      'mar',
-      'beira-mar',
-      'beira mar',
-      'oceano',
-    ])
-  ) {
+  if (containsAny(chunk, ['praia', 'orla', 'mar', 'beira-mar', 'beira mar', 'oceano'])) {
     groups.beach.push({
       label: 'Praia e orla',
       ...evidence,
@@ -274,9 +196,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'gastronomy',
-    );
+    classified.push('gastronomy');
   }
 
   if (
@@ -297,9 +217,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'mobility',
-    );
+    classified.push('mobility');
   }
 
   if (
@@ -326,9 +244,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'services',
-    );
+    classified.push('services');
   }
 
   if (
@@ -351,9 +267,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'leisure',
-    );
+    classified.push('leisure');
   }
 
   if (
@@ -374,9 +288,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'architecture',
-    );
+    classified.push('architecture');
   }
 
   if (
@@ -401,9 +313,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'investment',
-    );
+    classified.push('investment');
   }
 
   if (
@@ -425,9 +335,7 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'lifestyle',
-    );
+    classified.push('lifestyle');
   }
 
   if (
@@ -452,14 +360,10 @@ function pushBookEvidence(
       ...evidence,
     });
 
-    classified.push(
-      'audience',
-    );
+    classified.push('audience');
   }
 
-  if (
-    classified.length === 0
-  ) {
+  if (classified.length === 0) {
     groups.overview.push({
       label: `Inteligência sobre ${neighborhoodName}`,
       ...evidence,
@@ -470,83 +374,69 @@ function pushBookEvidence(
 export async function collectNeighborhoodEvidence(
   neighborhoodId: string,
 ): Promise<NeighborhoodEvidence> {
-  const neighborhood =
-    await db.neighborhood.findUnique({
-      where: {
-        id: neighborhoodId,
-      },
+  const neighborhood = await db.neighborhood.findUnique({
+    where: {
+      id: neighborhoodId,
+    },
 
-      include: {
-        projects: {
-          where: {
-            publishStatus:
-              'PUBLISHED',
-          },
+    include: {
+      projects: {
+        where: {
+          publishStatus: 'PUBLISHED',
+        },
 
-          include: {
-            developer: true,
+        include: {
+          developer: true,
 
-            typologies: true,
+          typologies: true,
 
-            amenities: {
-              include: {
-                amenity: true,
-              },
+          amenities: {
+            include: {
+              amenity: true,
             },
+          },
 
-            collections: {
-              include: {
-                collection: true,
-              },
+          collections: {
+            include: {
+              collection: true,
             },
-
-            sourceRecords: true,
-
-            bookIngestions: true,
           },
 
-          orderBy: {
-            updatedAt: 'desc',
-          },
+          sourceRecords: true,
+
+          bookIngestions: true,
+        },
+
+        orderBy: {
+          updatedAt: 'desc',
         },
       },
-    });
+    },
+  });
 
   if (!neighborhood) {
-    throw new Error(
-      'Bairro não encontrado.',
-    );
+    throw new Error('Bairro não encontrado.');
   }
 
-  const overview:
-    EvidenceItem[] = [];
+  const overview: EvidenceItem[] = [];
 
-  const lifestyle:
-    EvidenceItem[] = [];
+  const lifestyle: EvidenceItem[] = [];
 
-  const mobility:
-    EvidenceItem[] = [];
+  const mobility: EvidenceItem[] = [];
 
-  const beach:
-    EvidenceItem[] = [];
+  const beach: EvidenceItem[] = [];
 
-  const gastronomy:
-    EvidenceItem[] = [];
+  const gastronomy: EvidenceItem[] = [];
 
-  const services:
-    EvidenceItem[] = [];
+  const services: EvidenceItem[] = [];
 
-  const leisure:
-    EvidenceItem[] = [];
+  const leisure: EvidenceItem[] = [];
 
-  const architecture:
-    EvidenceItem[] = [];
+  const architecture: EvidenceItem[] = [];
 
-  const investment:
-    EvidenceItem[] = [];
+  const investment: EvidenceItem[] = [];
 
-  const audience:
-    EvidenceItem[] = [];
+  const audience: EvidenceItem[] = [];
 
   const groups = {
     overview,
@@ -561,43 +451,26 @@ export async function collectNeighborhoodEvidence(
     audience,
   };
 
-  for (
-    const project of
-    neighborhood.projects
-  ) {
-    const sourceUrl =
-      safeSourceUrl(
-        project.sourceUrl,
-      );
+  for (const project of neighborhood.projects) {
+    const sourceUrl = safeSourceUrl(project.sourceUrl);
 
-    const description =
-      compactDescription(
-        project.description,
-      );
+    const description = compactDescription(project.description);
 
     if (description) {
       overview.push({
         label: project.name,
         description,
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
-    if (
-      project.developer?.name
-    ) {
+    if (project.developer?.name) {
       architecture.push({
-        label:
-          'Empreendimentos e incorporadoras',
+        label: 'Empreendimentos e incorporadoras',
 
-        description:
-          `${project.name} é um empreendimento associado à incorporadora ${project.developer.name}.`,
+        description: `${project.name} é um empreendimento associado à incorporadora ${project.developer.name}.`,
 
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
@@ -609,256 +482,128 @@ export async function collectNeighborhoodEvidence(
       project.suitesFrom ||
       project.suitesTo
     ) {
-      const characteristics:
-        string[] = [];
+      const characteristics: string[] = [];
 
-      if (
-        project.areaFrom &&
-        project.areaTo
-      ) {
+      if (project.areaFrom && project.areaTo) {
         characteristics.push(
           `áreas entre ${project.areaFrom.toString()} m² e ${project.areaTo.toString()} m²`,
         );
-      } else if (
-        project.areaFrom
-      ) {
-        characteristics.push(
-          `áreas a partir de ${project.areaFrom.toString()} m²`,
-        );
+      } else if (project.areaFrom) {
+        characteristics.push(`áreas a partir de ${project.areaFrom.toString()} m²`);
       }
 
-      if (
-        project.bedroomsFrom &&
-        project.bedroomsTo
-      ) {
-        characteristics.push(
-          `${project.bedroomsFrom} a ${project.bedroomsTo} quartos`,
-        );
-      } else if (
-        project.bedroomsFrom
-      ) {
-        characteristics.push(
-          `a partir de ${project.bedroomsFrom} quartos`,
-        );
+      if (project.bedroomsFrom && project.bedroomsTo) {
+        characteristics.push(`${project.bedroomsFrom} a ${project.bedroomsTo} quartos`);
+      } else if (project.bedroomsFrom) {
+        characteristics.push(`a partir de ${project.bedroomsFrom} quartos`);
       }
 
-      if (
-        project.suitesFrom &&
-        project.suitesTo
-      ) {
-        characteristics.push(
-          `${project.suitesFrom} a ${project.suitesTo} suítes`,
-        );
+      if (project.suitesFrom && project.suitesTo) {
+        characteristics.push(`${project.suitesFrom} a ${project.suitesTo} suítes`);
       }
 
-      if (
-        characteristics.length >
-        0
-      ) {
+      if (characteristics.length > 0) {
         audience.push({
-          label:
-            'Perfil residencial',
+          label: 'Perfil residencial',
 
-          description:
-            `${project.name} apresenta ${characteristics.join(
-              ', ',
-            )}.`,
+          description: `${project.name} apresenta ${characteristics.join(', ')}.`,
 
-          ...(sourceUrl
-            ? { sourceUrl }
-            : {}),
+          ...(sourceUrl ? { sourceUrl } : {}),
         });
       }
     }
 
-    const typologies =
-      project.typologies
-        .map(
-          (item) => item.name,
-        )
-        .filter(Boolean);
+    const typologies = project.typologies.map((item) => item.name).filter(Boolean);
 
-    if (
-      typologies.length > 0
-    ) {
+    if (typologies.length > 0) {
       audience.push({
-        label:
-          'Tipologias disponíveis',
+        label: 'Tipologias disponíveis',
 
-        description:
-          `${project.name} possui tipologias como ${typologies.join(
-            ', ',
-          )}.`,
+        description: `${project.name} possui tipologias como ${typologies.join(', ')}.`,
 
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
-    const amenities =
-      project.amenities
-        .map(
-          (item) =>
-            item.amenity.name,
-        )
-        .filter(Boolean);
+    const amenities = project.amenities.map((item) => item.amenity.name).filter(Boolean);
 
-    if (
-      amenities.length > 0
-    ) {
+    if (amenities.length > 0) {
       leisure.push({
-        label:
-          'Lazer e comodidades',
+        label: 'Lazer e comodidades',
 
-        description:
-          `${project.name} reúne comodidades como ${amenities
-            .slice(0, 8)
-            .join(', ')}.`,
+        description: `${project.name} reúne comodidades como ${amenities.slice(0, 8).join(', ')}.`,
 
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
-    const collections =
-      project.collections
-        .map(
-          (item) =>
-            item.collection.name,
-        )
-        .filter(Boolean);
+    const collections = project.collections.map((item) => item.collection.name).filter(Boolean);
 
-    if (
-      collections.length > 0
-    ) {
+    if (collections.length > 0) {
       lifestyle.push({
-        label:
-          'Perfil da curadoria',
+        label: 'Perfil da curadoria',
 
-        description:
-          `${project.name} integra as seleções ${collections.join(
-            ', ',
-          )}.`,
+        description: `${project.name} integra as seleções ${collections.join(', ')}.`,
 
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
-    if (
-      project.priceFrom ||
-      project.priceTo
-    ) {
-      const priceParts:
-        string[] = [];
+    if (project.priceFrom || project.priceTo) {
+      const priceParts: string[] = [];
 
-      if (
-        project.priceFrom
-      ) {
+      if (project.priceFrom) {
         priceParts.push(
-          `valor inicial cadastrado de R$ ${Number(
-            project.priceFrom,
-          ).toLocaleString(
-            'pt-BR',
-          )}`,
+          `valor inicial cadastrado de R$ ${Number(project.priceFrom).toLocaleString('pt-BR')}`,
         );
       }
 
-      if (
-        project.priceTo
-      ) {
+      if (project.priceTo) {
         priceParts.push(
-          `valor final cadastrado de R$ ${Number(
-            project.priceTo,
-          ).toLocaleString(
-            'pt-BR',
-          )}`,
+          `valor final cadastrado de R$ ${Number(project.priceTo).toLocaleString('pt-BR')}`,
         );
       }
 
       investment.push({
-        label:
-          'Faixa comercial cadastrada',
+        label: 'Faixa comercial cadastrada',
 
-        description:
-          `${project.name} possui ${priceParts.join(
-            ' e ',
-          )}. Valores e disponibilidade estão sujeitos à confirmação.`,
+        description: `${project.name} possui ${priceParts.join(
+          ' e ',
+        )}. Valores e disponibilidade estão sujeitos à confirmação.`,
 
-        ...(sourceUrl
-          ? { sourceUrl }
-          : {}),
+        ...(sourceUrl ? { sourceUrl } : {}),
       });
     }
 
-    for (
-      const sourceRecord of
-      project.sourceRecords
-    ) {
-      const recordUrl =
-        safeSourceUrl(
-          sourceRecord.storageUrl,
-        );
+    for (const sourceRecord of project.sourceRecords) {
+      const recordUrl = safeSourceUrl(sourceRecord.storageUrl);
 
-      if (
-        sourceRecord.title &&
-        recordUrl
-      ) {
+      if (sourceRecord.title && recordUrl) {
         overview.push({
-          label:
-            `Fonte: ${sourceRecord.title}`,
+          label: `Fonte: ${sourceRecord.title}`,
 
-          description:
-            `Material de referência associado ao empreendimento ${project.name}.`,
+          description: `Material de referência associado ao empreendimento ${project.name}.`,
 
-          sourceUrl:
-            recordUrl,
+          sourceUrl: recordUrl,
         });
       }
     }
 
-    for (
-      const book of
-      project.bookIngestions
-    ) {
-      const bookUrl =
-        safeSourceUrl(
-          book.storageUrl,
-        );
+    for (const book of project.bookIngestions) {
+      const bookUrl = safeSourceUrl(book.storageUrl);
 
-      const text =
-        extractedText(
-          book.extracted,
-        );
+      const text = extractedText(book.extracted);
 
       /*
        * Aqui está a mudança principal:
        * quando o Book está processado e possui texto,
        * o Alpha passa a analisar o conteúdo real.
        */
-      if (
-        book.status ===
-          'COMPLETED' &&
-        text.length >= 80
-      ) {
-        const chunks =
-          splitIntoEvidenceChunks(
-            text,
-          );
+      if (book.status === 'COMPLETED' && text.length >= 80) {
+        const chunks = splitIntoEvidenceChunks(text);
 
-        for (
-          const chunk of chunks
-        ) {
-          pushBookEvidence(
-            chunk,
-            bookUrl,
-            project.name,
-            neighborhood.name,
-            groups,
-          );
+        for (const chunk of chunks) {
+          pushBookEvidence(chunk, bookUrl, project.name, neighborhood.name, groups);
         }
 
         continue;
@@ -870,137 +615,74 @@ export async function collectNeighborhoodEvidence(
        * do material. Isso não é tratado como fato
        * de lifestyle, mercado ou localização.
        */
-      if (
-        bookUrl &&
-        book.status !==
-          'FAILED'
-      ) {
+      if (bookUrl && book.status !== 'FAILED') {
         overview.push({
-          label:
-            `Material: ${book.fileName}`,
+          label: `Material: ${book.fileName}`,
 
-          description:
-            `Material de inteligência associado ao empreendimento ${project.name}.`,
+          description: `Material de inteligência associado ao empreendimento ${project.name}.`,
 
-          sourceUrl:
-            bookUrl,
+          sourceUrl: bookUrl,
         });
       }
     }
   }
 
-  const existingDescription =
-    compactDescription(
-      neighborhood.description,
-    );
+  const existingDescription = compactDescription(neighborhood.description);
 
-  if (
-    existingDescription
-  ) {
+  if (existingDescription) {
     overview.unshift({
-      label:
-        `Visão geral de ${neighborhood.name}`,
+      label: `Visão geral de ${neighborhood.name}`,
 
-      description:
-        existingDescription,
+      description: existingDescription,
     });
   }
 
-  const existingExperience =
-    compactDescription(
-      neighborhood.experienceDescription,
-    );
+  const existingExperience = compactDescription(neighborhood.experienceDescription);
 
-  if (
-    existingExperience
-  ) {
+  if (existingExperience) {
     lifestyle.unshift({
-      label:
-        `Experiência em ${neighborhood.name}`,
+      label: `Experiência em ${neighborhood.name}`,
 
-      description:
-        existingExperience,
+      description: existingExperience,
     });
   }
 
   return {
-    name:
-      neighborhood.name,
+    name: neighborhood.name,
 
-    city:
-      'Rio de Janeiro',
+    city: 'Rio de Janeiro',
 
-    state:
-      'Rio de Janeiro',
+    state: 'Rio de Janeiro',
 
-    overview:
-      uniqueEvidence(
-        overview,
-      ),
+    overview: uniqueEvidence(overview),
 
-    lifestyle:
-      uniqueEvidence(
-        lifestyle,
-      ),
+    lifestyle: uniqueEvidence(lifestyle),
 
-    mobility:
-      uniqueEvidence(
-        mobility,
-      ),
+    mobility: uniqueEvidence(mobility),
 
-    beach:
-      uniqueEvidence(
-        beach,
-      ),
+    beach: uniqueEvidence(beach),
 
-    gastronomy:
-      uniqueEvidence(
-        gastronomy,
-      ),
+    gastronomy: uniqueEvidence(gastronomy),
 
-    services:
-      uniqueEvidence(
-        services,
-      ),
+    services: uniqueEvidence(services),
 
-    leisure:
-      uniqueEvidence(
-        leisure,
-      ),
+    leisure: uniqueEvidence(leisure),
 
-    architecture:
-      uniqueEvidence(
-        architecture,
-      ),
+    architecture: uniqueEvidence(architecture),
 
-    investment:
-      uniqueEvidence(
-        investment,
-      ),
+    investment: uniqueEvidence(investment),
 
-    audience:
-      uniqueEvidence(
-        audience,
-      ),
+    audience: uniqueEvidence(audience),
 
     faq: [],
 
     heroImage:
       neighborhood.heroImage ??
-      neighborhood.projects.find(
-        (project) =>
-          Boolean(
-            project.heroImage,
-          ),
-      )?.heroImage ??
+      neighborhood.projects.find((project) => Boolean(project.heroImage))?.heroImage ??
       null,
 
-    videoUrl:
-      neighborhood.videoUrl ??
-      null,
+    videoUrl: neighborhood.videoUrl ?? null,
 
-    videoTitle:
-      neighborhood.videoTitle ??
-      null,
+    videoTitle: neighborhood.videoTitle ?? null,
   };
 }

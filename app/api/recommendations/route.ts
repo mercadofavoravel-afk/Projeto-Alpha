@@ -21,10 +21,7 @@ export async function POST(req: Request) {
 
     const input = parsed.data;
 
-    const ranked = rankProjects(
-      await getCandidates(),
-      input,
-    ).slice(0, 8);
+    const ranked = rankProjects(await getCandidates(), input).slice(0, 8);
 
     const resultData = ranked.map((project, index) => ({
       projectId: project.id,

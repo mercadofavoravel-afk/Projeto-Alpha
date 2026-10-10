@@ -106,12 +106,17 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           user.role === 'MANAGER'
             ? {
                 isActive: true,
+                billingMode: 'INTERNAL',
                 OR: [
                   { id: user.id, role: 'MANAGER' },
                   { role: 'CONSULTANT', managerId: user.id },
                 ],
               }
-            : { isActive: true, role: { in: ['CONSULTANT', 'MANAGER', 'DIRECTOR'] } },
+            : {
+                isActive: true,
+                billingMode: 'INTERNAL',
+                role: { in: ['CONSULTANT', 'MANAGER', 'DIRECTOR'] },
+              },
         select: { id: true, name: true, email: true },
         orderBy: { name: 'asc' },
       })

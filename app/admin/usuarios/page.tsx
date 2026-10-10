@@ -22,8 +22,12 @@ export default async function Page({
   const manageableRoles = actor.role === 'ADMIN' ? roleNames : salesRoleNames;
   const [users, managers] = await Promise.all([
     db.user.findMany({
-      where:
-        actor.role === 'DIRECTOR' ? { role: { in: ['MANAGER', 'CONSULTANT'] as UserRole[] } } : {},
+      where: {
+        billingMode: 'INTERNAL',
+        ...(actor.role === 'DIRECTOR'
+          ? { role: { in: ['MANAGER', 'CONSULTANT'] as UserRole[] } }
+          : {}),
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -44,7 +48,7 @@ export default async function Page({
       },
     }),
     db.user.findMany({
-      where: { role: 'MANAGER', isActive: true },
+      where: { billingMode: 'INTERNAL', role: 'MANAGER', isActive: true },
       select: { id: true, name: true, email: true },
       orderBy: { name: 'asc' },
     }),

@@ -94,6 +94,10 @@ export async function disconnectWordPressSite(formData: FormData) {
   const id = formData.get('siteId');
   if (typeof id !== 'string' || !/^[a-z0-9]{20,40}$/i.test(id)) done('invalid');
   await db.$transaction(async (tx) => {
+    const articleCount = await tx.customerArticle.count({
+      where: { siteId: id, site: { ownerId: user.id } },
+    });
+    if (articleCount) return;
     const removed = await tx.customerSite.deleteMany({ where: { id, ownerId: user.id } });
     if (removed.count)
       await tx.auditLog.create({
@@ -105,5 +109,9 @@ export async function disconnectWordPressSite(formData: FormData) {
         },
       });
   });
-  done('disconnected');
+  const stillConnected = await db.customerSite.findFirst({
+    where: { id, ownerId: user.id },
+    select: { id: true },
+  });
+  done(stillConnected ? 'has-articles' : 'disconnected');
 }

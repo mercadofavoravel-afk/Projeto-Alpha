@@ -53,6 +53,13 @@ enum BillingPaymentStatus {
   CANCELED
 }
 
+enum CustomerArticleStatus {
+  DRAFT
+  REVIEW
+  REMOTE_DRAFT
+  PUBLISHED
+}
+
 enum BrokerStatus {
   ACTIVE
   INACTIVE
@@ -208,8 +215,30 @@ model CustomerSite {
   verifiedAt                   DateTime
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
+  articles                     CustomerArticle[]
 
   @@index([ownerId])
+}
+
+model CustomerArticle {
+  id             String                @id @default(cuid())
+  siteId         String
+  site           CustomerSite          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String
+  excerpt        String
+  content        String
+  seoTitle       String
+  seoDescription String
+  status         CustomerArticleStatus @default(DRAFT)
+  wpPostId       Int?
+  publicUrl      String?
+  publishedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([siteId, slug])
+  @@index([siteId, status])
 }
 
 model Neighborhood {

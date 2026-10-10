@@ -60,9 +60,33 @@ export async function verifyWordPressEditor(
   username: string,
   appPassword: string,
 ) {
+  const user = await wordPressJson(
+    siteUrl,
+    username,
+    appPassword,
+    '/wp-json/wp/v2/users/me?context=edit',
+  );
+  if (!user || typeof user !== 'object') return null;
+  const identity = user as {
+    id?: unknown;
+    name?: unknown;
+    capabilities?: { edit_posts?: unknown };
+  };
+  return Number.isSafeInteger(identity.id) && identity.capabilities?.edit_posts === true
+    ? { id: identity.id as number, name: String(identity.name || username).slice(0, 120) }
+    : null;
+}
+
+async function wordPressJson(
+  siteUrl: string,
+  username: string,
+  appPassword: string,
+  path: string,
+  data?: Record<string, unknown>,
+): Promise<unknown | null> {
   const normalized = normalizeWordPressSite(siteUrl);
   if (!normalized) return null;
-  const url = new URL(`${normalized}/wp-json/wp/v2/users/me?context=edit`);
+  const url = new URL(`${normalized}${path}`);
   let records;
   try {
     records = await lookup(url.hostname, { all: true, family: 4 });
@@ -74,18 +98,25 @@ export async function verifyWordPressEditor(
     return null;
   const address = records[0].address;
   const credential = Buffer.from(`${username}:${appPassword}`).toString('base64');
-  return new Promise<{ id: number; name: string } | null>((resolve) => {
+  const body = data ? JSON.stringify(data) : null;
+  return new Promise<unknown | null>((resolve) => {
     const req = request(
       url,
       {
-        method: 'GET',
-        headers: { Authorization: `Basic ${credential}`, Accept: 'application/json' },
+        method: body ? 'POST' : 'GET',
+        headers: {
+          Authorization: `Basic ${credential}`,
+          Accept: 'application/json',
+          ...(body
+            ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+            : {}),
+        },
         lookup: (_host, _options, callback) => callback(null, address, 4),
         timeout: 8000,
         maxHeaderSize: 16_384,
       },
       (response) => {
-        if (response.statusCode !== 200) {
+        if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
           response.resume();
           resolve(null);
           return;
@@ -94,23 +125,14 @@ export async function verifyWordPressEditor(
         response.setEncoding('utf8');
         response.on('data', (chunk: string) => {
           text += chunk;
-          if (text.length > 65_536) {
+          if (text.length > 524_288) {
             req.destroy();
             resolve(null);
           }
         });
         response.on('end', () => {
           try {
-            const user = JSON.parse(text) as {
-              id?: unknown;
-              name?: unknown;
-              capabilities?: { edit_posts?: unknown };
-            };
-            resolve(
-              Number.isSafeInteger(user.id) && user.capabilities?.edit_posts === true
-                ? { id: user.id as number, name: String(user.name || username).slice(0, 120) }
-                : null,
-            );
+            resolve(JSON.parse(text));
           } catch {
             resolve(null);
           }
@@ -120,6 +142,57 @@ export async function verifyWordPressEditor(
     );
     req.on('timeout', () => req.destroy());
     req.on('error', () => resolve(null));
-    req.end();
+    req.end(body ?? undefined);
   });
+}
+
+export async function writeWordPressPost(
+  site: { siteUrl: string; wpUsername: string; applicationPassword: string },
+  article: {
+    wpPostId: number | null;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+  },
+  status: 'draft' | 'publish',
+) {
+  // A remote post must be created as a draft before a separate publish action.
+  if (status === 'publish' && !article.wpPostId) return null;
+  const path = article.wpPostId
+    ? `/wp-json/wp/v2/posts/${article.wpPostId}`
+    : '/wp-json/wp/v2/posts';
+  const payload = {
+    title: article.title,
+    slug: article.slug,
+    excerpt: article.excerpt,
+    content: article.content,
+    status,
+  };
+  const response = await wordPressJson(
+    site.siteUrl,
+    site.wpUsername,
+    site.applicationPassword,
+    path,
+    payload,
+  );
+  if (!response || typeof response !== 'object') return null;
+  const post = response as { id?: unknown; status?: unknown; link?: unknown };
+  if (
+    !Number.isSafeInteger(post.id) ||
+    post.status !== status ||
+    (article.wpPostId && post.id !== article.wpPostId)
+  )
+    return null;
+  let link: URL | null = null;
+  try {
+    if (typeof post.link === 'string') link = new URL(post.link);
+  } catch {
+    // A remote write may already have succeeded; keep its ID for reconciliation.
+  }
+  const siteHost = new URL(site.siteUrl).hostname;
+  return {
+    id: post.id as number,
+    link: link?.protocol === 'https:' && link.hostname === siteHost ? link.href : null,
+  };
 }

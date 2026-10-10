@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { connectWordPressSite, disconnectWordPressSite } from './actions';
@@ -19,6 +20,8 @@ export default async function SitesPage({
   const notices: Record<string, string> = {
     connected: 'Site conectado e acesso editorial verificado.',
     disconnected: 'Conexão removida da sua conta.',
+    'has-articles':
+      'Este site possui artigos. A desconexão foi interrompida para preservar o histórico e os posts remotos.',
     invalid: 'Confira o endereço HTTPS, o usuário e a senha de aplicativo do WordPress.',
     'in-use': 'Este site já pertence a outra conta do Alpha.',
     limit: 'Limite de dez sites por conta atingido.',
@@ -69,6 +72,9 @@ export default async function SitesPage({
                 timeZone: 'America/Sao_Paulo',
               }).format(site.verifiedAt)}
               .
+            </p>
+            <p>
+              <Link href={`/admin/sites/${site.id}/artigos`}>Abrir blog deste site</Link>
             </p>
             <form action={disconnectWordPressSite}>
               <input type="hidden" name="siteId" value={site.id} />

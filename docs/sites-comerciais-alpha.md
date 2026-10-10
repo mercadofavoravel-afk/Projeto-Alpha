@@ -12,7 +12,7 @@ Em **Meus sites**, o usuário editorial informa a URL HTTPS, o nome do usuário 
 
 Referência: [senhas de aplicativo na documentação oficial do WordPress](https://developer.wordpress.org/advanced-administration/security/application-passwords/).
 
-Esta etapa **não publica posts** nem altera arquivos SEO. Para isso, cada artigo futuro precisará de `siteId`, autor/organização, slug e status próprios. Antes da publicação, o editor precisa revisar originalidade, fatos, links e renderização. A API REST do WordPress recebe título, resumo, conteúdo, slug e estado do post; metadados de plugins SEO exigem integração compatível específica, e arquivo físico, robots e sitemap dependem do CMS e da hospedagem do cliente. O Alpha não pode assumir que um plugin qualquer expõe seus campos para escrita.
+O editor de cada site salva artigos em rascunho isolado, permite marcar revisado, envia um rascunho à API REST e exige uma segunda ação explícita para publicar. Armazena o ID e a URL retornados pelo WordPress. Antes de publicar, o editor precisa conferir originalidade, fatos, links e renderização na prévia do próprio WordPress. Título e descrição SEO ficam armazenados no Alpha, mas **não são enviados ao plugin SEO**: metadados de plugins exigem integração compatível específica. Arquivos físicos, robots e sitemap dependem do CMS e da hospedagem do cliente. Erros de rede após uma escrita remota exigem conferência manual do post antes de repetir, pois a confirmação local pode não ter sido gravada.
 
 ## WhatsApp
 
@@ -23,7 +23,7 @@ Referência: [Política de Negócios oficial do WhatsApp](https://business.whats
 ## Antes de oferecer a clientes externos
 
 1. Criar organizações e membros com papéis próprios, migrar a matriz e escopar **todas** as consultas e mutações de leads, equipe, artigos, catálogo, arquivos, fontes, analítica e integrações.
-2. Criar um editor de posts por site, publicação explícita na API REST, armazenamento da URL e ID remotos, revisão de resposta/erros, renovação/revogação de credenciais e suporte a plugins SEO conhecidos.
+2. Completar reconciliação de falhas remotas, renovação/revogação de credenciais e suporte a plugins SEO conhecidos; conferir o formulário e a origem de cada lead no site conectado.
 3. Conectar Search Console por propriedade verificada e gerar recomendações e arquivos compatíveis com cada CMS, sem presumir acesso à hospedagem.
 4. Integrar oficialmente WhatsApp Business Platform por cliente, com consentimento, templates aprovados, webhook e auditoria.
 5. Concluir cobrança com valor configurável, boleto e confirmação autenticada, aplicar teste de 30 dias e tolerância de cinco apenas à organização inadimplente, além de validar reativação.

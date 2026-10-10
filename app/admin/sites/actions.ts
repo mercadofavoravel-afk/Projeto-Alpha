@@ -7,7 +7,11 @@ import { redirect } from 'next/navigation';
 import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { encryptMarketingToken } from '@/lib/marketing-oauth';
-import { normalizeWordPressSite, verifyWordPressEditor } from '@/lib/wordpress-site';
+import {
+  isMatrixWordPressSite,
+  normalizeWordPressSite,
+  verifyWordPressEditor,
+} from '@/lib/wordpress-site';
 
 function done(result: string): never {
   revalidatePath('/admin/sites');
@@ -32,6 +36,8 @@ export async function connectWordPressSite(formData: FormData) {
     done('invalid');
   const siteUrl = normalizeWordPressSite(url);
   if (!siteUrl) done('invalid');
+  // The official brand remains in the matrix editorial and CRM flows.
+  if (isMatrixWordPressSite(siteUrl)) done('matrix-site');
   const existing = await db.customerSite.findUnique({
     where: { siteUrl },
     select: { id: true, ownerId: true },

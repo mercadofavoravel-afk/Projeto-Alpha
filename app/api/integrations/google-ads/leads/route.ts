@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
 import { hashOAuthState } from '@/lib/marketing-oauth';
-import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
+import { isCommercialCustomer } from '@/lib/commercial-subscription';
 import { storeCustomerExternalLead } from '@/lib/customer-external-lead';
 
 function sameKey(actual: string, expected: string) {
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-              ...assignableSubscriptionWhere(),
+              billingMode: 'INTERNAL',
             },
             select: {
               id: true,

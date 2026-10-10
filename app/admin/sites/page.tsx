@@ -24,6 +24,8 @@ export default async function SitesPage({
       'Este site possui artigos, leads ou uma conta de anúncios vinculada. A desconexão foi interrompida para preservar o histórico.',
     invalid: 'Confira o endereço HTTPS, o usuário e a senha de aplicativo do WordPress.',
     'in-use': 'Este site já pertence a outra conta do Alpha.',
+    'matrix-site':
+      'O domínio Imóveis de Alto Padrão Rio é operado pela matriz. Seus artigos e leads seguem no painel central.',
     limit: 'Limite de dez sites por conta atingido.',
     verification:
       'O WordPress não confirmou as credenciais ou a permissão de editar posts. Confira a API REST e tente novamente.',

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { requireApiPermission } from '@/lib/auth';
-import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
 import { db } from '@/lib/db';
 import { leadAccessWhere } from '@/lib/lead-access';
 
@@ -27,7 +26,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const target = await db.user.findFirst({
       where: {
         AND: [
-          assignableSubscriptionWhere(),
+          { billingMode: 'INTERNAL' },
           auth.user.role === 'MANAGER'
             ? {
                 id: targetId,

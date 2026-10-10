@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-import { isPublicWordPressIPv4, normalizeWordPressSite } from './wordpress-site';
+import {
+  isMatrixWordPressSite,
+  isPublicWordPressIPv4,
+  normalizeWordPressSite,
+} from './wordpress-site';
 
 describe('cadastro seguro do WordPress por cliente', () => {
   it('normaliza sites HTTPS e permite instalações em subdiretórios', () => {
@@ -35,5 +39,11 @@ describe('cadastro seguro do WordPress por cliente', () => {
     ])
       expect(isPublicWordPressIPv4(ip)).toBe(false);
     expect(isPublicWordPressIPv4('8.8.8.8')).toBe(true);
+  });
+
+  it('reserva o domínio da imobiliária para a operação matriz', () => {
+    expect(isMatrixWordPressSite('https://www.imoveisdealtopadraorio.com.br')).toBe(true);
+    expect(isMatrixWordPressSite('https://imoveisdealtopadraorio.com.br/alpha')).toBe(true);
+    expect(isMatrixWordPressSite('https://cliente-imoveisdealtopadraorio.com.br')).toBe(false);
   });
 });

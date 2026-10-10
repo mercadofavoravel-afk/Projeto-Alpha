@@ -8,7 +8,6 @@ import { normalizeLeadUtms } from '@/lib/utm';
 import { leadSchema } from '@/lib/validation';
 import { requireApiPermission } from '@/lib/auth';
 import { leadAccessWhere } from '@/lib/lead-access';
-import { assignableSubscriptionWhere } from '@/lib/commercial-subscription';
 
 export async function GET() {
   const auth = await requireApiPermission('crm:read');
@@ -61,7 +60,7 @@ export async function POST(request: Request) {
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-              ...assignableSubscriptionWhere(),
+              billingMode: 'INTERNAL',
             },
             select: {
               id: true,

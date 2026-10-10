@@ -57,6 +57,17 @@ export function normalizeWordPressSite(input: string) {
   return `${url.origin}${pathname}`;
 }
 
+export function isMatrixWordPressSite(siteUrl: string) {
+  try {
+    return (
+      new URL(siteUrl).hostname.toLowerCase().replace(/^www\./u, '') ===
+      'imoveisdealtopadraorio.com.br'
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function verifyWordPressEditor(
   siteUrl: string,
   username: string,

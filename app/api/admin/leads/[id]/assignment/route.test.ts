@@ -52,7 +52,7 @@ describe('atribuição de leads pelo gerente', () => {
     expect(mocks.findUser).toHaveBeenCalledWith({
       where: {
         AND: [
-          expect.objectContaining({ OR: expect.any(Array) }),
+          { billingMode: 'INTERNAL' },
           {
             id: consultantId,
             isActive: true,

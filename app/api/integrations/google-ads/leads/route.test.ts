@@ -80,6 +80,9 @@ describe('Google Ads lead form receiver', () => {
 
   it('keeps campaign provenance, assigns an eligible professional and records a receipt', async () => {
     expect((await POST(request())).status).toBe(200);
+    expect(calls.users).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     expect(calls.createLead).toHaveBeenCalledWith({
       data: expect.objectContaining({
         source: 'Google Ads | formulário 123',
@@ -158,6 +161,7 @@ describe('Google Ads lead form receiver', () => {
     });
     expect((await POST(request('personal-key'))).status).toBe(503);
     expect(calls.createLead).not.toHaveBeenCalled();
+    expect(calls.users).not.toHaveBeenCalled();
   });
 
   it('routes a commercial form to the site selected by its owner', async () => {

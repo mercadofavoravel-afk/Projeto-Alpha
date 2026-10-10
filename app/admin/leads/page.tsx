@@ -78,8 +78,9 @@ export default async function LeadsPage({
                   { id: user.id, role: 'MANAGER' },
                   { managerId: user.id, role: 'CONSULTANT' },
                 ],
+                billingMode: 'INTERNAL',
               }
-            : { role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+            : { billingMode: 'INTERNAL', role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
         select: { id: true, name: true, email: true },
         orderBy: { name: 'asc' },
       })
@@ -96,6 +97,7 @@ export default async function LeadsPage({
           where: {
             isActive: true,
             acceptsLeads: true,
+            billingMode: 'INTERNAL',
             role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
           },
           select: {

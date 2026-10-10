@@ -62,6 +62,9 @@ describe('resumo diário do CRM', () => {
   it('envia somente o resumo dos riscos do próprio corretor e registra auditoria', async () => {
     const response = await GET(request());
     expect(response.status).toBe(200);
+    expect(mocks.users).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     expect(await response.json()).toEqual({ sent: 1, skipped: 0, failed: 0 });
     expect(mocks.send).toHaveBeenCalledWith(
       expect.objectContaining({

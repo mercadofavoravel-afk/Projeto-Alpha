@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseMetaLeadDetail, parseMetaNotifications } from '@/lib/meta-lead-form';
 import { decryptMarketingToken } from '@/lib/marketing-oauth';
-import { assignableSubscriptionWhere, isCommercialCustomer } from '@/lib/commercial-subscription';
+import { isCommercialCustomer } from '@/lib/commercial-subscription';
 import { storeCustomerExternalLead } from '@/lib/customer-external-lead';
 
 const provider = 'META_LEAD_ADS';
@@ -112,7 +112,7 @@ async function receiveLead(
               isActive: true,
               acceptsLeads: true,
               role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-              ...assignableSubscriptionWhere(),
+              billingMode: 'INTERNAL',
             },
             select: {
               id: true,

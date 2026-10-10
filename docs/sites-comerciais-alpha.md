@@ -2,6 +2,8 @@
 
 ## Modelo de acesso
 
+O site oficial **imoveisdealtopadraorio.com.br** e seus artigos usam o CRM da matriz (`Lead`), inclusive quando chegam por formulário, Google Ads ou Meta vinculados à operação interna. O cliente licenciado conecta o próprio WordPress e suas contas de anúncios; os contatos ficam no CRM do site dele (`CustomerLead`). O domínio oficial é reservado e não pode ser conectado como site de cliente. Contas comerciais não integram a distribuição automática nem os seletores de corretores da matriz.
+
 O usuário entra no Alpha com seu próprio e-mail e senha. A matriz tem contas internas e administra a plataforma. Cada cliente deve pertencer a uma organização isolada, que pode ter membros e vários sites. O `CustomerSite` desta etapa pertence diretamente a um usuário e serve de começo para esse modelo; ainda não representa isolamento completo de organizações.
 
 Enquanto essa separação não estiver pronta, uma conta marcada `COMMERCIAL` é barrada das rotas de CRM, catálogo, artigos e indicadores compartilhados da matriz; ela só pode abrir o painel restrito, sua conta e seus sites. A criação comercial pela interface continua desativada. Esta é uma restrição preventiva, não a entrega final do produto.

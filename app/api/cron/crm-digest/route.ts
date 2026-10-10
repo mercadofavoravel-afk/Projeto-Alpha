@@ -31,7 +31,11 @@ export async function GET(request: Request) {
   const { today, tomorrow } = crmDayWindow(now);
   const day = today.toISOString().slice(0, 10);
   const users = await db.user.findMany({
-    where: { isActive: true, role: { in: ['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'] } },
+    where: {
+      isActive: true,
+      billingMode: 'INTERNAL',
+      role: { in: ['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+    },
     select: { id: true, email: true, role: true },
     orderBy: { id: 'asc' },
     take: 26,

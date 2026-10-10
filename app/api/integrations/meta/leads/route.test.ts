@@ -114,6 +114,9 @@ describe('Meta Lead Ads webhook', () => {
 
   it('fetches the verified lead and stores it once in the management queue', async () => {
     expect((await POST(notification(payload))).status).toBe(200);
+    expect(calls.findUsers).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ billingMode: 'INTERNAL' }) }),
+    );
     expect(fetch).toHaveBeenCalledWith(
       expect.objectContaining({ hostname: 'graph.facebook.com', pathname: '/v24.0/456' }),
       expect.objectContaining({ headers: { Authorization: 'Bearer page-access-token' } }),

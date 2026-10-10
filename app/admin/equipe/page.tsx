@@ -3,13 +3,13 @@ import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { leadRiskQueries } from '@/lib/lead-risk';
-import { commercialTeamWhere } from '@/lib/team-access';
+import { matrixTeamWhere } from '@/lib/team-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TeamPage() {
   const actor = await requireRole(['ADMIN', 'DIRECTOR', 'MANAGER']);
-  const where = commercialTeamWhere(actor);
+  const where = matrixTeamWhere(actor);
   const now = new Date();
   const [people, total, unassigned] = await Promise.all([
     db.user.findMany({

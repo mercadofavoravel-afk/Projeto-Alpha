@@ -139,6 +139,8 @@ export default async function ArticlePage({ params }: PageProps) {
         <a key={index} href={segment.href}>
           {segment.text}
         </a>
+      ) : segment.strong ? (
+        <strong key={index}>{segment.text}</strong>
       ) : (
         <span key={index}>{segment.text}</span>
       ),

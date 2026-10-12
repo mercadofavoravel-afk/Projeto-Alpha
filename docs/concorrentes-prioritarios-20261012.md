@@ -38,6 +38,15 @@ studios junto ao metrô no Flamengo, locação de temporada, microterritório da
 Rua Paul Redfern e pronto versus pré-lançamento em Ipanema. Esses são **temas
 para investigar**, não textos para copiar nem evidência de demanda comprovada.
 
+Nos **6.181 slugs de artigo** desse sitemap, uma busca literal de palavras no
+slug encontrou: Ipanema 917, Leblon 770, Barra 849, Botafogo 458, Gávea 237,
+Flamengo 236 e Jardim Botânico 145. Entre termos de intenção: `planta` 852,
+`preco` 241, `investimento` 84, `metro` 53, `financiamento` 21 e `airbnb` 11.
+Uma URL pode aparecer em várias contagens e um texto relevante pode não ter o
+termo no slug. É **cobertura nominal**, não tráfego, qualidade ou total de
+artigos únicos por bairro. A amostra pronto versus pré-lançamento em Ipanema
+contém slugs semelhantes que exigem deduplicação pela resposta ao comprador.
+
 No Neon do Alpha, nesta data: **15 empreendimentos PUBLISHED, 59 artigos
 PUBLISHED e 2 artigos DRAFT**. O WordPress oficial tem páginas adicionais;
 15 não é o total de produtos que a marca já divulgou. Deduplicar ambos antes

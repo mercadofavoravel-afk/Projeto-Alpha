@@ -14,7 +14,7 @@ prontos são classes separadas.
 
 | Operador | Evidência pública | O que ainda precisa ser contado |
 | --- | --- | --- |
-| [Apartamentos Rio](https://www.apartamentosrio.com.br/lancamentos) | Página de busca anunciou **272 lançamentos à venda** na consulta; inclui filtros, páginas individuais e CTA para material. | URLs distintas de lançamentos, artigos em `/blog`, imóveis prontos e repetição do mesmo produto. |
+| [Apartamentos Rio](https://www.apartamentosrio.com.br/lancamentos) | A captura consultada exibiu **270 lançamentos à venda**; outra indexação consultada anteriormente mostrou **272**. O contador é dinâmico. Há filtros, páginas individuais e CTA para material. | URLs distintas de lançamentos, artigos em `/blog`, imóveis prontos e repetição do mesmo produto. |
 | [Lançamentos Rio](https://www.lancamentosrio.com.br/lancamentos) | Busca de lançamentos exibiu **88** no resultado recente e **82** em outra captura da mesma URL; catálogo dinâmico. | Paginação completa, artigos, prontos e data da atualização de cada oferta. |
 | [Lançamentos RJ](https://lancamentosrj.com/blog) | Blog liga textos a lançamentos, prontos, bairros e construtoras; a própria página declara **609 lançamentos ativos** e **73 bairros**. | Confirmar itens únicos e atuais; separar afirmações do site de inventário validado e artigos por intenção. |
 | [Invexo Luxury](https://luxury.invexo.com.br/) | Catálogo de prontos por bairro, páginas de imóveis e notícias; [página do Leblon](https://luxury.invexo.com.br/imoveis-leblon-rj/) apresenta índice próprio de m². | Número de URLs únicas, método e recorte dos índices antes de qualquer comparação numérica. |
@@ -25,7 +25,7 @@ No Neon do Alpha, nesta data: **15 empreendimentos PUBLISHED, 59 artigos
 PUBLISHED e 2 artigos DRAFT**. O WordPress oficial tem páginas adicionais;
 15 não é o total de produtos que a marca já divulgou. Deduplicar ambos antes
 de publicar novo catálogo. A diferença entre 15 projetos cadastrados no Alpha
-e 272 itens exibidos pela Apartamentos Rio não se resolve criando 257 textos:
+e aproximadamente 270 itens exibidos pela Apartamentos Rio não se resolve criando centenas de textos:
 precisamos de produtos próprios autorizados e dados atuais para cada ficha.
 
 ## Primeira rodada de cobertura original

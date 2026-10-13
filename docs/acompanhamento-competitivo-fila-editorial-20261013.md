@@ -79,7 +79,7 @@ A página [Stay 360 Leblon](https://imoveisdealtopadraorio.com.br/stay-360-leblo
 
 ### Aplicação à cadência
 
-Antes de criar qualquer artigo novo, deduplicar contra o catálogo público e atribuir uma dor específica. Não abrir outra página genérica sobre loft, rendimento ou valorização enquanto esses clusters estiverem pendentes. Corrigir fatos de endereço e produto; depois, produzir as pautas de bairro/produto e as dúvidas de compra que concorrentes cobrem e que ainda faltem no catálogo próprio. A meta de 10 artigos por bairro/dia nas 13 regiões permanece: a triagem decide a ordem e a decisão entre corrigir, consolidar ou criar, sem reduzir a cadência acordada.
+Antes de criar qualquer artigo novo, deduplicar contra o catálogo público e atribuir uma dor específica. Não abrir outra página genérica sobre loft, rendimento ou valorização enquanto esses clusters estiverem pendentes. Corrigir fatos de endereço e produto; depois, produzir as pautas de bairro/produto e as dúvidas de compra que concorrentes cobrem e que ainda faltem no catálogo próprio. A meta anterior de 10 artigos por bairro/dia nas 13 regiões fica como referência de capacidade de longo prazo, não como publicação imediata. A cadência passa a ser progressiva, conforme o protocolo de aceleração registrado ao final deste documento.
 
 ### Escopo verificado e pendências da varredura
 
@@ -105,7 +105,7 @@ Na consulta pública de 13/10, o catálogo [Conteúdos](https://imoveisdealtopad
 
 ## Cadência acordada
 
-A meta definida é **10 artigos por bairro por dia**, para as **13 regiões** do plano (130 artigos/dia no conjunto). Cada artigo deve atacar uma dor específica e diferente, com pauta alternando bairro, público, produto e intenção. A meta orienta a fila de produção e revisão; não autoriza preencher volume com páginas repetitivas, fatos sem comprovação ou formulários sem atribuição.
+A meta de longo prazo anteriormente definida foi **10 artigos por bairro por dia** nas **13 regiões**. Por orientação de 13/10/2026, a publicação será acelerada de forma progressiva, sem iniciar em 130 artigos/dia. A velocidade aumenta conforme a qualidade dos lotes e a operação de CMS forem comprovadas.
 
 Para sustentar o ritmo, operar em lotes diários com pesquisa, deduplicação, redação, revisão factual/SEO, associação a produto e CTA, publicação e validação de formulário/CRM. Contabilizar separadamente novos artigos, melhorias em artigos existentes e peças aguardando fatosheet; medir cada lote em janela de 28 dias e redirecionar o esforço para temas que tragam leads qualificados e avanço comercial.
 
@@ -145,3 +145,23 @@ A cadência de referência já registrada (10 por bairro/dia nas 13 regiões) é
 ### Estado de execução
 
 O benchmark de volume foi atualizado, mas o número de 6.245 ainda precisa ser validado por URLs canônicas e não é uma contagem definitiva. A auditoria integral do WordPress segue pendente: a sessão atual não expõe o painel do site nem uma integração WordPress conectada que corresponda ao CMS usado. Não houve publicação de novos artigos nesta etapa. As autorizações já concedidas pelo usuário permanecem reconhecidas; a limitação observada é técnica, de acesso do painel nesta sessão, e não falta de autorização.
+## Protocolo de publicação acelerada com qualidade — 13/10/2026
+
+### Cadência por fases
+
+- **Fase 1:** até 5 artigos originais por dia, durante o primeiro lote de validação.
+- **Fase 2:** até 10 artigos por dia depois de 10 publicações consecutivas passarem a revisão factual/editorial e à validação da URL pública, canonical, marca, CTA e atribuição de lead.
+- **Fase 3:** aumentar em lotes de 5 artigos/dia, com teto de 20/dia nesta operação inicial; só manter cada aumento se a revisão pré-publicação, a validação técnica e a distribuição temática estiverem concluídas sem pendências.
+- A referência anterior de 130/dia fica como objetivo de capacidade futura a reavaliar, não como ordem para publicar esse volume de imediato. A contagem para comparar com concorrentes inclui apenas artigos originais, publicados no domínio oficial, com canonical válida e sem duplicação.
+
+### Porta de qualidade por artigo
+
+Publicar somente se a pauta acrescentar informação própria e responder a uma decisão real; estiver deduplicada do catálogo; tiver fonte e data para fatos de mercado, valores e regras de locação; não prometer rentabilidade; distinguir hipótese de dado comprovado; e passar por revisão de linguagem, links, canonical, CTA e formulário. Se falhar, corrigir, fundir com uma URL útil ou suspender a pauta. Reavaliar conteúdo financeiro, tributário, regulatório e de Airbnb em fontes oficiais atuais antes da redação.
+
+### Princípio de conformidade
+
+O Google não define neste guia uma cota numérica diária. A política caracteriza abuso de conteúdo escalado pela produção de muitas páginas sem valor para pessoas e com finalidade primária de manipular rankings, seja qual for o método de produção. A meta operacional, portanto, é publicar o maior lote que passe integralmente pelos controles, e não preencher volume com variações artificiais de palavras-chave. Fonte oficial consultada em 13/10/2026: https://developers.google.com/search/docs/essentials/spam-policies e https://developers.google.com/search/docs/fundamentals/creating-helpful-content.
+
+### Dependência operacional registrada
+
+A autorização de leitura e escrita do usuário está reconhecida. Nesta sessão, não há integração WordPress ativa correspondente ao CMS do site e o painel não está observável pelo navegador; portanto, não publicar nem declarar artigo publicado até o CMS responder e a URL pública poder ser conferida. Isso é uma limitação operacional da sessão, não um novo pedido de autorização.

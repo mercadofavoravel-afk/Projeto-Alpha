@@ -49,6 +49,38 @@ Pontuar cada artigo Alpha em seis critérios antes de publicar:
 
 Medir cada URL em janela de 28 dias: impressões e CTR por consulta no Search Console, visitas quando analytics estiverem disponíveis, leads atribuídos e válidos, primeiro atendimento e avanço comercial. Não usar impressão como visita, clique de CTA como lead ou resultado público de concorrente como conversão.
 
+## Auditoria de qualidade do conteúdo próprio — 13/10/2026
+
+A amostra do hub público de conteúdos e páginas próprias mostra que a fila deve começar pela correção factual e pela consolidação de URLs que cobrem a mesma pergunta. Esta auditoria é uma fotografia de páginas acessíveis publicamente; não altera conteúdo no WordPress.
+
+### Prioridade P0 — endereço com informação incompatível com fonte pública
+
+A página [Avenida Visconde de Albuquerque 1325 Leblon](https://imoveisdealtopadraorio.com.br/avenida-visconde-de-albuquerque-1325-leblon/) descreve o número 1325 como entorno residencial e apresenta características do local como orientação de moradia. A [AGENERSA informa que o Colégio Estadual André Maurois está instalado no terreno da Av. Visconde de Albuquerque, nº 1325, Leblon](https://www.rj.gov.br/agenersa/node/2100) (13/12/2024). Suspender afirmações sobre imóveis, perfil residencial, caminhabilidade e conveniências específicas desse número até conferir o endereço, o trecho e as fontes. Corrigir a página para distinguir o imóvel/endereço de seu entorno; excluir conteúdo que não corresponda ao local. Revalidar também as afirmações sobre Canal do Leblon e distâncias a pé antes de reutilizá-las.
+
+### Prioridade P1 — consolidar o cluster “loft”
+
+O hub [Conteúdos](https://imoveisdealtopadraorio.com.br/conteudos/) lista muitas pautas muito próximas, incluindo “O que é um loft urbano?” e “O que é um loft urbano? Guia completo sobre o conceito”, além de “O que é um loft residencial?”, “O que é loft apartamento?”, “O que é loft em arquitetura?”, “O que significa loft em português?”, “O que é um loft?”, “O que é loft studio?” e variações de loft/flat. São pelo menos 15 títulos de topo e itens mais antigos na mesma família sem uma distinção clara de decisão de compra. Exemplos de páginas publicadas: [loft urbano](https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-urbano/), [loft urbano — guia](https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-urbano-2/), [loft e funcionamento](https://imoveisdealtopadraorio.com.br/o-que-e-loft-e-como-funciona/), [loft em arquitetura](https://imoveisdealtopadraorio.com.br/o-que-e-loft-em-arquitetura/) e [loft residencial](https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-residencial/).
+
+A sobreposição não é só nominal: as páginas repetem definição, planta aberta, pé-direito e origem industrial. A amostra inclui limites específicos de altura e metragem, faixas de aluguel e afirmações de valorização/rentabilidade sem série, local, período ou método apresentados junto ao dado. O hub ainda anuncia loft hotel como “uma das melhores opções de investimento”. Tratar números e linguagem de retorno como não validados até identificar fonte primária e data; retirar promessa de investimento se não houver sustentação verificável.
+
+Ação: cruzar cada URL com consultas, impressões, cliques, links externos e leads no Search Console/CRM; escolher um artigo canônico para a definição; fundir nele os trechos úteis, corrigir afirmações e redirecionar URLs realmente redundantes após checar tráfego e links. Manter páginas separadas apenas quando respondam a intenções materialmente distintas, como comparação loft x studio/flat ou verificação de planta e pé-direito, com conteúdo próprio e evidência de procura.
+
+### Prioridade P1 — remover promessa financeira sem comprovação
+
+A página [Stay 360 Leblon](https://imoveisdealtopadraorio.com.br/stay-360-leblon/) e a [Coleção Leblon](https://imoveisdealtopadraorio.com.br/colecao-leblon/) repetem que há demanda o ano inteiro, excelentes taxas de ocupação, alta rentabilidade, investimento “seguro” e valorização “contínua”. Não há, no trecho observado, série de ocupação, fonte, janela temporal, despesas, vacância ou metodologia que sustente essas conclusões. Remover garantias e substituir por dados datados do factsheet e uma explicação transparente dos fatores de custo e risco; publicar estimativa de retorno somente com premissas e método reproduzíveis.
+
+### Aplicação à cadência
+
+Antes de criar qualquer artigo novo, deduplicar contra o catálogo público e atribuir uma dor específica. Não abrir outra página genérica sobre loft, rendimento ou valorização enquanto esses clusters estiverem pendentes. Corrigir fatos de endereço e produto; depois, produzir as pautas de bairro/produto e as dúvidas de compra que concorrentes cobrem e que ainda faltem no catálogo próprio. A meta de 10 artigos por bairro/dia nas 13 regiões permanece: a triagem decide a ordem e a decisão entre corrigir, consolidar ou criar, sem reduzir a cadência acordada.
+
+### URLs auditadas
+
+- Hub próprio: https://imoveisdealtopadraorio.com.br/conteudos/
+- Endereço 1325: https://imoveisdealtopadraorio.com.br/avenida-visconde-de-albuquerque-1325-leblon/
+- Fonte pública do endereço 1325: https://www.rj.gov.br/agenersa/node/2100
+- Cluster loft: https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-urbano/ ; https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-urbano-2/ ; https://imoveisdealtopadraorio.com.br/o-que-e-loft-e-como-funciona/ ; https://imoveisdealtopadraorio.com.br/o-que-e-loft-em-arquitetura/ ; https://imoveisdealtopadraorio.com.br/o-que-e-um-loft-residencial/
+- Promessas comerciais: https://imoveisdealtopadraorio.com.br/stay-360-leblon/ ; https://imoveisdealtopadraorio.com.br/colecao-leblon/
+
 ## Próxima fila editorial
 
 1. **Concluir e revisar os dois rascunhos já existentes:** Gávea — “Comprar apartamento na Gávea: como medir a rotina até Leblon e Jardim Botânico”; Jardim Botânico — “Jardim Botânico: comprar perto do parque ou dos serviços do dia a dia?”. São guias de decisão e não devem inventar estoque próprio no bairro.

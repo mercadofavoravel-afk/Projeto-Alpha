@@ -40,7 +40,7 @@ Todo artigo produzido a partir do benchmark será uma peça original da **Imóve
 
 O benchmark serve para identificar consultas, intenção de busca, cobertura e lacunas. A redação deve ser independente: não copiar trechos, estrutura distintiva, imagens, marca ou metadados de concorrentes. Criar uma resposta melhor com apuração própria, fatos verificáveis de produto/bairro, comparação útil e CTA no domínio oficial. Links de concorrentes ficam apenas como fontes de pesquisa neste documento interno e nunca serão destino de artigos, formulários ou leads.
 
-Antes de publicar cada URL, validar domínio final após redirecionamentos, logo, título/meta, canonical, links e destino do CTA. Reprovar qualquer peça que não se identifique claramente como Imóveis de Alto Padrão Rio e não permaneça no domínio oficial.
+A busca pública da home no domínio oficial ainda apresenta o rótulo “Imóveis Lançamento RJ”; revisar título do site, título SEO e dados estruturados para usar consistentemente “Imóveis de Alto Padrão Rio”, evitando confusão de marca. Isso é uma observação do domínio oficial, não evidência de que um artigo tenha sido publicado em domínio concorrente. Antes de publicar cada URL, validar domínio final após redirecionamentos, logo, título/meta, canonical, links e destino do CTA. Reprovar qualquer peça que não se identifique claramente como Imóveis de Alto Padrão Rio e não permaneça no domínio oficial.
 
 ## Método de cobertura e qualidade
 

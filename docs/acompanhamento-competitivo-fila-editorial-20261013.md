@@ -81,6 +81,12 @@ A página [Stay 360 Leblon](https://imoveisdealtopadraorio.com.br/stay-360-leblo
 
 Antes de criar qualquer artigo novo, deduplicar contra o catálogo público e atribuir uma dor específica. Não abrir outra página genérica sobre loft, rendimento ou valorização enquanto esses clusters estiverem pendentes. Corrigir fatos de endereço e produto; depois, produzir as pautas de bairro/produto e as dúvidas de compra que concorrentes cobrem e que ainda faltem no catálogo próprio. A meta de 10 artigos por bairro/dia nas 13 regiões permanece: a triagem decide a ordem e a decisão entre corrigir, consolidar ou criar, sem reduzir a cadência acordada.
 
+### Escopo verificado e pendências da varredura
+
+Na consulta pública de 13/10, o catálogo [Conteúdos](https://imoveisdealtopadraorio.com.br/conteudos/) respondeu com aproximadamente 4.000 linhas de resultados editoriais. Foram feitas buscas no índice público do domínio oficial por três domínios concorrentes conhecidos (`lancamentosrj.com`, `lancamentos-rj.com` e `imoveislancamentorj.com.br`) e por referências a Invexo, Lopes Rio e Apartamentos Rio; as consultas não retornaram páginas próprias com esses termos. Esse resultado reduz indícios no material indexado, mas não prova ausência em todas as páginas ou no conteúdo não indexado.
+
+**A auditoria completa ainda está pendente.** A lista pública permite inspecionar títulos e descrições, mas não fornece uma exportação confiável de todos os corpos, URLs canônicas e destinos de links. Nesta sessão, a navegação do painel WordPress foi bloqueada pelo mecanismo de proteção do navegador após o uso prévio de credenciais; por isso, ainda não foi possível rodar um inventário direto post a post no CMS. Para concluir a conferência sem lacunas, obter pelo painel/exportação um CSV dos artigos publicados com ID, título, slug, URL/canônica e corpo, cruzar com sitemap e redirecionamentos, e testar todos os links externos. Até essa validação, reportar os resultados como amostra pública — nunca como “todos conferidos”.
+
 ### URLs auditadas
 
 - Hub próprio: https://imoveisdealtopadraorio.com.br/conteudos/

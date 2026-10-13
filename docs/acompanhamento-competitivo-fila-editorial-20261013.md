@@ -108,3 +108,12 @@ Na consulta pública de 13/10, o catálogo [Conteúdos](https://imoveisdealtopad
 A meta definida é **10 artigos por bairro por dia**, para as **13 regiões** do plano (130 artigos/dia no conjunto). Cada artigo deve atacar uma dor específica e diferente, com pauta alternando bairro, público, produto e intenção. A meta orienta a fila de produção e revisão; não autoriza preencher volume com páginas repetitivas, fatos sem comprovação ou formulários sem atribuição.
 
 Para sustentar o ritmo, operar em lotes diários com pesquisa, deduplicação, redação, revisão factual/SEO, associação a produto e CTA, publicação e validação de formulário/CRM. Contabilizar separadamente novos artigos, melhorias em artigos existentes e peças aguardando fatosheet; medir cada lote em janela de 28 dias e redirecionar o esforço para temas que tragam leads qualificados e avanço comercial.
+
+
+## Cruzamento adicional de publicações — 13/10/2026
+
+- O catálogo público `/conteudos/` do domínio oficial foi lido em 4.018 linhas. A busca no texto extraído por `lancamentosrj.com`, `lancamentos-rj.com`, `imoveislancamentorj.com.br`, Invexo, Lopes e Apartamentos Rio não retornou correspondências. Isso cobre o texto indexado do catálogo, não o conteúdo completo e os destinos de cada URL individual.
+- No banco Neon do Alpha, a tabela `Article` contém 60 registros marcados `PUBLISHED` e 2 `DRAFT`; `PublicationAttempt` não contém registros. A leitura dos campos de título, resumo, corpo, SEO e imagem dos 60 registros publicados não encontrou os domínios e marcas concorrentes mapeados. Os hosts de URLs extraídos foram `imoveisdealtopadraorio.com.br`, `www.metrorio.com.br` e `trilhos.motiva.com.br`; os dois últimos aparecem como referências de transporte em artigos de bairro.
+- Como o log de publicação está vazio e o banco é do Alpha, esses 60 registros não comprovam quais páginas estão publicadas no WordPress. A conferência integral de URLs canônicas, links e corpo de cada post do WordPress continua pendente.
+- O catálogo e a home ainda exibem o título público “Imóveis Lançamento RJ”. Padronizar título, metadados e identidade para “Imóveis de Alto Padrão Rio” continua sendo recomendação de marca; esse rótulo aparece no domínio oficial e não prova publicação em domínio concorrente.
+- Nenhum artigo foi criado ou alterado no WordPress nesta verificação.

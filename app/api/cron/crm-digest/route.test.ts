@@ -18,6 +18,8 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 vi.mock('@/lib/email', () => ({ sendCrmRiskDigestEmail: mocks.send }));
+const notify = vi.hoisted(() => ({ retry: vi.fn() }));
+vi.mock('@/lib/lead-notification', () => ({ retryPendingLeadNotifications: notify.retry }));
 
 import { GET } from './route';
 
@@ -41,6 +43,7 @@ describe('resumo diário do CRM', () => {
     mocks.findAudit.mockResolvedValue(null);
     mocks.createAudit.mockResolvedValue({ id: 'audit-1' });
     mocks.send.mockResolvedValue(undefined);
+    notify.retry.mockResolvedValue({ attempted: 0, failed: 0 });
     mocks.transaction.mockImplementation((run: (tx: unknown) => Promise<unknown>) =>
       run({
         $queryRaw: mocks.lock,
@@ -62,7 +65,12 @@ describe('resumo diário do CRM', () => {
   it('envia somente o resumo dos riscos do próprio corretor e registra auditoria', async () => {
     const response = await GET(request());
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ sent: 1, skipped: 0, failed: 0 });
+    expect(await response.json()).toEqual({
+      sent: 1,
+      skipped: 0,
+      failed: 0,
+      notificationRecovery: { attempted: 0, failed: 0 },
+    });
     expect(mocks.send).toHaveBeenCalledWith(
       expect.objectContaining({
         to: 'team@example.com',
@@ -79,13 +87,23 @@ describe('resumo diário do CRM', () => {
 
   it('não reenvia quando o resumo do dia já foi registrado', async () => {
     mocks.findAudit.mockResolvedValue({ id: 'existing' });
-    expect(await (await GET(request())).json()).toEqual({ sent: 0, skipped: 1, failed: 0 });
+    expect(await (await GET(request())).json()).toEqual({
+      sent: 0,
+      skipped: 1,
+      failed: 0,
+      notificationRecovery: { attempted: 0, failed: 0 },
+    });
     expect(mocks.send).not.toHaveBeenCalled();
   });
 
   it('não envia e-mail quando não há risco', async () => {
     mocks.count.mockResolvedValue(0);
-    expect(await (await GET(request())).json()).toEqual({ sent: 0, skipped: 1, failed: 0 });
+    expect(await (await GET(request())).json()).toEqual({
+      sent: 0,
+      skipped: 1,
+      failed: 0,
+      notificationRecovery: { attempted: 0, failed: 0 },
+    });
     expect(mocks.transaction).not.toHaveBeenCalled();
     expect(mocks.send).not.toHaveBeenCalled();
   });

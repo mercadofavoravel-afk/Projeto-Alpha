@@ -12,6 +12,16 @@ vi.mock('@/lib/auth', () => ({
   requireApiPermission: vi.fn(),
 }));
 
+const notify = vi.hoisted(() => ({ deliver: vi.fn() }));
+vi.mock('@/lib/lead-notification', () => ({
+  deliverLeadNotification: notify.deliver,
+  leadNotificationPending: (leadId: string) => ({
+    action: 'lead.email_notification.pending',
+    entityType: 'Lead',
+    entityId: leadId,
+  }),
+}));
+
 vi.mock('@/lib/db', () => ({
   db: {
     $transaction: async (
@@ -41,6 +51,7 @@ describe('POST /api/leads', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     database.findUsers.mockResolvedValue([]);
+    notify.deliver.mockResolvedValue(true);
 
     database.createLead.mockResolvedValue({
       id: 'lead_organic_01',
@@ -110,6 +121,31 @@ describe('POST /api/leads', () => {
           articleSlug: 'investir-em-ipanema',
         }),
       }),
+    });
+    expect(database.createAudit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.email_notification.pending' }),
+    });
+    expect(notify.deliver).toHaveBeenCalledWith('lead_organic_01');
+  });
+
+  it('keeps the CRM lead when the email provider cannot deliver immediately', async () => {
+    notify.deliver.mockResolvedValue(false);
+    const response = await POST(
+      new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Cliente orgânico',
+          phone: '(21) 96426-1042',
+          email: 'cliente@example.com',
+          neighborhood: 'Ipanema',
+          consent: true,
+        }),
+      }),
+    );
+    expect(response.status).toBe(201);
+    expect(database.createAudit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.email_notification.pending' }),
     });
   });
 

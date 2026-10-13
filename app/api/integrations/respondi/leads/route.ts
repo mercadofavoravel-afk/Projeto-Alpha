@@ -8,6 +8,7 @@ import { parseRespondiLead } from '@/lib/article-lead-integration';
 import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
+import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
 const provider = 'RESPONDI';
 
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
   const neighborhood = resolveArticleNeighborhood(catalog.article.category, catalog.article.title);
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      await db.$transaction(
+      const leadId = await db.$transaction(
         async (transaction) => {
           const users = await transaction.user.findMany({
             where: {
@@ -138,14 +139,17 @@ export async function POST(request: Request) {
               },
             },
           });
+          await transaction.auditLog.create({ data: leadNotificationPending(created.id) });
           if (assignee)
             await transaction.user.update({
               where: { id: assignee.id },
               data: { lastLeadAssignedAt: created.createdAt },
             });
+          return created.id;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
+      await deliverLeadNotification(leadId);
       return NextResponse.json({ ok: true });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

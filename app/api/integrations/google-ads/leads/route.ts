@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
+import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
 function sameKey(actual: string, expected: string) {
   const actualHash = createHash('sha256').update(actual).digest();
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      await db.$transaction(
+      const leadId = await db.$transaction(
         async (transaction) => {
           const users = await transaction.user.findMany({
             where: {
@@ -109,15 +110,18 @@ export async function POST(request: Request) {
               },
             },
           });
+          await transaction.auditLog.create({ data: leadNotificationPending(created.id) });
           if (assignee) {
             await transaction.user.update({
               where: { id: assignee.id },
               data: { lastLeadAssignedAt: receivedAt },
             });
           }
+          return created.id;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
+      await deliverLeadNotification(leadId);
       return NextResponse.json({});
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

@@ -1,5 +1,55 @@
 import 'server-only';
 
+type NewLeadEmail = {
+  to: string;
+  lead: {
+    id: string;
+    name: string;
+    phone: string;
+    email: string | null;
+    neighborhood: string | null;
+    articleSlug: string | null;
+    source: string | null;
+    consent: boolean;
+  };
+  idempotencyKey: string;
+};
+
+export async function sendNewLeadEmail({ to, lead, idempotencyKey }: NewLeadEmail) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  if (!apiKey || !from) throw new Error('Configuração de e-mail transacional ausente');
+
+  const lines = [
+    'Novo contato registrado no CRM matriz do Projeto Alpha.',
+    `Nome: ${lead.name}`,
+    `Telefone: ${lead.phone}`,
+    `E-mail: ${lead.email || 'não informado'}`,
+    `Bairro: ${lead.neighborhood || 'não informado'}`,
+    `Artigo: ${lead.articleSlug || 'não atribuído'}`,
+    `Origem declarada: ${lead.source || 'não informada'}`,
+    `Consentimento para contato: ${lead.consent ? 'sim' : 'não'}`,
+    '',
+    `Ficha no CRM: https://imoveisdealtopadraorio.com.br/alpha/admin/leads/${encodeURIComponent(lead.id)}`,
+  ];
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey,
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject: `Alpha — novo lead ${(lead.neighborhood || 'sem bairro').replace(/[\r\n]/g, ' ').slice(0, 80)}`,
+      text: lines.join('\n'),
+    }),
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!response.ok) throw new Error(`Falha no aviso de novo lead (${response.status})`);
+}
+
 type PasswordResetEmail = {
   to: string;
   resetUrl: string;

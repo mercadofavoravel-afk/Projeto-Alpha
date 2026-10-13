@@ -8,6 +8,7 @@ import { normalizeLeadUtms } from '@/lib/utm';
 import { leadSchema } from '@/lib/validation';
 import { requireApiPermission } from '@/lib/auth';
 import { leadAccessWhere } from '@/lib/lead-access';
+import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
 export async function GET() {
   const auth = await requireApiPermission('crm:read');
@@ -112,6 +113,7 @@ export async function POST(request: Request) {
               },
             },
           });
+          await transaction.auditLog.create({ data: leadNotificationPending(createdLead.id) });
           return createdLead;
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
@@ -129,6 +131,8 @@ export async function POST(request: Request) {
     }
   }
   if (!lead) return NextResponse.json({ error: 'Falha temporária.' }, { status: 503 });
+
+  await deliverLeadNotification(lead.id);
 
   return NextResponse.json(
     {

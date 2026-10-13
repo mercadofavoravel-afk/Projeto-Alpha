@@ -2,6 +2,8 @@
 
 O formulário nativo do Alpha continua no artigo e grava no CRM com `articleSlug`, bairro, URL de visualização e UTMs disponíveis. A integração externa adiciona um **formulário Respondi separado por artigo** e um **link Tintim do site separado por artigo**. O link do Tintim inicia conversa no WhatsApp; não é o formulário Respondi nem prova que o contato virou lead no CRM.
 
+Leads novos do formulário nativo, de um formulário Respondi **efetivamente associado** a artigo publicado e dos receptores já existentes de Meta e Google Ads passam a registrar, na mesma transação de criação no CRM matriz, uma pendência de aviso para `contato@imoveisdealtopadraorio.com.br`. Havendo `RESEND_API_KEY` e `EMAIL_FROM` válidos, a aplicação tenta enviar o aviso após gravar o lead. Falha do e-mail não descarta o cadastro: a rotina já existente `/alpha/api/cron/crm-digest` tenta recuperar até dez avisos pendentes por execução. O envio tem chave de idempotência por lead e auditoria de entrega. Não pressupor que e-mail foi entregue apenas porque um lead existe; consultar a auditoria `lead.email_notification.sent` e o provedor. A caixa da matriz não deve ser usada como destino de futuros clientes licenciados.
+
 ## Cadastro no painel Alpha
 
 Em `/alpha/admin/artigos/<id>`, a seção **Captação por artigo** recebe o ID e a URL pública `https://form.respondi.app/<ID>` e o link rastreável HTTPS do Tintim. O ID precisa coincidir com a URL. Os links não podem ser usados em dois artigos. Enquanto não forem cadastrados, o artigo mantém apenas o formulário nativo. Não copie uma URL de outro cliente/licenciado para a matriz.

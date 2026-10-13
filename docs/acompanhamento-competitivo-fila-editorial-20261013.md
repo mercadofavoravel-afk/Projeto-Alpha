@@ -117,3 +117,31 @@ Para sustentar o ritmo, operar em lotes diários com pesquisa, deduplicação, r
 - Como o log de publicação está vazio e o banco é do Alpha, esses 60 registros não comprovam quais páginas estão publicadas no WordPress. A conferência integral de URLs canônicas, links e corpo de cada post do WordPress continua pendente.
 - O catálogo e a home ainda exibem o título público “Imóveis Lançamento RJ”. Padronizar título, metadados e identidade para “Imóveis de Alto Padrão Rio” continua sendo recomendação de marca; esse rótulo aparece no domínio oficial e não prova publicação em domínio concorrente.
 - Nenhum artigo foi criado ou alterado no WordPress nesta verificação.
+
+## Plano de execução até fechar a lacuna editorial — atualização 13/10/2026
+
+### Referência de volume concorrente
+
+Na consulta de 13/10/2026, a página pública do blog do Lançamentos RJ declara “mais de 6.245 matérias” (https://lancamentosrj.com/blog). Esse número é uma declaração do próprio site, não uma contagem independente de artigos únicos. Manter separado das 6.062 publicações de catálogo e 6.181 URLs de sitemap observadas anteriormente; antes de definir uma meta numérica final, contar URLs canônicas que respondem, deduplicar e excluir imóveis, filtros, tags e páginas sem conteúdo editorial.
+
+A meta do Alpha será de cobertura editorial comparável nas intenções relevantes ao negócio, com quantidade auditável de artigos próprios. O total concorrente é referência de escala, não prova de qualidade nem meta automática de publicar milhares de páginas repetitivas.
+
+### Taxonomia para mapear a cobertura
+
+Classificar cada artigo concorrente por bairro/região, tipo de imóvel, estágio (lançamento/pronto), público (investidor/comprador/morador), intenção (descoberta/comparação/decisão), tipologia (com prioridade a studios), uso (moradia/locação tradicional/temporada), questão prática (planta, documentação, custo total, mobilidade, serviços) e data/validade das informações. Dar atenção a Zona Sul, studios e locação por temporada/Airbnb, sem presumir rentabilidade nem disponibilidade.
+
+O benchmark registra pergunta, intenção, fatos e lacuna; não replica redação, imagens, títulos distintivos, sequência editorial ou identidade visual de concorrentes. Cada pauta Alpha terá ângulo, apuração e estrutura próprios.
+
+### Etapas e critério de avanço
+
+1. Fechar inventário do conteúdo Alpha no WordPress: URL publicada, ID, canônica, status, corpo, links externos, imagem e CTA; cruzar com o banco e o sitemap. Os 60 registros PUBLISHED do Neon são apenas um sinal auxiliar, não substituem essa inspeção.
+2. Contar as páginas editoriais concorrentes por URL canônica e classe; ler cada artigo identificado em lotes e registrar a taxonomia acima. Atualizar uma planilha/registro com URL, data de leitura, tema, evidência, intenção e lacuna.
+3. Deduplicar com o catálogo Alpha e montar fila priorizada por intenção comercial, fonte disponível, produto próprio confirmado e lacuna. Começar por investidor, comprador final, Zona Sul, studios e locação de temporada.
+4. Produzir, revisar e publicar uma peça por vez exclusivamente em https://imoveisdealtopadraorio.com.br/. Antes de cada publicação, checar originalidade, fonte/data/método para preços e dados financeiros, autoria/marca, canonical, links, CTA, formulário, UTMs e destino no CRM; validar a URL pública após publicar.
+5. Contabilizar apenas artigos próprios originais e válidos na comparação de volume. A cada lote, acompanhar impressões, cliques, leads válidos e avanço comercial em janela de 28 dias; atualizar a fila com esses resultados.
+
+A cadência de referência já registrada (10 por bairro/dia nas 13 regiões) é uma meta operacional. Só avançar quando cada peça passar a revisão factual e editorial; o Google define conteúdo escalado produzido principalmente para manipular rankings como abuso, independentemente de automação. Assim, o ritmo acompanha a capacidade real de apurar e revisar cada artigo com valor próprio, sem publicar páginas em série para completar um número.
+
+### Estado de execução
+
+O benchmark de volume foi atualizado, mas o número de 6.245 ainda precisa ser validado por URLs canônicas e não é uma contagem definitiva. A auditoria integral do WordPress segue pendente: a sessão atual não expõe o painel do site nem uma integração WordPress conectada que corresponda ao CMS usado. Não houve publicação de novos artigos nesta etapa. As autorizações já concedidas pelo usuário permanecem reconhecidas; a limitação observada é técnica, de acesso do painel nesta sessão, e não falta de autorização.

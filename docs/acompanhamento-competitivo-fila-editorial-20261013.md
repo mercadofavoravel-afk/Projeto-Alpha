@@ -34,6 +34,14 @@ Esses totais permanecem como fotografia datada. Não definir meta de produção 
 - Patrimóvel — lançamentos: https://patrimovel.com.br/lancamentos/
 - Patrimóvel — prontos: https://patrimovel.com.br/prontos/
 
+## Regra de marca, originalidade e domínio de publicação
+
+Todo artigo produzido a partir do benchmark será uma peça original da **Imóveis de Alto Padrão Rio** e será publicado somente no domínio oficial **https://imoveisdealtopadraorio.com.br/**, com identidade visual e logo próprios. Não publicar conteúdo, logo, CTA ou formulário da empresa em domínio de concorrente, nem apresentar uma página como se fosse de outra imobiliária.
+
+O benchmark serve para identificar consultas, intenção de busca, cobertura e lacunas. A redação deve ser independente: não copiar trechos, estrutura distintiva, imagens, marca ou metadados de concorrentes. Criar uma resposta melhor com apuração própria, fatos verificáveis de produto/bairro, comparação útil e CTA no domínio oficial. Links de concorrentes ficam apenas como fontes de pesquisa neste documento interno e nunca serão destino de artigos, formulários ou leads.
+
+Antes de publicar cada URL, validar domínio final após redirecionamentos, logo, título/meta, canonical, links e destino do CTA. Reprovar qualquer peça que não se identifique claramente como Imóveis de Alto Padrão Rio e não permaneça no domínio oficial.
+
 ## Método de cobertura e qualidade
 
 Para cada URL observada, registrar domínio, canônica, tipo de página, bairro, produto, intenção, data, CTA, evidência de preço/planta, contraparte própria, decisão (manter, melhorar, fundir ou criar). Deduplicar por resposta à dúvida do comprador, não apenas por slug ou título.

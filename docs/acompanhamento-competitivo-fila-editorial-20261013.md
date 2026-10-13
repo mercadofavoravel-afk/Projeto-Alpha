@@ -181,3 +181,10 @@ Status: texto pronto para revisão editorial final e integração ao CMS; **não
 ### Tentativa de publicação após autorização explícita — 13/10/2026
 
 O usuário reiterou autorização para publicar. Foi feita nova tentativa de abrir o WordPress por uma aba do domínio oficial; a ferramenta do navegador retornou bloqueio de observação por proteção de credenciais. A transferência para controle manual foi solicitada, sem retorno de estado do painel. A conexão WordPress.com também segue sem sessão ativa e não foi usada como substituta do CMS hospedado no domínio. Não houve envio de formulário, criação de post no CMS ou publicação. Manter o artigo pronto no branch e não registrar como publicado até verificar a URL pública.
+## Autorização contínua e tratamento de bloqueios de sessão
+
+- O usuário concedeu autorização contínua para leitura e escrita no repositório e no painel WordPress da Imóveis de Alto Padrão Rio/Projeto Alpha. Também confirmou que Tintim e Respondi já foram configurados e usados no fluxo da página Nova Coleção Be In Rio, publicada em `https://imoveisdealtopadraorio.com.br/nova-colecao-be-in-rio/` em 06/10/2026.
+- Não pedir novamente autorização geral para acessar ou publicar nesses recursos quando a mesma tarefa e o mesmo destino estiverem em curso. Tratar “pode seguir” e as autorizações anteriores como vigentes.
+- Não registrar senhas, códigos ou tokens neste documento. A autorização é uma decisão do usuário; cookie, sessão, conector ou navegador disponível são meios técnicos que podem expirar ou não acompanhar uma nova sessão.
+- Se o meio técnico não estiver disponível, descrever o bloqueio como limitação desta sessão, sem sugerir que o usuário não autorizou. Continuar todas as etapas independentes do bloqueio e manter o conteúdo e os metadados prontos para publicação.
+- Após publicação, confirmar somente com evidência da URL pública no domínio oficial; nunca inferir que a página foi publicada por ter sido preparada ou enviada a um painel.

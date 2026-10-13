@@ -57,4 +57,8 @@ Medir cada URL em janela de 28 dias: impressões e CTR por consulta no Search Co
 4. **Barra/Recreio:** priorizar comparações específicas de Green Park e Kronos por planta, rotina e custo, revisando números antigos antes de criar novos artigos.
 5. Expandir para Botafogo, Flamengo, Centro/Porto Maravilha e Recreio após cruzar produtos próprios, consultas próprias e cobertura atual. Nenhum artigo de produto sem factsheet atual e página Alpha/WordPress própria.
 
-Cadência operacional proposta no roadmap: selecionar 10–15 melhorias ou novas peças por semana após deduplicação; o volume inclui atualização de páginas existentes. Publicar somente peças que passem os seis critérios e estejam prontas para receber e atribuir leads. Revisar o lote após 28 dias e deslocar esforço para temas com intenção qualificada e jornada de CRM comprovada.
+## Cadência acordada
+
+A meta definida é **10 artigos por bairro por dia**, para as **13 regiões** do plano (130 artigos/dia no conjunto). Cada artigo deve atacar uma dor específica e diferente, com pauta alternando bairro, público, produto e intenção. A meta orienta a fila de produção e revisão; não autoriza preencher volume com páginas repetitivas, fatos sem comprovação ou formulários sem atribuição.
+
+Para sustentar o ritmo, operar em lotes diários com pesquisa, deduplicação, redação, revisão factual/SEO, associação a produto e CTA, publicação e validação de formulário/CRM. Contabilizar separadamente novos artigos, melhorias em artigos existentes e peças aguardando fatosheet; medir cada lote em janela de 28 dias e redirecionar o esforço para temas que tragam leads qualificados e avanço comercial.

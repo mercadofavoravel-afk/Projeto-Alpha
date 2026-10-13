@@ -434,6 +434,18 @@ model Article {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   contentPlans   ContentPlan[]
+  leadIntegration ArticleLeadIntegration?
+}
+
+model ArticleLeadIntegration {
+  id             String   @id @default(cuid())
+  articleId      String   @unique
+  article        Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  respondiFormId String?  @unique
+  respondiUrl    String?
+  tintimUrl      String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model ContentPlan {

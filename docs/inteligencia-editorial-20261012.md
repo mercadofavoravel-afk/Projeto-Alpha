@@ -9,14 +9,14 @@ O ranking de 100 URLs por cliques foi consultado, mas não representa os 100
 melhores artigos para compradores de imóveis de alto padrão. A seleção editorial
 precisa combinar consulta, intenção, produto, artigo e lead atribuído.
 
-| URL própria observada | Impressões | Cliques | Leitura para a operação |
-| --- | ---: | ---: | --- |
-| `/onde-fica-a-barrinha-na-barra-da-tijuca/` | 792 | 30 | Interesse geográfico; verificar consultas antes de supor intenção de compra. |
-| `/rua-visconde-de-piraja-580-ipanema/` | 1.013 | 23 | Busca por galeria/endereço comercial; não tratar como lead residencial. |
-| `/onde-morar-em-copacabana/` | 1.252 | 13 | Tema de moradia com possível interesse imobiliário; examinar consultas e CTA. |
-| `/visconde-de-piraja-595-ipanema/` | 1.013 | 12 | Busca por edifício e serviços comerciais; baixa aderência ao produto residencial. |
-| `/onde-fica-o-bairro-jardim-leblon/` | 3.387 | 10 | Página trata de Belo Horizonte; excluir da prioridade de Leblon/RJ. |
-| `/alpha/artigos/ipanema-locacao-curta-temporada-verificar-regras` | 5 | 0 | Página de intenção de investimento; conteúdo revisado em 12/10. Amostra ainda insuficiente para inferir desempenho. |
+| URL própria observada                                             | Impressões | Cliques | Leitura para a operação                                                                                             |
+| ----------------------------------------------------------------- | ---------: | ------: | ------------------------------------------------------------------------------------------------------------------- |
+| `/onde-fica-a-barrinha-na-barra-da-tijuca/`                       |        792 |      30 | Interesse geográfico; verificar consultas antes de supor intenção de compra.                                        |
+| `/rua-visconde-de-piraja-580-ipanema/`                            |      1.013 |      23 | Busca por galeria/endereço comercial; não tratar como lead residencial.                                             |
+| `/onde-morar-em-copacabana/`                                      |      1.252 |      13 | Tema de moradia com possível interesse imobiliário; examinar consultas e CTA.                                       |
+| `/visconde-de-piraja-595-ipanema/`                                |      1.013 |      12 | Busca por edifício e serviços comerciais; baixa aderência ao produto residencial.                                   |
+| `/onde-fica-o-bairro-jardim-leblon/`                              |      3.387 |      10 | Página trata de Belo Horizonte; excluir da prioridade de Leblon/RJ.                                                 |
+| `/alpha/artigos/ipanema-locacao-curta-temporada-verificar-regras` |          5 |       0 | Página de intenção de investimento; conteúdo revisado em 12/10. Amostra ainda insuficiente para inferir desempenho. |
 
 No Neon, no mesmo recorte, havia um lead com referência ao produto VIE Ipanema,
 sem `articleSlug` e sem `utmSource`. O texto do campo de origem não prova tráfego
@@ -30,10 +30,10 @@ As páginas abaixo demonstram formatos e caminhos de conversão observáveis. Se
 cliques, leads, custos e vendas não são públicos; nenhuma posição neste quadro
 é um ranking de resultado comercial.
 
-| Página pública | Padrão útil a examinar | Resposta editorial do Alpha |
-| --- | --- | --- |
-| [Comprimob: Gavi Gávea](https://www.comprimob.com.br/lancamentos-de-imoveis-gavi-gavea) | Página específica do produto, variações de planta e formulário. | Dar ao comprador uma comparação verificável de planta, custos e uso, vinculada a página própria e cadastro identificado. |
-| [Lançamentos RJ: Jardim Botânico](https://lancamentosrj.com/busca-imoveis-bairro/jardim-botanico) | Hub de bairro que encaminha para produtos. | Ligar dúvidas concretas a páginas de empreendimento verificadas e evitar textos genéricos de bairro. |
+| Página pública                                                                                    | Padrão útil a examinar                                          | Resposta editorial do Alpha                                                                                              |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [Comprimob: Gavi Gávea](https://www.comprimob.com.br/lancamentos-de-imoveis-gavi-gavea)           | Página específica do produto, variações de planta e formulário. | Dar ao comprador uma comparação verificável de planta, custos e uso, vinculada a página própria e cadastro identificado. |
+| [Lançamentos RJ: Jardim Botânico](https://lancamentosrj.com/busca-imoveis-bairro/jardim-botanico) | Hub de bairro que encaminha para produtos.                      | Ligar dúvidas concretas a páginas de empreendimento verificadas e evitar textos genéricos de bairro.                     |
 
 A Biblioteca de Anúncios da Meta e a Central de Transparência do Google permitem
 observar anúncios públicos, mas não revelam qual criativo gerou lead qualificado

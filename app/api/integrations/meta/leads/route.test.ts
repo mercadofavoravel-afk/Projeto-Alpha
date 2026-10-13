@@ -26,6 +26,16 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+const notify = vi.hoisted(() => ({ deliver: vi.fn() }));
+vi.mock('@/lib/lead-notification', () => ({
+  deliverLeadNotification: notify.deliver,
+  leadNotificationPending: (leadId: string) => ({
+    action: 'lead.email_notification.pending',
+    entityType: 'Lead',
+    entityId: leadId,
+  }),
+}));
+
 import { GET, POST } from './route';
 
 const payload = {
@@ -60,6 +70,7 @@ describe('Meta Lead Ads webhook', () => {
     calls.findReceipt.mockResolvedValue(null);
     calls.findUsers.mockResolvedValue([]);
     calls.createLead.mockResolvedValue({ id: 'new-lead' });
+    notify.deliver.mockResolvedValue(true);
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
@@ -124,6 +135,10 @@ describe('Meta Lead Ads webhook', () => {
       },
     });
     expect(calls.createActivity).toHaveBeenCalled();
+    expect(calls.createAudit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.email_notification.pending' }),
+    });
+    expect(notify.deliver).toHaveBeenCalledWith('new-lead');
     calls.findReceipt.mockResolvedValueOnce({ id: 'existing' });
     expect((await POST(notification(payload))).status).toBe(200);
     expect(calls.createLead).toHaveBeenCalledTimes(1);

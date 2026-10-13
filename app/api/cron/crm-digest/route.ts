@@ -5,6 +5,7 @@ import { crmDayWindow } from '@/lib/crm-day';
 import { db } from '@/lib/db';
 import { sendCrmRiskDigestEmail } from '@/lib/email';
 import { leadRiskQueries } from '@/lib/lead-risk';
+import { retryPendingLeadNotifications } from '@/lib/lead-notification';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,6 +27,8 @@ export async function GET(request: Request) {
   if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
     return NextResponse.json({ error: 'E-mail não configurado.' }, { status: 503 });
   }
+
+  const notificationRecovery = await retryPendingLeadNotifications();
 
   const now = new Date();
   const { today, tomorrow } = crmDayWindow(now);
@@ -106,7 +109,10 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json(
-    { sent, skipped, failed },
-    { status: failed ? 503 : 200, headers: { 'Cache-Control': 'private, no-store' } },
+    { sent, skipped, failed, notificationRecovery },
+    {
+      status: failed || notificationRecovery.failed ? 503 : 200,
+      headers: { 'Cache-Control': 'private, no-store' },
+    },
   );
 }

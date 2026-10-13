@@ -26,6 +26,16 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+const notify = vi.hoisted(() => ({ deliver: vi.fn() }));
+vi.mock('@/lib/lead-notification', () => ({
+  deliverLeadNotification: notify.deliver,
+  leadNotificationPending: (leadId: string) => ({
+    action: 'lead.email_notification.pending',
+    entityType: 'Lead',
+    entityId: leadId,
+  }),
+}));
+
 import { POST } from './route';
 
 const payload = {
@@ -63,6 +73,7 @@ describe('Respondi webhook', () => {
       },
     });
     calls.receiptFind.mockResolvedValue(null);
+    notify.deliver.mockResolvedValue(true);
     calls.users.mockResolvedValue([]);
     calls.leadCreate.mockResolvedValue({
       id: 'lead-01',
@@ -98,6 +109,10 @@ describe('Respondi webhook', () => {
     expect(calls.receiptCreate).toHaveBeenCalledWith({
       data: { provider: 'RESPONDI', externalId: 'abc123:r-001', leadId: 'lead-01' },
     });
+    expect(calls.audit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.email_notification.pending' }),
+    });
+    expect(notify.deliver).toHaveBeenCalledWith('lead-01');
     calls.receiptFind.mockResolvedValueOnce({ id: 'receipt-01' });
     expect((await POST(request(token))).status).toBe(200);
     expect(calls.leadCreate).toHaveBeenCalledTimes(1);

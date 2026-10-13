@@ -22,6 +22,16 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+const notify = vi.hoisted(() => ({ deliver: vi.fn() }));
+vi.mock('@/lib/lead-notification', () => ({
+  deliverLeadNotification: notify.deliver,
+  leadNotificationPending: (leadId: string) => ({
+    action: 'lead.email_notification.pending',
+    entityType: 'Lead',
+    entityId: leadId,
+  }),
+}));
+
 import { POST } from './route';
 
 function request(key = 'configured-secret', isTest = false) {
@@ -57,6 +67,7 @@ describe('Google Ads lead form receiver', () => {
       },
     ]);
     calls.createLead.mockResolvedValue({ id: 'lead-1' });
+    notify.deliver.mockResolvedValue(true);
   });
   afterEach(() => {
     if (previousKey === undefined) delete process.env.GOOGLE_ADS_LEAD_WEBHOOK_KEY;
@@ -93,5 +104,9 @@ describe('Google Ads lead form receiver', () => {
         type: 'TASK',
       }),
     });
+    expect(calls.audit).toHaveBeenCalledWith({
+      data: expect.objectContaining({ action: 'lead.email_notification.pending' }),
+    });
+    expect(notify.deliver).toHaveBeenCalledWith('lead-1');
   });
 });

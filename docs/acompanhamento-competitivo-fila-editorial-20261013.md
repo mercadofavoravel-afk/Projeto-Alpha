@@ -188,14 +188,29 @@ O usuário reiterou autorização para publicar. Foi feita nova tentativa de abr
 - Não registrar senhas, códigos ou tokens neste documento. A autorização é uma decisão do usuário; cookie, sessão, conector ou navegador disponível são meios técnicos que podem expirar ou não acompanhar uma nova sessão.
 - Se o meio técnico não estiver disponível, descrever o bloqueio como limitação desta sessão, sem sugerir que o usuário não autorizou. Continuar todas as etapas independentes do bloqueio e manter o conteúdo e os metadados prontos para publicação.
 - Após publicação, confirmar somente com evidência da URL pública no domínio oficial; nunca inferir que a página foi publicada por ter sido preparada ou enviada a um painel.
-
 ## Atualização de execução — artigo de mercado publicado em 13/10/2026
 
-O primeiro artigo foi reescrito a partir do direcionamento editorial de mercado imobiliário de alto padrão da Zona Sul, com foco em studios, Ipanema e Leblon. Foi publicado no domínio oficial e conferido na página pública:
+O primeiro artigo foi reescrito a partir do direcionamento editorial de mercado imobiliário de
+alto padrão da Zona Sul, com foco em studios, Ipanema e Leblon. Foi publicado no domínio oficial
+e conferido na página pública:
 https://imoveisdealtopadraorio.com.br/studio-em-ipanema-e-leblon-para-investir-precos-oferta-e-locacao-em-2026/
 
-A página publicada usa dados de mercado e distingue os recortes: preços anunciados do FipeZAP por bairro (agosto de 2026); levantamento da Brain Inteligência Estratégica para o segmento de luxo no 2º trimestre de 2026; e dados da AirDNA para locação de curta temporada na cidade, atualizados em 13/10/2026. O texto deixa explícito que dados da cidade não são projeções para Ipanema, Leblon ou uma unidade específica, separa receita bruta de resultado líquido e não promete valorização ou rentabilidade. A CTA aponta para o WhatsApp comercial já utilizado no site. O post está na categoria Blog, assinado por Alanna Antunes, com frase-chave e meta descrição configuradas.
+A página publicada usa dados de mercado e distingue os recortes: preços anunciados do FipeZAP
+por bairro (agosto de 2026); levantamento da Brain Inteligência Estratégica para o segmento de
+luxo no 2º trimestre de 2026; e dados da AirDNA para locação de curta temporada na cidade,
+atualizados em 13/10/2026. O texto deixa explícito que dados da cidade não são projeções para
+Ipanema, Leblon ou uma unidade específica, separa receita bruta de resultado líquido e não
+promete valorização ou rentabilidade. A CTA aponta para o WhatsApp comercial já utilizado no
+site. O post está na categoria Blog, assinado por Alanna Antunes, com frase-chave e meta
+descrição configuradas.
 
-Nenhum site de governo foi usado como fonte para este artigo; não foram consultados STJ, Planalto ou outros portais governamentais para compor a análise de mercado. O post contém links a fontes privadas de pesquisa e informação imobiliária/locação. Também não contém nome, domínio, logo, CTA ou formulário de concorrente.
+Nenhum site de governo foi usado como fonte para este artigo; não foram consultados STJ,
+Planalto ou outros portais governamentais para compor a análise de mercado. O post contém links
+a fontes privadas de pesquisa e informação imobiliária/locação. Também não contém nome, domínio,
+logo, CTA ou formulário de concorrente.
 
-Esta atualização substitui, para o primeiro artigo, os registros anteriores de preparação e de tentativa de publicação sem CMS. Esses registros descrevem etapas anteriores e não representam o estado atual. Para as próximas pautas desta linha editorial, priorizar indicadores, relatórios e fatos de mercado imobiliário; evitar transformar conteúdo em análise de decisões judiciais ou políticas governamentais.
+Esta atualização substitui, para o primeiro artigo, os registros anteriores de preparação e de
+tentativa de publicação sem CMS. Esses registros descrevem etapas anteriores e não representam o
+estado atual. Para as próximas pautas desta linha editorial, priorizar indicadores, relatórios e
+fatos de mercado imobiliário; evitar transformar conteúdo em análise de decisões judiciais ou
+políticas governamentais.

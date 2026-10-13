@@ -165,3 +165,16 @@ O Google não define neste guia uma cota numérica diária. A política caracter
 ### Dependência operacional registrada
 
 A autorização de leitura e escrita do usuário está reconhecida. Nesta sessão, não há integração WordPress ativa correspondente ao CMS do site e o painel não está observável pelo navegador; portanto, não publicar nem declarar artigo publicado até o CMS responder e a URL pública poder ser conferida. Isso é uma limitação operacional da sessão, não um novo pedido de autorização.
+## Primeiro artigo preparado — 13/10/2026
+
+### Benchmark individual lido
+
+Foi lido o artigo público do Lançamentos RJ “Investir em Airbnb em Ipanema: rentabilidade máxima Na Zona Sul carioca” (https://lancamentosrj.com/blog/investir-em-airbnb-em-ipanema-rentabilidade). A página aborda comparação entre curta temporada e locação tradicional, gestão, custos e sazonalidade; também afirma em trechos que a receita pode chegar a três vezes a locação mensal, sem apresentar ali uma metodologia reproduzível para essa comparação. O Alpha não reaproveita texto, estrutura distintiva, projeções, imagens ou CTA do concorrente.
+
+### Peça original criada no branch
+
+Arquivo: `docs/editorial/lote-01-studio-ipanema-locacao-curta-temporada.md`.
+
+Pauta: studio em Ipanema para estadia de curta duração, com foco em diligência condominial, custo total de entrada, operação e cenários líquidos. O artigo destaca a decisão do STJ de 7/05/2026 e o Tema Repetitivo 1.443 afetado em setembro de 2026; separa a noção legal de locação por temporada da autorização condominial e orienta revalidar o tema antes da publicação. As fontes primárias incluídas são STJ e Planalto. Não contém estimativa de retorno, preço ou ocupação sem fonte.
+
+Status: texto pronto para revisão editorial final e integração ao CMS; **não publicado**. O CMS WordPress não está acessível por ferramenta ativa nesta sessão. A autorização do usuário está reconhecida e não está sendo solicitada novamente.

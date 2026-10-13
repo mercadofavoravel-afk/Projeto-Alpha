@@ -5,7 +5,7 @@ import { requirePermission, getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { hasPermission } from '@/lib/permissions';
 
-import { saveArticleAction } from '../actions';
+import { saveArticleAction, saveArticleLeadIntegrationAction } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +21,7 @@ export default async function ArticleEditorPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ criado?: string; salvo?: string; erro?: string }>;
+  searchParams: Promise<{ criado?: string; salvo?: string; erro?: string; integracao?: string }>;
 }) {
   await requirePermission('catalog:write');
 
@@ -31,6 +31,7 @@ export default async function ArticleEditorPage({
     where: {
       id,
     },
+    include: { leadIntegration: true },
   });
 
   if (!article || !user) {
@@ -62,6 +63,13 @@ export default async function ArticleEditorPage({
       )}
 
       {query.salvo === '1' && <p className="notice">Artigo salvo com sucesso.</p>}
+      {query.integracao === 'salva' && <p className="notice">Catálogo de captação salvo.</p>}
+      {query.erro === 'integracao' && (
+        <p className="notice">Confira o ID e as URLs HTTPS do Respondi e do Tintim.</p>
+      )}
+      {query.erro === 'integracao-duplicada' && (
+        <p className="notice">Este formulário ou link do Tintim já pertence a outro artigo.</p>
+      )}
 
       {query.erro === 'campos' && (
         <p className="notice">Informe título e conteúdo com pelo menos 50 caracteres.</p>
@@ -206,6 +214,46 @@ export default async function ArticleEditorPage({
             </Link>
           )}
         </div>
+      </form>
+      <form action={saveArticleLeadIntegrationAction} className="admin-card editor-form">
+        <input type="hidden" name="id" value={article.id} />
+        <div className="eyebrow">Captação por artigo</div>
+        <h2>Respondi e Tintim</h2>
+        <p>
+          Associe um formulário Respondi exclusivo a este artigo e um link rastreável do Tintim para
+          conversas de WhatsApp. O formulário próprio do Alpha permanece disponível.
+        </p>
+        <div className="editor-grid">
+          <label>
+            ID do formulário Respondi
+            <input
+              name="respondiFormId"
+              defaultValue={article.leadIntegration?.respondiFormId ?? ''}
+              placeholder="ID mostrado na URL pública"
+            />
+          </label>
+          <label className="editor-wide">
+            URL pública Respondi
+            <input
+              name="respondiUrl"
+              type="url"
+              defaultValue={article.leadIntegration?.respondiUrl ?? ''}
+              placeholder="https://form.respondi.app/ID"
+            />
+          </label>
+          <label className="editor-wide">
+            Link rastreável Tintim para site
+            <input
+              name="tintimUrl"
+              type="url"
+              defaultValue={article.leadIntegration?.tintimUrl ?? ''}
+              placeholder="https://...tintim.app/..."
+            />
+          </label>
+        </div>
+        <button className="btn" type="submit">
+          Salvar captação
+        </button>
       </form>
     </>
   );

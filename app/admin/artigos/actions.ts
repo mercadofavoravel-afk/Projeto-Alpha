@@ -8,6 +8,7 @@ import { getArticlePublicationIssues } from '@/lib/article-publication';
 import { findInvalidEditorialDestinations } from '@/lib/editorial-destination';
 import { createEditorialDraft, isEditorialDraft } from '@/lib/editorial-draft';
 import { db } from '@/lib/db';
+import { articleLeadIntegrationSchema } from '@/lib/article-lead-integration';
 import { createSlug } from '@/lib/slug';
 
 const publishStatuses = ['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED'] as const;
@@ -177,4 +178,41 @@ export async function saveArticleAction(formData: FormData) {
   revalidateArticlePaths(current.slug);
   revalidateArticlePaths(article.slug);
   redirect(`/admin/artigos/${article.id}?salvo=1`);
+}
+
+export async function saveArticleLeadIntegrationAction(formData: FormData) {
+  await requirePermission('catalog:write');
+  const id = String(formData.get('id') || '');
+  const article = await db.article.findUnique({ where: { id }, select: { id: true, slug: true } });
+  if (!article) redirect('/admin/artigos?erro=nao-encontrado');
+  const field = (name: string) => String(formData.get(name) || '').trim() || null;
+  const parsed = articleLeadIntegrationSchema.safeParse({
+    respondiFormId: field('respondiFormId'),
+    respondiUrl: field('respondiUrl'),
+    tintimUrl: field('tintimUrl'),
+  });
+  if (!parsed.success) redirect(`/admin/artigos/${id}?erro=integracao`);
+  const claimed =
+    parsed.data.respondiFormId || parsed.data.tintimUrl
+      ? await db.articleLeadIntegration.findFirst({
+          where: {
+            articleId: { not: id },
+            OR: [
+              ...(parsed.data.respondiFormId
+                ? [{ respondiFormId: parsed.data.respondiFormId }]
+                : []),
+              ...(parsed.data.tintimUrl ? [{ tintimUrl: parsed.data.tintimUrl }] : []),
+            ],
+          },
+          select: { id: true },
+        })
+      : null;
+  if (claimed) redirect(`/admin/artigos/${id}?erro=integracao-duplicada`);
+  await db.articleLeadIntegration.upsert({
+    where: { articleId: id },
+    create: { articleId: id, ...parsed.data },
+    update: parsed.data,
+  });
+  revalidatePath(`/artigos/${article.slug}`);
+  redirect(`/admin/artigos/${id}?integracao=salva`);
 }

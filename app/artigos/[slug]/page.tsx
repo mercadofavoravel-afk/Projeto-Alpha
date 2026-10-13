@@ -6,6 +6,7 @@ import { LeadCaptureForm } from '@/app/empreendimentos/[slug]/LeadCaptureForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { TrackArticleView } from '@/components/TrackArticleView';
+import { ArticleExternalCapture } from '@/components/ArticleExternalCapture';
 import { db } from '@/lib/db';
 import { articleContentBlocks, articleContentSegments } from '@/lib/article-links';
 import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
@@ -39,6 +40,7 @@ async function getArticle(slug: string) {
       slug,
       publishStatus: 'PUBLISHED',
     },
+    include: { leadIntegration: true },
   });
 }
 
@@ -315,6 +317,11 @@ export default async function ArticlePage({ params }: PageProps) {
               projectSlug={`artigo-${article.slug}`}
               articleSlug={article.slug}
               source={createArticleLeadSource(article.title, neighborhood)}
+            />
+            <ArticleExternalCapture
+              articleSlug={article.slug}
+              respondiUrl={article.leadIntegration?.respondiUrl}
+              tintimUrl={article.leadIntegration?.tintimUrl}
             />
           </div>
         </section>

@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { requirePermission } from '@/lib/auth';
+import {
+  customerLeadStatuses,
+  customerLeadWhere,
+  parseCustomerLeadFilters,
+} from '@/lib/customer-lead-export';
 import { customerLeadRiskQueries } from '@/lib/customer-lead-risk';
 import { db } from '@/lib/db';
 import { firstContactMinutes, stalledHours } from '@/lib/lead-risk';
@@ -17,9 +22,16 @@ const statusNames: Record<string, string> = {
   LOST: 'Perdido',
 };
 
-export default async function CustomerSiteLeads({ params }: { params: Promise<{ id: string }> }) {
+export default async function CustomerSiteLeads({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string }>;
+}) {
   const user = await requirePermission('sites:manage');
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const filters = parseCustomerLeadFilters(query);
   const site = await db.customerSite.findFirst({
     where: { id, ownerId: user.id },
     select: { id: true, siteUrl: true },
@@ -27,10 +39,11 @@ export default async function CustomerSiteLeads({ params }: { params: Promise<{ 
   if (!site) notFound();
   const now = new Date();
   const risks = customerLeadRiskQueries(site.id, now);
+  const leadWhere = customerLeadWhere(site.id, filters);
   const [total, leads, alerts] = await Promise.all([
-    db.customerLead.count({ where: { siteId: site.id } }),
+    db.customerLead.count({ where: leadWhere }),
     db.customerLead.findMany({
-      where: { siteId: site.id },
+      where: leadWhere,
       orderBy: { createdAt: 'desc' },
       take: 100,
       select: {
@@ -63,6 +76,15 @@ export default async function CustomerSiteLeads({ params }: { params: Promise<{ 
     overdue: 'Tarefa com prazo vencido',
     stalled: `Atendimento sem contato registrado há mais de ${stalledHours} h`,
   };
+  const exportQuery = new URLSearchParams();
+  if (filters.status) exportQuery.set('status', filters.status);
+  if (filters.query) exportQuery.set('q', filters.query);
+  if (filters.from) exportQuery.set('from', filters.from);
+  if (filters.to) exportQuery.set('to', filters.to);
+  const exportHref =
+    `/api/customer-sites/${site.id}/leads/export` +
+    (exportQuery.size ? `?${exportQuery.toString()}` : '');
+
   return (
     <>
       <p>
@@ -70,9 +92,46 @@ export default async function CustomerSiteLeads({ params }: { params: Promise<{ 
       </p>
       <h1>Leads de {site.siteUrl}</h1>
       <p>
-        {total} contato(s) deste site. Exibindo os 100 mais recentes. Outros sites e a matriz não
-        aparecem aqui.
+        {total} lead(s) com estes filtros. Exibindo até os 100 mais recentes. A busca e a exportação
+        incluem somente os dados deste site.
       </p>
+      <form method="get" className="admin-card form-grid">
+        <h2>Filtrar leads</h2>
+        <label>
+          Buscar por nome, telefone, e-mail, origem ou artigo
+          <input name="q" defaultValue={filters.query} maxLength={120} />
+        </label>
+        <label>
+          Status
+          <select name="status" defaultValue={filters.status ?? ''}>
+            <option value="">Todos</option>
+            {customerLeadStatuses.map((status) => (
+              <option key={status} value={status}>
+                {statusNames[status]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          De
+          <input type="date" name="from" defaultValue={filters.from} />
+        </label>
+        <label>
+          Até
+          <input type="date" name="to" defaultValue={filters.to} />
+        </label>
+        <div>
+          <button className="btn" type="submit">
+            Aplicar filtros
+          </button>{' '}
+          <Link className="btn" href={`/admin/sites/${site.id}/leads`}>
+            Limpar
+          </Link>{' '}
+          <a className="btn" href={exportHref}>
+            Exportar CSV
+          </a>
+        </div>
+      </form>
       <section className="admin-card" aria-label="Alertas de atendimento deste site">
         <h2>Leads que precisam de atenção</h2>
         <p>
@@ -101,7 +160,7 @@ export default async function CustomerSiteLeads({ params }: { params: Promise<{ 
         </div>
       </section>
       <section className="admin-card">
-        {leads.length === 0 && <p>Nenhum contato recebido neste site.</p>}
+        {leads.length === 0 && <p>Nenhum contato corresponde aos filtros neste site.</p>}
         {leads.map((lead) => (
           <div className="panel" key={lead.id}>
             <h2>

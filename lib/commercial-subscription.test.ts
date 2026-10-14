@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   canUseCommercialPermission,
+  commercialMonthlyPriceCents,
   paidThroughAfterPayment,
   subscriptionState,
 } from './commercial-subscription';
@@ -9,6 +10,10 @@ import {
 describe('commercial subscription access', () => {
   const trialEndsAt = new Date('2026-11-01T00:00:00Z');
   const subscription = { trialEndsAt, paidThroughAt: null };
+
+  it('sets the monthly plan price to R$100', () => {
+    expect(commercialMonthlyPriceCents).toBe(10_000);
+  });
 
   it('keeps the matrix independent from customer billing and grants 30 days plus five days', () => {
     expect(subscriptionState('INTERNAL', null, new Date('2030-01-01')).status).toBe('INTERNAL');

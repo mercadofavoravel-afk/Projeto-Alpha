@@ -27,7 +27,12 @@ export default async function CustomerSiteLeads({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    q?: string;
+    from?: string;
+    to?: string;
+  }>;
 }) {
   const user = await requirePermission('sites:manage');
   const [{ id }, query] = await Promise.all([params, searchParams]);
@@ -54,7 +59,9 @@ export default async function CustomerSiteLeads({
         article: { select: { title: true } },
         createdAt: true,
         _count: {
-          select: { activities: { where: { completedAt: null, dueAt: { lt: now } } } },
+          select: {
+            activities: { where: { completedAt: null, dueAt: { lt: now } } },
+          },
         },
       },
     }),

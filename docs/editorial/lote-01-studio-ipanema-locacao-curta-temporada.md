@@ -66,16 +66,16 @@ valor de uso pessoal do imóvel.
 
 ## Como avaliar um studio de alto padrão para investir
 
--  **Compare o micro mercado:** use imóveis semelhantes no mesmo trecho e padrão, observando
+- **Compare o micro mercado:** use imóveis semelhantes no mesmo trecho e padrão, observando
   metragem, estado, andar, vista e data do anúncio. Média de bairro serve como contexto, não
   como avaliação individual.
--  **Defina o uso antes da compra:** moradia, segunda residência, locação tradicional e
+- **Defina o uso antes da compra:** moradia, segunda residência, locação tradicional e
   temporada pedem plantas e rotinas operacionais diferentes.
--  **Monte cenários conservador, base e forte:** varie diária e ocupação com referências locais
+- **Monte cenários conservador, base e forte:** varie diária e ocupação com referências locais
   verificáveis. Não aplique automaticamente a média da cidade a um endereço da Zona Sul.
--  **Confira a operação do edifício:** entenda custos recorrentes, serviços disponíveis e se a
+- **Confira a operação do edifício:** entenda custos recorrentes, serviços disponíveis e se a
   dinâmica prevista para a unidade combina com as regras e a rotina do condomínio.
--  **Olhe a saída:** pense em quem poderia comprar ou alugar o imóvel no futuro e quais
+- **Olhe a saída:** pense em quem poderia comprar ou alugar o imóvel no futuro e quais
   atributos ampliam esse público — localização caminhável, planta eficiente e boa conservação,
   por exemplo.
 
@@ -99,9 +99,9 @@ uso? [Fale com a equipe da Imóveis de Alto Padrão Rio](https://wa.me/552196426
 
 ## Fontes de mercado
 
--  [Índice FipeZAP — preços anunciados por bairro, agosto de 2026](https://forbes.com.br/forbes-money/forbes-real-estate/2026/09/bairros-metro-quadrado-mais-caro-brasil/).
--  [Brain Inteligência Estratégica — lançamentos, vendas e preços no segmento de luxo, 2º trimestre de 2026](https://forbes.com.br/forbes-money/forbes-real-estate/2026/09/imoveis-luxo-rio-de-janeiro-queda/).
--  [AirDNA — dados de locação de curta temporada no Rio, atualizados em 13 de outubro de 2026](https://www.airdna.co/vacation-rental-data/app/br/rio-de-janeiro).
+- [Índice FipeZAP — preços anunciados por bairro, agosto de 2026](https://forbes.com.br/forbes-money/forbes-real-estate/2026/09/bairros-metro-quadrado-mais-caro-brasil/).
+- [Brain Inteligência Estratégica — lançamentos, vendas e preços no segmento de luxo, 2º trimestre de 2026](https://forbes.com.br/forbes-money/forbes-real-estate/2026/09/imoveis-luxo-rio-de-janeiro-queda/).
+- [AirDNA — dados de locação de curta temporada no Rio, atualizados em 13 de outubro de 2026](https://www.airdna.co/vacation-rental-data/app/br/rio-de-janeiro).
 
-*Os indicadores têm recortes e metodologias diferentes. Preços anunciados, médias de mercado e
-estimativas de receita não substituem a análise da unidade e de seus custos.*
+_Os indicadores têm recortes e metodologias diferentes. Preços anunciados, médias de mercado e
+estimativas de receita não substituem a análise da unidade e de seus custos._

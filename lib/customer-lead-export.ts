@@ -57,7 +57,9 @@ export function customerLeadWhere(
         ...(filters.from ? { gte: new Date(`${filters.from}T00:00:00-03:00`) } : {}),
         ...(filters.to
           ? {
-              lt: new Date(new Date(`${filters.to}T00:00:00-03:00`).getTime() + 24 * 60 * 60 * 1000),
+              lt: new Date(
+                new Date(`${filters.to}T00:00:00-03:00`).getTime() + 24 * 60 * 60 * 1000,
+              ),
             }
           : {}),
       },

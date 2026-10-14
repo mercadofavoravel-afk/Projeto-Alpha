@@ -88,9 +88,10 @@ export default async function CustomerSiteLeads({
   if (filters.query) exportQuery.set('q', filters.query);
   if (filters.from) exportQuery.set('from', filters.from);
   if (filters.to) exportQuery.set('to', filters.to);
+  const exportQueryString = exportQuery.toString();
   const exportHref =
     `/api/customer-sites/${site.id}/leads/export` +
-    (exportQuery.size ? `?${exportQuery.toString()}` : '');
+    (exportQueryString ? `?${exportQueryString}` : '');
 
   return (
     <>

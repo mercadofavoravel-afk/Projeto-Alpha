@@ -109,7 +109,6 @@ A meta de longo prazo anteriormente definida foi **10 artigos por bairro por dia
 
 Para sustentar o ritmo, operar em lotes diários com pesquisa, deduplicação, redação, revisão factual/SEO, associação a produto e CTA, publicação e validação de formulário/CRM. Contabilizar separadamente novos artigos, melhorias em artigos existentes e peças aguardando fatosheet; medir cada lote em janela de 28 dias e redirecionar o esforço para temas que tragam leads qualificados e avanço comercial.
 
-
 ## Cruzamento adicional de publicações — 13/10/2026
 
 - O catálogo público `/conteudos/` do domínio oficial foi lido em 4.018 linhas. A busca no texto extraído por `lancamentosrj.com`, `lancamentos-rj.com`, `imoveislancamentorj.com.br`, Invexo, Lopes e Apartamentos Rio não retornou correspondências. Isso cobre o texto indexado do catálogo, não o conteúdo completo e os destinos de cada URL individual.
@@ -145,6 +144,7 @@ A cadência de referência já registrada (10 por bairro/dia nas 13 regiões) é
 ### Estado de execução
 
 O benchmark de volume foi atualizado, mas o número de 6.245 ainda precisa ser validado por URLs canônicas e não é uma contagem definitiva. A auditoria integral do WordPress segue pendente: a sessão atual não expõe o painel do site nem uma integração WordPress conectada que corresponda ao CMS usado. Não houve publicação de novos artigos nesta etapa. As autorizações já concedidas pelo usuário permanecem reconhecidas; a limitação observada é técnica, de acesso do painel nesta sessão, e não falta de autorização.
+
 ## Protocolo de publicação acelerada com qualidade — 13/10/2026
 
 ### Cadência por fases
@@ -165,6 +165,7 @@ O Google não define neste guia uma cota numérica diária. A política caracter
 ### Dependência operacional registrada
 
 A autorização de leitura e escrita do usuário está reconhecida. Nesta sessão, não há integração WordPress ativa correspondente ao CMS do site e o painel não está observável pelo navegador; portanto, não publicar nem declarar artigo publicado até o CMS responder e a URL pública poder ser conferida. Isso é uma limitação operacional da sessão, não um novo pedido de autorização.
+
 ## Primeiro artigo preparado — 13/10/2026
 
 ### Benchmark individual lido
@@ -178,9 +179,11 @@ Arquivo: `docs/editorial/lote-01-studio-ipanema-locacao-curta-temporada.md`.
 Pauta: studio em Ipanema para estadia de curta duração, com foco em diligência condominial, custo total de entrada, operação e cenários líquidos. O artigo destaca a decisão do STJ de 7/05/2026 e o Tema Repetitivo 1.443 afetado em setembro de 2026; separa a noção legal de locação por temporada da autorização condominial e orienta revalidar o tema antes da publicação. As fontes primárias incluídas são STJ e Planalto. Não contém estimativa de retorno, preço ou ocupação sem fonte.
 
 Status: texto pronto para revisão editorial final e integração ao CMS; **não publicado**. O CMS WordPress não está acessível por ferramenta ativa nesta sessão. A autorização do usuário está reconhecida e não está sendo solicitada novamente.
+
 ### Tentativa de publicação após autorização explícita — 13/10/2026
 
 O usuário reiterou autorização para publicar. Foi feita nova tentativa de abrir o WordPress por uma aba do domínio oficial; a ferramenta do navegador retornou bloqueio de observação por proteção de credenciais. A transferência para controle manual foi solicitada, sem retorno de estado do painel. A conexão WordPress.com também segue sem sessão ativa e não foi usada como substituta do CMS hospedado no domínio. Não houve envio de formulário, criação de post no CMS ou publicação. Manter o artigo pronto no branch e não registrar como publicado até verificar a URL pública.
+
 ## Autorização contínua e tratamento de bloqueios de sessão
 
 - O usuário concedeu autorização contínua para leitura e escrita no repositório e no painel WordPress da Imóveis de Alto Padrão Rio/Projeto Alpha. Também confirmou que Tintim e Respondi já foram configurados e usados no fluxo da página Nova Coleção Be In Rio, publicada em `https://imoveisdealtopadraorio.com.br/nova-colecao-be-in-rio/` em 06/10/2026.
@@ -188,6 +191,7 @@ O usuário reiterou autorização para publicar. Foi feita nova tentativa de abr
 - Não registrar senhas, códigos ou tokens neste documento. A autorização é uma decisão do usuário; cookie, sessão, conector ou navegador disponível são meios técnicos que podem expirar ou não acompanhar uma nova sessão.
 - Se o meio técnico não estiver disponível, descrever o bloqueio como limitação desta sessão, sem sugerir que o usuário não autorizou. Continuar todas as etapas independentes do bloqueio e manter o conteúdo e os metadados prontos para publicação.
 - Após publicação, confirmar somente com evidência da URL pública no domínio oficial; nunca inferir que a página foi publicada por ter sido preparada ou enviada a um painel.
+
 ## Atualização de execução — artigo de mercado publicado em 13/10/2026
 
 O primeiro artigo foi reescrito a partir do direcionamento editorial de mercado imobiliário de

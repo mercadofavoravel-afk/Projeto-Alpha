@@ -60,7 +60,11 @@ describe('customer lead filters and export', () => {
             { phone: { contains: 'Barra', mode: 'insensitive' } },
             { email: { contains: 'Barra', mode: 'insensitive' } },
             { source: { contains: 'Barra', mode: 'insensitive' } },
-            { article: { is: { title: { contains: 'Barra', mode: 'insensitive' } } } },
+            {
+              article: {
+                is: { title: { contains: 'Barra', mode: 'insensitive' } },
+              },
+            },
           ],
         },
       ],

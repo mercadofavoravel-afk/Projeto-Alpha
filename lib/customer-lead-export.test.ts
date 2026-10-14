@@ -50,8 +50,8 @@ describe('customer lead filters and export', () => {
         { status: 'NEW' },
         {
           createdAt: {
-            gte: new Date('2026-10-01T00:00:00.000Z'),
-            lt: new Date('2026-10-15T00:00:00.000Z'),
+            gte: new Date('2026-10-01T03:00:00.000Z'),
+            lt: new Date('2026-10-15T03:00:00.000Z'),
           },
         },
         {

@@ -2,10 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/lib/auth';
-import {
-  commercialMonthlyPriceCents,
-  subscriptionState,
-} from '@/lib/commercial-subscription';
+import { commercialMonthlyPriceCents, subscriptionState } from '@/lib/commercial-subscription';
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';

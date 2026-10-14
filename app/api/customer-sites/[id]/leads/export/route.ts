@@ -1,15 +1,16 @@
 import { requireApiPermission } from '@/lib/auth';
-import { customerLeadWhere, customerLeadsToCsv, parseCustomerLeadFilters } from '@/lib/customer-lead-export';
+import {
+  customerLeadWhere,
+  customerLeadsToCsv,
+  parseCustomerLeadFilters,
+} from '@/lib/customer-lead-export';
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 const exportLimit = 20_000;
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireApiPermission('sites:manage');
   if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
 
@@ -47,7 +48,9 @@ export async function GET(
   });
   if (rows.length > exportLimit) {
     return Response.json(
-      { error: 'Muitos resultados. Aplique um período menor e tente novamente.' },
+      {
+        error: 'Muitos resultados. Aplique um período menor e tente novamente.',
+      },
       { status: 413 },
     );
   }

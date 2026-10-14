@@ -2,7 +2,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/lib/auth';
-import { subscriptionState } from '@/lib/commercial-subscription';
+import {
+  commercialMonthlyPriceCents,
+  subscriptionState,
+} from '@/lib/commercial-subscription';
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -21,12 +24,18 @@ export default async function SubscriptionPage() {
   const pending = subscription?.payments[0];
   const boleto =
     pending?.boletoUrl && /^https:\/\//i.test(pending.boletoUrl) ? pending.boletoUrl : null;
+  const monthlyPrice = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(commercialMonthlyPriceCents / 100);
+
   return (
     <main className="login-shell">
       <section className="login-card">
         <div className="eyebrow">Projeto Alpha · acesso individual</div>
         <h1>Assinatura suspensa</h1>
         <p>O prazo de pagamento, incluindo cinco dias de tolerância, terminou para esta conta.</p>
+        <p>Plano comercial: {monthlyPrice} por mês</p>
         <p>Conta: {user.email}</p>
         {access.dueAt && (
           <p>

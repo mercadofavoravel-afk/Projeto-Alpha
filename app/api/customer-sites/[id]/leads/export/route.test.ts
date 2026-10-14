@@ -19,7 +19,9 @@ import { GET } from './route';
 const context = { params: Promise.resolve({ id: 'site_customer_01' }) };
 
 function request(query = '') {
-  return new Request(`https://alpha.example/api/customer-sites/site_customer_01/leads/export${query}`);
+  return new Request(
+    `https://alpha.example/api/customer-sites/site_customer_01/leads/export${query}`,
+  );
 }
 
 describe('licensed customer lead CSV export', () => {
@@ -116,8 +118,6 @@ describe('licensed customer lead CSV export', () => {
     const response = await GET(request(), context);
 
     expect(response.status).toBe(413);
-    expect(mocks.findLeads).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 20_001 }),
-    );
+    expect(mocks.findLeads).toHaveBeenCalledWith(expect.objectContaining({ take: 20_001 }));
   });
 });

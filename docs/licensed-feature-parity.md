@@ -35,9 +35,10 @@ O login individual identifica a pessoa; a organização identifica a operação.
 1. Criar organização matriz e organizações licenciadas, membros e papéis por organização; migrar o usuário e os registros existentes da matriz sem trocar o destino de seus leads.
 2. Vincular sites, catálogo, artigos, mídia, leads, atividades, origem/analítica e integrações à organização; escopar todas as consultas, mutações, cron e APIs.
 3. Reutilizar as telas e fluxos da matriz com contexto de organização, em vez de manter duas implementações divergentes de CRM, SEO e publicação.
-4. Integrar credenciais externas por organização e concluir as ferramentas ainda ausentes, inclusive SEO por CMS, WhatsApp Business e cobrança confirmada.
+4. Integrar credenciais externas por organização e concluir as ferramentas ainda ausentes, inclusive SEO por CMS e WhatsApp Business.
 5. Aplicar migrações em homologação e produção, conferir dois clientes separados e liberar licenças somente após passar nos critérios de paridade e isolamento.
 6. Validar a instalação pelo navegador em Android e pela Tela de Início no iPhone. Se a distribuição pela Play Store ou App Store fizer parte do produto comercial, preparar os pacotes próprios e submeter às respectivas análises; o manifesto web sozinho não equivale a publicação nas lojas.
+7. Deixar a cobrança para a etapa final: selecionar o provedor Pix/boleto, configurar credenciais, validar assinatura e idempotência dos webhooks e testar pagamento, inadimplência, bloqueio e reativação.
 
 O PR #114 prepara algumas peças, mas **não satisfaz ainda a paridade nem está liberado para comercialização**.
 

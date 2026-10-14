@@ -1,6 +1,7 @@
 import type { BillingMode, Prisma } from '@prisma/client';
 
 const dayMs = 24 * 60 * 60 * 1000;
+export const commercialMonthlyPriceCents = 10_000;
 export const commercialTrialDays = 30;
 export const commercialGraceDays = 5;
 

@@ -18,7 +18,7 @@ export type CustomerLeadFilters = {
 
 function validDate(value: unknown) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/u.test(value)) return undefined;
-  const date = new Date(`${value}T00:00:00.000Z`);
+  const date = new Date(`${value}T00:00:00-03:00`);
   return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value
     ? undefined
     : value;
@@ -54,10 +54,10 @@ export function customerLeadWhere(
   if (filters.from || filters.to) {
     and.push({
       createdAt: {
-        ...(filters.from ? { gte: new Date(`${filters.from}T00:00:00.000Z`) } : {}),
+        ...(filters.from ? { gte: new Date(`${filters.from}T00:00:00-03:00`) } : {}),
         ...(filters.to
           ? {
-              lt: new Date(new Date(`${filters.to}T00:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000),
+              lt: new Date(new Date(`${filters.to}T00:00:00-03:00`).getTime() + 24 * 60 * 60 * 1000),
             }
           : {}),
       },

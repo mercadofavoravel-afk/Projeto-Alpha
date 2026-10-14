@@ -31,8 +31,7 @@ export function parseCustomerLeadFilters(input: {
   to?: unknown;
 }): CustomerLeadFilters {
   const status =
-    typeof input.status === 'string' &&
-    customerLeadStatuses.includes(input.status as LeadStatus)
+    typeof input.status === 'string' && customerLeadStatuses.includes(input.status as LeadStatus)
       ? (input.status as LeadStatus)
       : undefined;
   const query = typeof input.q === 'string' ? input.q.trim().slice(0, 120) : '';
@@ -58,9 +57,7 @@ export function customerLeadWhere(
         ...(filters.from ? { gte: new Date(`${filters.from}T00:00:00.000Z`) } : {}),
         ...(filters.to
           ? {
-              lt: new Date(
-                new Date(`${filters.to}T00:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000,
-              ),
+              lt: new Date(new Date(`${filters.to}T00:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000),
             }
           : {}),
       },
@@ -142,7 +139,11 @@ export function customerLeadsToCsv(rows: CustomerLeadCsvRow[]) {
     ...rows.map((row) =>
       columns
         .map((column) =>
-          csvCell(column === 'articleTitle' ? row.article?.title : row[column as keyof CustomerLeadCsvRow]),
+          csvCell(
+            column === 'articleTitle'
+              ? row.article?.title
+              : row[column as keyof CustomerLeadCsvRow],
+          ),
         )
         .join(','),
     ),

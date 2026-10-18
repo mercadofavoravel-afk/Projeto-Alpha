@@ -24,7 +24,8 @@ export async function deliverLeadNotification(leadId: string): Promise<boolean> 
       async (transaction) => {
         // The same lead can be processed by its request and the daily recovery job.
         const lock = `lead-email:${leadId}`;
-        await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
+        // PostgreSQL returns void here; execute without decoding a result row in Prisma.
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
         const pending = await transaction.auditLog.findFirst({
           where: { action: pendingAction, entityType: 'Lead', entityId: leadId },
           select: { id: true },

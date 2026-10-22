@@ -1,11 +1,11 @@
 export const leadsPerPage = 100;
 
-export function resolveLeadPage(value: string | undefined, total: number) {
-  const totalPages = Math.max(1, Math.ceil(total / leadsPerPage));
+export function resolveLeadPage(value: string | undefined, total: number, pageSize = leadsPerPage) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const requested = value && /^[1-9]\d*$/.test(value) ? Number(value) : 1;
   const page = Math.min(Number.isSafeInteger(requested) ? requested : 1, totalPages);
 
-  return { page, totalPages, skip: (page - 1) * leadsPerPage };
+  return { page, totalPages, skip: (page - 1) * pageSize };
 }
 
 export function leadPageHref(filters: URLSearchParams, page: number) {

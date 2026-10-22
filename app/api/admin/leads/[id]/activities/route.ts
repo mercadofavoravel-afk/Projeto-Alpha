@@ -9,7 +9,11 @@ import { firstContactNotePrefix } from '@/lib/lead-follow-up';
 const activitySchema = z.object({
   type: z.enum(['NOTE', 'CALL', 'WHATSAPP', 'EMAIL', 'VISIT', 'TASK']),
   note: z.string().trim().max(2000).optional(),
-  dueAt: z.coerce.date().optional(),
+  dueAt: z
+    .string()
+    .datetime({ offset: true })
+    .transform((value) => new Date(value))
+    .optional(),
 });
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -32,7 +36,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { id } = await context.params;
-  const parsed = activitySchema.safeParse(await request.json());
+  const parsed = activitySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Atividade inválida', details: parsed.error.flatten() },

@@ -87,4 +87,37 @@ describe('registro de acompanhamento no CRM', () => {
     expect(response.status).toBe(404);
     expect(mocks.createActivity).not.toHaveBeenCalled();
   });
+
+  it('preserva o instante escolhido no horário de Brasília sem antecipar o lembrete', async () => {
+    const response = await POST(
+      request({ type: 'CALL', dueAt: '2026-10-23T09:30:00-03:00' }),
+      context,
+    );
+    expect(response.status).toBe(201);
+    expect(mocks.createActivity).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        dueAt: new Date('2026-10-23T12:30:00Z'),
+        completedAt: undefined,
+      }),
+    });
+    expect(mocks.updateLead).not.toHaveBeenCalled();
+  });
+
+  it('recusa horário sem fuso e JSON inválido antes de gravar', async () => {
+    expect((await POST(request({ type: 'TASK', dueAt: '2026-10-23T09:30' }), context)).status).toBe(
+      400,
+    );
+    expect(
+      (
+        await POST(
+          new Request('http://localhost/api/admin/leads/lead-1/activities', {
+            method: 'POST',
+            body: '{',
+          }),
+          context,
+        )
+      ).status,
+    ).toBe(400);
+    expect(mocks.createActivity).not.toHaveBeenCalled();
+  });
 });

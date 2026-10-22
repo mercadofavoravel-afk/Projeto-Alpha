@@ -40,7 +40,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
         body: JSON.stringify({
           type,
           note: note.trim() || undefined,
-          dueAt: dueAt || undefined,
+          dueAt: dueAt ? new Date(dueAt).toISOString() : undefined,
         }),
       });
 
@@ -102,7 +102,7 @@ export function ActivityForm({ leadId }: { leadId: string }) {
         />
         <small>
           Deixe em branco ao registrar uma ligação, mensagem, e-mail ou visita já realizada. Informe
-          uma data para criar um lembrete futuro.
+          uma data para criar um lembrete futuro, no horário local do seu aparelho.
         </small>
       </div>
 

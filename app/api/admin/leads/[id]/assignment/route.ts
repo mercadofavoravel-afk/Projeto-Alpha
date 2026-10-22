@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { requireApiPermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { lockRouting } from '@/lib/lead-routing';
 import { leadAccessWhere } from '@/lib/lead-access';
 
 const assignmentSchema = z.object({ assignedToId: z.string().cuid().nullable() });
@@ -41,14 +42,18 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   const result = await db.$transaction(async (transaction) => {
+    await lockRouting(transaction);
     const lead = await transaction.lead.findFirst({
       where: { id, ...leadAccessWhere(auth.user) },
       select: { id: true, assignedToId: true },
     });
     if (!lead) return null;
-    if (lead.assignedToId === targetId) return lead;
+    if (targetId && lead.assignedToId === targetId) return lead;
 
-    await transaction.lead.update({ where: { id }, data: { assignedToId: targetId } });
+    await transaction.lead.update({
+      where: { id },
+      data: { assignedToId: targetId, routingQueueId: null },
+    });
     await transaction.leadActivity.create({
       data: {
         leadId: id,

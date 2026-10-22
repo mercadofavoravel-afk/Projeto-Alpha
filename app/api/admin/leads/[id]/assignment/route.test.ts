@@ -15,6 +15,7 @@ vi.mock('@/lib/db', () => ({
     user: { findFirst: mocks.findUser },
     $transaction: async (callback: (transaction: unknown) => Promise<unknown>) =>
       callback({
+        $executeRaw: async () => 1,
         lead: { findFirst: mocks.findLead, update: mocks.updateLead },
         leadActivity: { create: mocks.createActivity },
         auditLog: { create: mocks.createAudit },
@@ -84,10 +85,19 @@ describe('atribuição de leads pelo gerente', () => {
     expect(response.status).toBe(200);
     expect(mocks.updateLead).toHaveBeenCalledWith({
       where: { id: 'lead-1' },
-      data: { assignedToId: consultantId },
+      data: { assignedToId: consultantId, routingQueueId: null },
     });
     expect(mocks.createAudit).toHaveBeenCalledWith({
       data: expect.objectContaining({ userId: managerId, action: 'lead.assigned' }),
+    });
+  });
+  it('devolução pela direção retira o lead da retomada automática', async () => {
+    mocks.auth.mockResolvedValue({ ok: true, user: { id: 'admin', role: 'ADMIN' } });
+    mocks.findLead.mockResolvedValue({ id: 'lead-1', assignedToId: null });
+    expect((await PATCH(request(null), context)).status).toBe(200);
+    expect(mocks.updateLead).toHaveBeenCalledWith({
+      where: { id: 'lead-1' },
+      data: { assignedToId: null, routingQueueId: null },
     });
   });
 });

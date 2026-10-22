@@ -16,7 +16,9 @@ function normalized(value: string | null | undefined) {
 
 export function candidateCanReceive(candidate: DistributionCandidate, region?: string | null) {
   if (candidate.activeLeadCount >= candidate.leadCapacity) return false;
-  if (candidate.serviceRegions.length === 0 || !region) return true;
+  if (candidate.serviceRegions.length === 0) return true;
+  // A missing neighborhood must not bypass a regional queue's scope.
+  if (!normalized(region)) return false;
   const target = normalized(region);
   return candidate.serviceRegions.some((item) => normalized(item) === target);
 }

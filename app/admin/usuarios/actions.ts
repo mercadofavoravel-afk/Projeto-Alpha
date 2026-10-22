@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { requireRole } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { canManageEmployeeRole, employeeRoles } from '@/lib/team-roles';
+import { leadRoutingSettingsSchema } from '@/lib/lead-routing-settings';
 
 const createSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -26,11 +27,11 @@ const createSchema = z.object({
   managerId: z.string().cuid().nullable(),
 });
 
-function parseRegions(value: FormDataEntryValue | null) {
-  return String(value ?? '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
+function parseRegions(formData: FormData) {
+  return leadRoutingSettingsSchema.safeParse({
+    scope: formData.get('routingScope'),
+    regions: String(formData.get('serviceRegions') ?? ''),
+  });
 }
 
 function parseManagerId(value: FormDataEntryValue | null) {
@@ -54,6 +55,8 @@ function done(result: string): never {
 
 export async function createEmployee(formData: FormData) {
   const actor = await requireRole(['ADMIN', 'DIRECTOR']);
+  const routing = parseRegions(formData);
+  if (!routing.success) done('routing');
   const parsed = createSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -61,7 +64,7 @@ export async function createEmployee(formData: FormData) {
     password: formData.get('password'),
     acceptsLeads: formData.get('acceptsLeads') === 'true',
     leadCapacity: Number(formData.get('leadCapacity') || 30),
-    serviceRegions: parseRegions(formData.get('serviceRegions')),
+    serviceRegions: routing.data,
     managerId: parseManagerId(formData.get('managerId')),
   });
   if (!parsed.success) done('invalid');
@@ -111,7 +114,9 @@ export async function updateEmployee(formData: FormData) {
   const active = formData.get('isActive') === 'true';
   const acceptsLeads = formData.get('acceptsLeads') === 'true';
   const leadCapacity = Number(formData.get('leadCapacity') || 30);
-  const serviceRegions = parseRegions(formData.get('serviceRegions'));
+  const routing = parseRegions(formData);
+  if (!routing.success) done('routing');
+  const serviceRegions = routing.data;
   const managerId = parseManagerId(formData.get('managerId'));
   if (
     typeof id !== 'string' ||

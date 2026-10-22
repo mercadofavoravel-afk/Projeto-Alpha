@@ -221,6 +221,35 @@ describe('POST /api/leads', () => {
     expect(database.updateUser).not.toHaveBeenCalled();
   });
 
+  it('keeps a lead without neighborhood out of a regional-only queue', async () => {
+    database.findUsers.mockResolvedValue([
+      {
+        id: 'regional',
+        leadCapacity: 30,
+        serviceRegions: ['Leblon'],
+        lastLeadAssignedAt: null,
+        _count: { assignedLeads: 0 },
+      },
+    ]);
+    const response = await POST(
+      new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Cliente',
+          phone: '(21) 96426-1042',
+          email: 'cliente@example.com',
+          consent: true,
+        }),
+      }),
+    );
+    expect(response.status).toBe(201);
+    expect(database.createLead).toHaveBeenCalledWith({
+      data: expect.objectContaining({ assignedToId: null }),
+    });
+    expect(database.updateUser).not.toHaveBeenCalled();
+  });
+
   it('rejects a lead without consent before writing to the CRM', async () => {
     const response = await POST(
       new Request('http://localhost/api/leads', {

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const MAX_SHIFTS = 24;
+
 export const PRESENCE_TTL_MS = 3 * 60_000;
 export const REGISTRATION_MS = 30 * 60_000;
 export const DEFAULT_SHIFTS = [
@@ -16,7 +18,7 @@ export const shiftsSchema = z
     }),
   )
   .min(1)
-  .max(2)
+  .max(MAX_SHIFTS)
   .superRefine((shifts, ctx) => {
     const occupied = new Set<number>();
     for (const shift of shifts) {

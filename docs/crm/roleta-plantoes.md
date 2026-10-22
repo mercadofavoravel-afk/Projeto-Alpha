@@ -1,6 +1,6 @@
 # Roleta de plantão
 
-Acessar `/alpha/admin/roleta`. Administração e direção criam filas gerais ou por bairros e configuram um ou dois plantões. Os padrões são 09h–14h e 14h45–09h do dia seguinte, em America/Sao_Paulo. Criar uma fila é uma decisão explícita: a migração não ativa filas nem altera corretores existentes.
+Acessar `/alpha/admin/roleta`. Administração e direção criam filas gerais ou por bairros e configuram de um a 24 plantões por dia. Horários e quantidade são editáveis por fila. Os padrões iniciais são 09h–14h e 14h45–09h do dia seguinte, em America/Sao_Paulo. Criar uma fila é uma decisão explícita: a migração não ativa filas nem altera corretores existentes.
 
 Corretores habilitados fazem check-in em cada plantão, a partir de 30 minutos antes. O sorteio consolida uma ordem única e o recebimento percorre essa ordem em rodízio. Entradas tardias ficam no fim; sair e voltar preserva a posição. Limite de capacidade, bairros atendidos, conta ativa, habilitação de recebimento e presença recente são obrigatórios.
 

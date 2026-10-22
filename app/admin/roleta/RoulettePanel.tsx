@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { alphaPath } from '@/lib/public-path';
-import { DEFAULT_SHIFTS, type ShiftSchedule } from '@/lib/roulette-rules';
+import { DEFAULT_SHIFTS, MAX_SHIFTS, type ShiftSchedule } from '@/lib/roulette-rules';
 
 type Entry = {
   id: string;
@@ -268,14 +268,32 @@ export function RoulettePanel() {
               Plantões por dia
               <select
                 value={shifts.length}
-                onChange={(e) =>
-                  setShifts(e.target.value === '1' ? [shifts[0]] : [shifts[0], DEFAULT_SHIFTS[1]])
-                }
+                onChange={(e) => {
+                  const count = Number(e.target.value);
+                  setShifts(
+                    Array.from(
+                      { length: count },
+                      (_, index) =>
+                        shifts[index] || {
+                          name: `Plantão ${index + 1}`,
+                          start: 0,
+                          end: 0,
+                        },
+                    ),
+                  );
+                }}
               >
-                <option value="1">Um sorteio</option>
-                <option value="2">Dois sorteios</option>
+                {Array.from({ length: MAX_SHIFTS }, (_, index) => (
+                  <option key={index} value={index + 1}>
+                    {index + 1} sorteio(s)
+                  </option>
+                ))}
               </select>
             </label>
+            <p>
+              Edite início e fim de cada plantão. Os horários não podem se sobrepor; a ordem é
+              sorteada em cada início configurado.
+            </p>
             {shifts.map((shift, index) => (
               <fieldset key={index}>
                 <legend>Plantão {index + 1}</legend>

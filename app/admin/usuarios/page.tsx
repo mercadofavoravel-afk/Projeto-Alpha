@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import { requireRole } from '@/lib/auth';
 import type { UserRole } from '@prisma/client';
-import { createEmployee, updateEmployee } from './actions';
+import { createEmployee, updateEmployee, sendEmployeeAccessLink } from './actions';
 import { LeadRoutingFields } from './LeadRoutingFields';
 export const dynamic = 'force-dynamic';
 const roleNames = {
@@ -52,7 +52,17 @@ export default async function Page({
   ]);
   const { result } = await searchParams;
   const notices: Record<string, string> = {
-    created: 'Profissional cadastrado.',
+    created:
+      'Profissional cadastrado. O provedor aceitou o e-mail com link de acesso e senha inicial. Peça ao corretor que confira a caixa de entrada e o spam.',
+    'created-email-failed':
+      'Profissional cadastrado, mas o envio do e-mail não foi confirmado. Use Enviar link de acesso na linha do usuário.',
+    'email-unavailable':
+      'O serviço de e-mail precisa ser configurado para enviar os acessos. Nenhuma nova conta foi criada por esta tentativa.',
+    'email-recent':
+      'Já existe um link recente. Confira a caixa de entrada e o spam ou aguarde 30 minutos antes de pedir outro.',
+    'access-link-sent':
+      'O provedor aceitou o e-mail com link para definir uma nova senha, válido por 30 minutos.',
+    'access-link-failed': 'O envio não foi confirmado. Tente enviar o link novamente.',
     updated: 'Acesso atualizado.',
     routing: 'Escolha fila geral ou informe de 1 a 30 bairros válidos para a fila regional.',
     invalid: 'Confira os dados. A senha precisa ter pelo menos 12 caracteres.',
@@ -81,7 +91,7 @@ export default async function Page({
         </label>
         <label>
           Função
-          <select name="role" required>
+          <select name="role" required defaultValue="CONSULTANT">
             {Object.entries(manageableRoles).map(([value, name]) => (
               <option key={value} value={value}>
                 {name}
@@ -90,14 +100,8 @@ export default async function Page({
           </select>
         </label>
         <label>
-          Senha inicial individual
-          <input
-            name="password"
-            type="password"
-            minLength={12}
-            autoComplete="new-password"
-            required
-          />
+          Senha inicial individual (opcional)
+          <input name="password" type="password" minLength={12} autoComplete="new-password" />
         </label>
         <label>
           Recebimento de leads
@@ -123,8 +127,9 @@ export default async function Page({
           </select>
         </label>
         <p>
-          Compartilhe a senha com o profissional por um canal seguro; ele poderá trocá-la após
-          entrar.
+          Ao criar o acesso, o corretor receberá por e-mail o link da plataforma, seu e-mail de
+          login e a senha inicial. Se deixar a senha em branco, o sistema gera uma senha individual.
+          Ele poderá trocá-la em Minha conta após entrar.
         </p>
         <button className="btn" type="submit">
           Criar acesso
@@ -163,56 +168,73 @@ export default async function Page({
                   {u.role === 'ADMIN' ? (
                     'Administrador'
                   ) : (
-                    <form action={updateEmployee} className="form-grid">
-                      <input type="hidden" name="userId" value={u.id} />
-                      <select
-                        name="role"
-                        defaultValue={u.role}
-                        aria-label={`Função de ${u.name || u.email}`}
-                      >
-                        {Object.entries(manageableRoles).map(([value, name]) => (
-                          <option key={value} value={value}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                      <select name="acceptsLeads" defaultValue={u.acceptsLeads ? 'true' : 'false'}>
-                        <option value="false">Não receber</option>
-                        <option value="true">Disponível</option>
-                      </select>
-                      <input
-                        name="leadCapacity"
-                        type="number"
-                        min={1}
-                        max={500}
-                        defaultValue={u.leadCapacity}
-                        aria-label={`Capacidade de ${u.name || u.email}`}
-                      />
-                      <LeadRoutingFields regions={u.serviceRegions} />
-                      <select
-                        name="managerId"
-                        defaultValue={u.managerId || ''}
-                        aria-label={`Gerente responsável por ${u.name || u.email}`}
-                      >
-                        <option value="">Sem gerente vinculado</option>
-                        {managers.map((manager) => (
-                          <option key={manager.id} value={manager.id}>
-                            {manager.name || manager.email}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        name="isActive"
-                        defaultValue={u.isActive ? 'true' : 'false'}
-                        aria-label={`Situação de ${u.name || u.email}`}
-                      >
-                        <option value="true">Ativo</option>
-                        <option value="false">Bloqueado</option>
-                      </select>
-                      <button className="btn" type="submit">
-                        Salvar
-                      </button>
-                    </form>
+                    <>
+                      <form action={updateEmployee} className="form-grid">
+                        <input type="hidden" name="userId" value={u.id} />
+                        <select
+                          name="role"
+                          defaultValue={u.role}
+                          aria-label={`Função de ${u.name || u.email}`}
+                        >
+                          {Object.entries(manageableRoles).map(([value, name]) => (
+                            <option key={value} value={value}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          name="acceptsLeads"
+                          defaultValue={u.acceptsLeads ? 'true' : 'false'}
+                        >
+                          <option value="false">Não receber</option>
+                          <option value="true">Disponível</option>
+                        </select>
+                        <input
+                          name="leadCapacity"
+                          type="number"
+                          min={1}
+                          max={500}
+                          defaultValue={u.leadCapacity}
+                          aria-label={`Capacidade de ${u.name || u.email}`}
+                        />
+                        <LeadRoutingFields regions={u.serviceRegions} />
+                        <select
+                          name="managerId"
+                          defaultValue={u.managerId || ''}
+                          aria-label={`Gerente responsável por ${u.name || u.email}`}
+                        >
+                          <option value="">Sem gerente vinculado</option>
+                          {managers.map((manager) => (
+                            <option key={manager.id} value={manager.id}>
+                              {manager.name || manager.email}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          name="isActive"
+                          defaultValue={u.isActive ? 'true' : 'false'}
+                          aria-label={`Situação de ${u.name || u.email}`}
+                        >
+                          <option value="true">Ativo</option>
+                          <option value="false">Bloqueado</option>
+                        </select>
+                        <button className="btn" type="submit">
+                          Salvar
+                        </button>
+                      </form>
+                      {u.isActive && (
+                        <form action={sendEmployeeAccessLink}>
+                          <input type="hidden" name="userId" value={u.id} />
+                          <button className="btn" type="submit">
+                            Enviar link de acesso
+                          </button>
+                          <small>
+                            Envia ao e-mail cadastrado um link para escolher outra senha. A senha
+                            atual só muda quando o corretor concluir.
+                          </small>
+                        </form>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>

@@ -25,13 +25,18 @@ export async function changeOwnPassword(formData: FormData) {
     redirect('/admin/minha-conta?result=current');
   }
   const passwordHash = await bcrypt.hash(next, 12);
-  await db.$transaction([
-    db.user.update({
+  await db.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('alpha:lead-routing'))`;
+    await tx.leadRouletteEntry.updateMany({
+      where: { userId: user.id, checkedOutAt: null },
+      data: { checkedOutAt: new Date() },
+    });
+    await tx.user.update({
       where: { id: user.id },
       data: { passwordHash, passwordChangedAt: new Date() },
-    }),
-    db.session.deleteMany({ where: { userId: user.id } }),
-    db.passwordResetToken.deleteMany({ where: { userId: user.id } }),
-  ]);
+    });
+    await tx.session.deleteMany({ where: { userId: user.id } });
+    await tx.passwordResetToken.deleteMany({ where: { userId: user.id } });
+  });
   redirect('/login');
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
 import { db } from '@/lib/db';
-import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
 import { normalizeLeadUtms } from '@/lib/utm';
 import { leadSchema } from '@/lib/validation';
@@ -56,30 +56,10 @@ export async function POST(request: Request) {
     try {
       lead = await db.$transaction(
         async (transaction) => {
-          const users = await transaction.user.findMany({
-            where: {
-              isActive: true,
-              acceptsLeads: true,
-              role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-            },
-            select: {
-              id: true,
-              leadCapacity: true,
-              serviceRegions: true,
-              lastLeadAssignedAt: true,
-              _count: {
-                select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
-              },
-            },
-          });
-          const candidates: DistributionCandidate[] = users.map((user) => ({
-            id: user.id,
-            activeLeadCount: user._count.assignedLeads,
-            leadCapacity: user.leadCapacity,
-            serviceRegions: user.serviceRegions,
-            lastLeadAssignedAt: user.lastLeadAssignedAt,
-          }));
-          const assignee = chooseAssignee(candidates, leadData.neighborhood);
+          const { assignee, routingQueueId } = await resolveLeadAssignment(
+            transaction,
+            leadData.neighborhood,
+          );
           const createdLead = await transaction.lead.create({
             data: {
               ...leadData,
@@ -87,6 +67,7 @@ export async function POST(request: Request) {
               email: parsed.data.email || null,
               message,
               assignedToId: assignee?.id || null,
+              routingQueueId,
             },
           });
 

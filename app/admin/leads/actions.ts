@@ -4,60 +4,34 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requireRole } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { resolveLeadAssignment, routingTransaction } from '@/lib/lead-routing';
 
 export async function distributeUnassignedLeadsAction() {
   const actor = await requireRole(['ADMIN', 'DIRECTOR']);
 
-  const [unassignedLeads, users] = await Promise.all([
-    db.lead.findMany({
-      where: { assignedToId: null, status: { notIn: ['WON', 'LOST'] } },
-      select: { id: true, neighborhood: true },
-      orderBy: { createdAt: 'asc' },
-      take: 25,
-    }),
-    db.user.findMany({
-      where: {
-        isActive: true,
-        acceptsLeads: true,
-        role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-      },
-      select: {
-        id: true,
-        leadCapacity: true,
-        serviceRegions: true,
-        lastLeadAssignedAt: true,
-        _count: {
-          select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
-        },
-      },
-    }),
-  ]);
-
-  const candidates: DistributionCandidate[] = users.map((user) => ({
-    id: user.id,
-    activeLeadCount: user._count.assignedLeads,
-    leadCapacity: user.leadCapacity,
-    serviceRegions: user.serviceRegions,
-    lastLeadAssignedAt: user.lastLeadAssignedAt,
-  }));
-
   let assigned = 0;
-  await db.$transaction(async (transaction) => {
+  await routingTransaction(async (transaction) => {
+    const unassignedLeads = await transaction.lead.findMany({
+      where: { assignedToId: null, status: { notIn: ['WON', 'LOST'] } },
+      select: { id: true, neighborhood: true, routingQueueId: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      take: 25,
+    });
     for (const lead of unassignedLeads) {
-      const assignee = chooseAssignee(candidates, lead.neighborhood);
+      const { assignee, routingQueueId } = await resolveLeadAssignment(
+        transaction,
+        lead.neighborhood,
+        lead.routingQueueId || undefined,
+      );
       if (!assignee) continue;
 
       const updated = await transaction.lead.updateMany({
         where: { id: lead.id, assignedToId: null },
-        data: { assignedToId: assignee.id },
+        data: { assignedToId: assignee.id, routingQueueId },
       });
       if (updated.count === 0) continue;
 
       const assignedAt = new Date();
-      assignee.activeLeadCount += 1;
-      assignee.lastLeadAssignedAt = assignedAt;
       assigned += 1;
 
       await transaction.user.update({

@@ -168,6 +168,7 @@ model User {
   passwordChangedAt   DateTime?
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
+  rouletteEntries     LeadRouletteEntry[]
   assignedLeads       Lead[]               @relation("AssignedLeads")
   contentPlans        ContentPlan[]         @relation("ContentPlanCreator")
   createdAt           DateTime             @default(now())
@@ -395,6 +396,8 @@ model Lead {
   utmCampaign  String?
   consent      Boolean
   status       LeadStatus    @default(NEW)
+  routingQueueId   String?
+  routingQueue     LeadRouletteQueue?    @relation(fields: [routingQueueId], references: [id], onDelete: Restrict)
   assignedToId String?
   assignedTo   User?         @relation("AssignedLeads", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdAt    DateTime      @default(now())
@@ -405,6 +408,7 @@ model Lead {
   @@index([status])
   @@index([assignedToId])
   @@index([createdAt])
+  @@index([routingQueueId, assignedToId, createdAt])
 }
 
 model ExternalLeadReceipt {
@@ -704,4 +708,47 @@ model DiscoveryCandidate {
   @@index([sourceRootId])
   @@index([importedProjectId])
   @@index([lastSeenAt])
+}
+
+model LeadRouletteQueue {
+  id        String              @id @default(cuid())
+  name      String
+  regions   String[]
+  enabled   Boolean             @default(false)
+  shifts    Json
+  sessions  LeadRouletteShift[]
+  leads     Lead[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model LeadRouletteShift {
+  id           String              @id @default(cuid())
+  queueId      String
+  queue        LeadRouletteQueue   @relation(fields: [queueId], references: [id], onDelete: Restrict)
+  name         String
+  startsAt     DateTime
+  endsAt       DateTime
+  drawnAt      DateTime?
+  nextPosition Int                 @default(0)
+  entries      LeadRouletteEntry[]
+
+  @@unique([queueId, startsAt])
+  @@index([endsAt])
+}
+
+model LeadRouletteEntry {
+  id           String            @id @default(cuid())
+  shiftId      String
+  shift        LeadRouletteShift @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  position     Int?
+  checkedInAt  DateTime          @default(now())
+  checkedOutAt DateTime?
+  lastSeenAt   DateTime          @default(now())
+
+  @@unique([shiftId, userId])
+  @@unique([shiftId, position])
+  @@index([userId, checkedOutAt])
 }

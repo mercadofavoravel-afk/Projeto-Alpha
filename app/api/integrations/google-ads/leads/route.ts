@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/lib/db';
-import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { parseGoogleLeadForm } from '@/lib/google-lead-form';
 import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
@@ -48,30 +48,10 @@ export async function POST(request: Request) {
     try {
       const leadId = await db.$transaction(
         async (transaction) => {
-          const users = await transaction.user.findMany({
-            where: {
-              isActive: true,
-              acceptsLeads: true,
-              role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-            },
-            select: {
-              id: true,
-              leadCapacity: true,
-              serviceRegions: true,
-              lastLeadAssignedAt: true,
-              _count: {
-                select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
-              },
-            },
-          });
-          const candidates: DistributionCandidate[] = users.map((user) => ({
-            id: user.id,
-            activeLeadCount: user._count.assignedLeads,
-            leadCapacity: user.leadCapacity,
-            serviceRegions: user.serviceRegions,
-            lastLeadAssignedAt: user.lastLeadAssignedAt,
-          }));
-          const assignee = chooseAssignee(candidates, lead.neighborhood);
+          const { assignee, routingQueueId } = await resolveLeadAssignment(
+            transaction,
+            lead.neighborhood,
+          );
           const receivedAt = new Date();
           const created = await transaction.lead.create({
             data: {
@@ -85,6 +65,7 @@ export async function POST(request: Request) {
               utmCampaign: lead.campaignId,
               consent: false, // The webhook has no distinct privacy-consent field.
               assignedToId: assignee?.id || null,
+              routingQueueId,
             },
           });
           await transaction.externalLeadReceipt.create({

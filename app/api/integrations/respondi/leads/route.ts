@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { parseRespondiLead } from '@/lib/article-lead-integration';
 import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
-import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
 import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
@@ -70,30 +70,10 @@ export async function POST(request: Request) {
     try {
       const leadId = await db.$transaction(
         async (transaction) => {
-          const users = await transaction.user.findMany({
-            where: {
-              isActive: true,
-              acceptsLeads: true,
-              role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-            },
-            select: {
-              id: true,
-              leadCapacity: true,
-              serviceRegions: true,
-              lastLeadAssignedAt: true,
-              _count: {
-                select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
-              },
-            },
-          });
-          const candidates: DistributionCandidate[] = users.map((user) => ({
-            id: user.id,
-            activeLeadCount: user._count.assignedLeads,
-            leadCapacity: user.leadCapacity,
-            serviceRegions: user.serviceRegions,
-            lastLeadAssignedAt: user.lastLeadAssignedAt,
-          }));
-          const assignee = chooseAssignee(candidates, neighborhood);
+          const { assignee, routingQueueId } = await resolveLeadAssignment(
+            transaction,
+            neighborhood,
+          );
           const created = await transaction.lead.create({
             data: {
               name: details.name,
@@ -108,6 +88,7 @@ export async function POST(request: Request) {
               utmCampaign: details.utmCampaign,
               consent: details.consent,
               assignedToId: assignee?.id || null,
+              routingQueueId,
             },
           });
           await transaction.externalLeadReceipt.create({

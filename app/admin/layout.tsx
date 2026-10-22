@@ -7,6 +7,7 @@ import { requireUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/permissions';
 import { alphaPath } from '@/lib/public-path';
 import { LeadAttention } from './LeadAttention';
+import { RoulettePresence } from './RoulettePresence';
 
 export const metadata: Metadata = {
   title: 'Administração',
@@ -57,6 +58,9 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/leads/kanban">Quadro comercial</Link>
 
           <Link href="/admin/agenda">Agenda</Link>
+          {['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role) && (
+            <Link href="/admin/roleta">Roleta de plantão</Link>
+          )}
           {['ADMIN', 'DIRECTOR', 'MANAGER'].includes(role) && (
             <Link href="/admin/equipe">Equipe comercial</Link>
           )}
@@ -127,6 +131,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       <main className="main">
         {hasPermission(user.role, 'crm:read') && <LeadAttention />}
+        {['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(user.role) && <RoulettePresence />}
         {children}
       </main>
     </div>

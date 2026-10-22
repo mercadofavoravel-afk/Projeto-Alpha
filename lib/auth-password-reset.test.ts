@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const transaction = {
+    $executeRaw: vi.fn(),
+    leadRouletteEntry: { updateMany: vi.fn() },
     passwordResetToken: { updateMany: vi.fn(), deleteMany: vi.fn() },
     user: { updateMany: vi.fn() },
     session: { deleteMany: vi.fn() },
@@ -70,6 +72,9 @@ describe('recuperação de senha', () => {
     mocks.transaction.user.updateMany.mockResolvedValue({ count: 1 });
 
     expect(await resetPassword('token', 'nova-senha-segura')).toBe(true);
+    expect(mocks.transaction.leadRouletteEntry.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userId: 'usuario-1', checkedOutAt: null } }),
+    );
     expect(mocks.transaction.user.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'usuario-1', isActive: true } }),
     );

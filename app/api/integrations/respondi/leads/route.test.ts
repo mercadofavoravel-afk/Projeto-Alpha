@@ -17,6 +17,8 @@ vi.mock('@/lib/db', () => ({
     externalLeadReceipt: { findUnique: calls.receiptFind },
     $transaction: (callback: (transaction: unknown) => Promise<unknown>) =>
       callback({
+        $executeRaw: async () => 1,
+        leadRouletteQueue: { findMany: async () => [] },
         user: { findMany: calls.users, update: calls.updateUser },
         lead: { create: calls.leadCreate },
         externalLeadReceipt: { create: calls.receiptCreate },

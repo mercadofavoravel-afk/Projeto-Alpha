@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/lib/db';
-import { chooseAssignee, type DistributionCandidate } from '@/lib/lead-distribution';
+import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { parseMetaLeadDetail, parseMetaNotifications } from '@/lib/meta-lead-form';
 import { deliverLeadNotification, leadNotificationPending } from '@/lib/lead-notification';
 
@@ -86,30 +86,10 @@ async function receiveLead(
     try {
       const leadId = await db.$transaction(
         async (transaction) => {
-          const users = await transaction.user.findMany({
-            where: {
-              isActive: true,
-              acceptsLeads: true,
-              role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
-            },
-            select: {
-              id: true,
-              leadCapacity: true,
-              serviceRegions: true,
-              lastLeadAssignedAt: true,
-              _count: {
-                select: { assignedLeads: { where: { status: { notIn: ['WON', 'LOST'] } } } },
-              },
-            },
-          });
-          const candidates: DistributionCandidate[] = users.map((user) => ({
-            id: user.id,
-            activeLeadCount: user._count.assignedLeads,
-            leadCapacity: user.leadCapacity,
-            serviceRegions: user.serviceRegions,
-            lastLeadAssignedAt: user.lastLeadAssignedAt,
-          }));
-          const assignee = chooseAssignee(candidates, details.neighborhood);
+          const { assignee, routingQueueId } = await resolveLeadAssignment(
+            transaction,
+            details.neighborhood,
+          );
           const now = new Date();
           const created = await transaction.lead.create({
             data: {
@@ -126,6 +106,7 @@ async function receiveLead(
               utmMedium: 'paid',
               consent: false,
               assignedToId: assignee?.id || null,
+              routingQueueId,
             },
           });
           await transaction.externalLeadReceipt.create({

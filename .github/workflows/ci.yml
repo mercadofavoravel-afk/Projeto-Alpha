@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/crm-roleta-plantoes-20261022
 
   pull_request:
     branches:
@@ -48,6 +49,7 @@ jobs:
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: ci-admin-password
       NODE_ENV: test
+      ROULETTE_DATABASE_TESTS: '1'
 
     steps:
       - name: Checkout

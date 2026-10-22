@@ -26,6 +26,8 @@ vi.mock('@/lib/db', () => ({
   db: {
     $transaction: async (
       callback: (transaction: {
+        $executeRaw: () => Promise<number>;
+        leadRouletteQueue: { findMany: () => Promise<never[]> };
         lead: { create: typeof database.createLead };
         leadActivity: { createMany: typeof database.createActivities };
         user: { findMany: typeof database.findUsers; update: typeof database.updateUser };
@@ -33,6 +35,8 @@ vi.mock('@/lib/db', () => ({
       }) => Promise<unknown>,
     ) =>
       callback({
+        $executeRaw: async () => 1,
+        leadRouletteQueue: { findMany: async () => [] },
         lead: {
           create: database.createLead,
         },

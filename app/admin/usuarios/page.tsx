@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { requireRole } from '@/lib/auth';
 import type { UserRole } from '@prisma/client';
 import { createEmployee, updateEmployee } from './actions';
+import { LeadRoutingFields } from './LeadRoutingFields';
 export const dynamic = 'force-dynamic';
 const roleNames = {
   DIRECTOR: 'Diretor',
@@ -53,6 +54,7 @@ export default async function Page({
   const notices: Record<string, string> = {
     created: 'Profissional cadastrado.',
     updated: 'Acesso atualizado.',
+    routing: 'Escolha fila geral ou informe de 1 a 30 bairros válidos para a fila regional.',
     invalid: 'Confira os dados. A senha precisa ter pelo menos 12 caracteres.',
     duplicate: 'Este e-mail já está cadastrado.',
     self: 'Altere sua própria conta por outro administrador.',
@@ -108,10 +110,7 @@ export default async function Page({
           Capacidade de leads ativos
           <input name="leadCapacity" type="number" min={1} max={500} defaultValue={30} required />
         </label>
-        <label className="full">
-          Regiões de atendimento
-          <input name="serviceRegions" placeholder="Barra da Tijuca, Ipanema, Centro" />
-        </label>
+        <LeadRoutingFields />
         <label>
           Gerente responsável pelo corretor
           <select name="managerId" defaultValue="">
@@ -189,12 +188,7 @@ export default async function Page({
                         defaultValue={u.leadCapacity}
                         aria-label={`Capacidade de ${u.name || u.email}`}
                       />
-                      <input
-                        name="serviceRegions"
-                        defaultValue={u.serviceRegions.join(', ')}
-                        placeholder="Regiões separadas por vírgula"
-                        aria-label={`Regiões de ${u.name || u.email}`}
-                      />
+                      <LeadRoutingFields regions={u.serviceRegions} />
                       <select
                         name="managerId"
                         defaultValue={u.managerId || ''}

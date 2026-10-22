@@ -31,6 +31,21 @@ describe('lead distribution', () => {
   it('chooses the least loaded eligible professional', () => {
     expect(chooseAssignee(candidates, 'Ipanema')?.id).toBe('ipanema');
     expect(chooseAssignee(candidates, 'Centro')).toBeNull();
-    expect(chooseAssignee(candidates, null)?.id).toBe('ipanema');
+    expect(chooseAssignee(candidates, null)).toBeNull();
+  });
+
+  it('keeps general queues eligible for every neighborhood and unknown locations', () => {
+    const general = { ...candidates[0], id: 'general', serviceRegions: [] };
+    for (const region of ['Leblon', 'Gávea', 'Centro', null, '   ']) {
+      expect(chooseAssignee([...candidates, general], region)?.id).toBe('general');
+    }
+    expect(candidateCanReceive({ ...general, activeLeadCount: 10 }, 'Centro')).toBe(false);
+  });
+
+  it('matches regional names without case or accent differences', () => {
+    const regional = { ...candidates[0], serviceRegions: ['Gávea', 'Jardim Botânico'] };
+    expect(candidateCanReceive(regional, ' gavea ')).toBe(true);
+    expect(candidateCanReceive(regional, 'JARDIM BOTANICO')).toBe(true);
+    expect(candidateCanReceive(regional, 'Ipanema')).toBe(false);
   });
 });

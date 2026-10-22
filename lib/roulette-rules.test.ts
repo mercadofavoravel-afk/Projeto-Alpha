@@ -70,3 +70,25 @@ describe('plantões imobiliários', () => {
     expect(source).toEqual(['A', 'B', 'C', 'D']);
   });
 });
+
+describe('quantidade configurável de sorteios', () => {
+  it('aceita três ou mais plantões e mantém as fronteiras corretas', () => {
+    const shifts = [
+      { name: 'Manhã', start: 540, end: 720 },
+      { name: 'Tarde', start: 720, end: 1080 },
+      { name: 'Noite', start: 1080, end: 540 },
+    ];
+    expect(shiftsSchema.safeParse(shifts).success).toBe(true);
+    expect(currentShift(at('12:00'), shifts)?.name).toBe('Tarde');
+    expect(currentShift(at('18:00'), shifts)?.name).toBe('Noite');
+    expect(
+      shiftsSchema.safeParse(
+        Array.from({ length: 24 }, (_, i) => ({
+          name: `Turno ${i}`,
+          start: i * 60,
+          end: ((i + 1) * 60) % 1440,
+        })),
+      ).success,
+    ).toBe(true);
+  });
+});

@@ -4,6 +4,7 @@ import { requireApiUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { checkInRoulette, processRouletteQueues, routingTransaction } from '@/lib/lead-routing';
 import {
+  MAX_SHIFTS,
   currentShift,
   normalizeRegion,
   PRESENCE_TTL_MS,
@@ -35,7 +36,7 @@ export async function GET() {
     include: {
       sessions: {
         orderBy: { startsAt: 'desc' },
-        take: 3,
+        take: MAX_SHIFTS * 2,
         include: {
           entries: {
             orderBy: { position: 'asc' },

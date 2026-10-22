@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   audit: vi.fn(),
 }));
+vi.mock('server-only', () => ({}));
 vi.mock('@/lib/auth', () => ({ requireRole: mocks.role }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('next/navigation', () => ({

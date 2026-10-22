@@ -135,3 +135,48 @@ export async function sendCrmRiskDigestEmail({
   });
   if (!response.ok) throw new Error(`Falha no resumo do CRM (${response.status})`);
 }
+
+export async function sendEmployeeAccessEmail({
+  to,
+  name,
+  initialPassword,
+  loginUrl,
+  idempotencyKey,
+}: {
+  to: string;
+  name: string;
+  initialPassword: string;
+  loginUrl: string;
+  idempotencyKey: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  if (!apiKey || !from) throw new Error('Configuração de e-mail transacional ausente');
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Idempotency-Key': idempotencyKey,
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject: 'Seu acesso à Imóveis de Alto Padrão — Projeto Alpha',
+      text: [
+        `Olá, ${name}.`,
+        'A gestão cadastrou seu acesso à equipe da Imóveis de Alto Padrão.',
+        '',
+        `Acesse: ${loginUrl}`,
+        `E-mail de acesso: ${to}`,
+        `Senha inicial individual: ${initialPassword}`,
+        '',
+        'Você já pode entrar na plataforma. Para escolher sua própria senha, abra Minha conta > Trocar senha.',
+        'Para receber leads, a gestão precisa habilitar seu recebimento e você deve fazer check-in no plantão da roleta.',
+        'Não compartilhe sua senha. Se precisar de outra, use Esqueci minha senha na tela de acesso.',
+      ].join('\n'),
+    }),
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!response.ok) throw new Error(`Falha no envio do acesso (${response.status})`);
+}

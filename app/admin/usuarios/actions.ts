@@ -1,12 +1,17 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'node:crypto';
 import { Prisma, UserRole } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
-import { requireRole } from '@/lib/auth';
+import { createPasswordReset, requireRole, revokePasswordReset } from '@/lib/auth';
+import { sendEmployeeAccessEmail, sendPasswordResetEmail } from '@/lib/email';
+import { createPasswordResetUrl } from '@/lib/password-reset-url';
+import { alphaPath } from '@/lib/public-path';
+import { getSiteUrl } from '@/lib/seo/canonical';
 import { db } from '@/lib/db';
 import { canManageEmployeeRole, employeeRoles } from '@/lib/team-roles';
 import { leadRoutingSettingsSchema } from '@/lib/lead-routing-settings';
@@ -20,7 +25,7 @@ const createSchema = z.object({
     .max(254)
     .transform((email) => email.toLowerCase()),
   role: z.enum(employeeRoles),
-  password: z.string().min(12).max(128),
+  password: z.union([z.string().min(12).max(128), z.literal('')]).optional(),
   acceptsLeads: z.boolean(),
   leadCapacity: z.number().int().min(1).max(500),
   serviceRegions: z.array(z.string().trim().min(2).max(80)).max(30),
@@ -61,7 +66,7 @@ export async function createEmployee(formData: FormData) {
     name: formData.get('name'),
     email: formData.get('email'),
     role: formData.get('role'),
-    password: formData.get('password'),
+    password: String(formData.get('password') || ''),
     acceptsLeads: formData.get('acceptsLeads') === 'true',
     leadCapacity: Number(formData.get('leadCapacity') || 30),
     serviceRegions: routing.data,
@@ -73,10 +78,13 @@ export async function createEmployee(formData: FormData) {
     parsed.data;
   if (!canManageEmployeeRole(actor.role, role)) done('invalid');
   if (role === 'CONSULTANT' && !(await validManager(managerId))) done('invalid');
-  const passwordHash = await bcrypt.hash(password, 12);
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) done('email-unavailable');
+  const initialPassword = password || randomBytes(24).toString('base64url');
+  const passwordHash = await bcrypt.hash(initialPassword, 12);
+  let createdId: string;
 
   try {
-    await db.$transaction(async (transaction) => {
+    createdId = await db.$transaction(async (transaction) => {
       const user = await transaction.user.create({
         data: {
           name,
@@ -98,13 +106,38 @@ export async function createEmployee(formData: FormData) {
           metadata: { role },
         },
       });
+      return user.id;
     });
   } catch (cause) {
     if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === 'P2002')
       done('duplicate');
     throw cause;
   }
-  done('created');
+  let emailAccepted = false;
+  try {
+    await sendEmployeeAccessEmail({
+      to: email,
+      name,
+      initialPassword,
+      loginUrl: new URL(alphaPath('/login'), getSiteUrl()).toString(),
+      idempotencyKey: `employee-access/${createdId}`,
+    });
+    emailAccepted = true;
+  } catch {
+    /* Account persists; the management screen offers a recovery link. */
+  }
+  await db.auditLog
+    .create({
+      data: {
+        action: emailAccepted ? 'user.access_email.accepted' : 'user.access_email.failed',
+        entityType: 'User',
+        entityId: createdId,
+        userId: actor.id,
+        metadata: { type: 'initial_access' },
+      },
+    })
+    .catch(() => undefined);
+  done(emailAccepted ? 'created' : 'created-email-failed');
 }
 
 export async function updateEmployee(formData: FormData) {
@@ -175,4 +208,38 @@ export async function updateEmployee(formData: FormData) {
     });
   });
   done('updated');
+}
+
+export async function sendEmployeeAccessLink(formData: FormData) {
+  const actor = await requireRole(['ADMIN', 'DIRECTOR']);
+  const id = String(formData.get('userId') || '');
+  if (!z.string().cuid().safeParse(id).success) done('invalid');
+  const target = await db.user.findUnique({
+    where: { id },
+    select: { role: true, email: true, isActive: true },
+  });
+  if (!target || !target.isActive || !canManageEmployeeRole(actor.role, target.role))
+    done('invalid');
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) done('email-unavailable');
+  const token = await createPasswordReset(target.email);
+  if (!token) done('email-recent');
+  let emailAccepted = false;
+  try {
+    await sendPasswordResetEmail({ to: target.email, resetUrl: createPasswordResetUrl(token) });
+    emailAccepted = true;
+  } catch {
+    await revokePasswordReset(token);
+  }
+  await db.auditLog
+    .create({
+      data: {
+        action: emailAccepted ? 'user.access_link.accepted' : 'user.access_link.failed',
+        entityType: 'User',
+        entityId: id,
+        userId: actor.id,
+        metadata: { type: 'access_recovery' },
+      },
+    })
+    .catch(() => undefined);
+  done(emailAccepted ? 'access-link-sent' : 'access-link-failed');
 }

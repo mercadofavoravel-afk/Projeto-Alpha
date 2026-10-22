@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import React from 'react';
 
 import { requirePermission } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { leadNotificationHealth } from '@/lib/lead-notification';
+import { SITE_CONFIG } from '@/lib/site-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +14,7 @@ function configured(value: string | undefined) {
   return Boolean(value?.trim());
 }
 
-function dateLabel(date: Date | undefined, empty = 'Nenhum recebimento registrado') {
+function dateLabel(date: Date | null | undefined, empty = 'Nenhum recebimento registrado') {
   return date
     ? new Intl.DateTimeFormat('pt-BR', {
         dateStyle: 'short',
@@ -25,35 +28,70 @@ export default async function IntegrationsPage() {
   await requirePermission('users:manage');
 
   const since = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
-  const [googleCount, metaCount, googleLatest, metaLatest, digestCount, digestLatest] =
-    await Promise.all([
-      db.externalLeadReceipt.count({
-        where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } },
-      }),
-      db.externalLeadReceipt.count({
-        where: { provider: 'META_LEAD_ADS', createdAt: { gte: since } },
-      }),
-      db.externalLeadReceipt.findFirst({
-        where: { provider: 'GOOGLE_ADS' },
-        orderBy: { createdAt: 'desc' },
-        select: { createdAt: true },
-      }),
-      db.externalLeadReceipt.findFirst({
-        where: { provider: 'META_LEAD_ADS' },
-        orderBy: { createdAt: 'desc' },
-        select: { createdAt: true },
-      }),
-      db.auditLog.count({
-        where: { action: 'crm.daily_digest.sent', createdAt: { gte: since } },
-      }),
-      db.auditLog.findFirst({
-        where: { action: 'crm.daily_digest.sent' },
-        orderBy: { createdAt: 'desc' },
-        select: { createdAt: true },
-      }),
-    ]);
+  const [
+    googleCount,
+    metaCount,
+    googleLatest,
+    metaLatest,
+    digestCount,
+    digestLatest,
+    respondiCount,
+    respondiLatest,
+    mappedForms,
+    publishedArticles,
+    notifications,
+  ] = await Promise.all([
+    db.externalLeadReceipt.count({
+      where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } },
+    }),
+    db.externalLeadReceipt.count({
+      where: { provider: 'META_LEAD_ADS', createdAt: { gte: since } },
+    }),
+    db.externalLeadReceipt.findFirst({
+      where: { provider: 'GOOGLE_ADS' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+    db.externalLeadReceipt.findFirst({
+      where: { provider: 'META_LEAD_ADS' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+    db.auditLog.count({
+      where: { action: 'crm.daily_digest.sent', createdAt: { gte: since } },
+    }),
+    db.auditLog.findFirst({
+      where: { action: 'crm.daily_digest.sent' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+    db.externalLeadReceipt.count({
+      where: { provider: 'RESPONDI', createdAt: { gte: since } },
+    }),
+    db.externalLeadReceipt.findFirst({
+      where: { provider: 'RESPONDI' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+    db.articleLeadIntegration.count({
+      where: { respondiFormId: { not: null }, article: { publishStatus: 'PUBLISHED' } },
+    }),
+    db.article.count({ where: { publishStatus: 'PUBLISHED' } }),
+    leadNotificationHealth(since),
+  ]);
 
   const channels = [
+    {
+      name: 'Respondi · artigos',
+      configured: Boolean(
+        process.env.RESPONDI_WEBHOOK_TOKEN &&
+          process.env.RESPONDI_WEBHOOK_TOKEN.length >= 32 &&
+          !process.env.RESPONDI_WEBHOOK_TOKEN.startsWith('replace-'),
+      ),
+      count: respondiCount,
+      latest: respondiLatest?.createdAt,
+      next: `${mappedForms} de ${publishedArticles} artigos publicados com formulário associado. Conferir o webhook no Respondi e um recebimento autorizado; o formulário próprio do Alpha funciona separadamente.`,
+    },
     {
       name: 'Google Ads · formulário nativo',
       configured: configured(process.env.GOOGLE_ADS_LEAD_WEBHOOK_KEY),
@@ -84,6 +122,32 @@ export default async function IntegrationsPage() {
         Configuração é verificada apenas pela presença das variáveis no servidor. Isso não comprova
         acesso à conta externa nem entrega de leads. O painel nunca exibe chaves ou tokens.
       </p>
+      <div className="panel">
+        <h2>Avisos de novos leads</h2>
+        <p>
+          Destino da matriz: {SITE_CONFIG.email}.{' '}
+          {configured(process.env.RESEND_API_KEY) && configured(process.env.EMAIL_FROM)
+            ? 'Configuração de e-mail presente.'
+            : 'Configuração de e-mail incompleta.'}
+        </p>
+        <p role={notifications.pending > 0 ? 'status' : undefined}>
+          <strong>{notifications.pending} avisos aguardando envio.</strong>{' '}
+          {notifications.pending > 0
+            ? `Pendência mais antiga: ${dateLabel(notifications.oldestPendingAt)}.`
+            : 'Não há avisos pendentes na fila registrada.'}
+        </p>
+        <p>
+          {notifications.sent} envios aceitos pela API de e-mail nos últimos {periodDays} dias.
+          Último registro: {dateLabel(notifications.latestSentAt, 'Nenhum envio registrado')}. O
+          cadastro permanece no CRM se o aviso falhar. A rotina diária tenta recuperar os avisos
+          pendentes; aceitação pela API não comprova entrega na caixa de entrada.
+        </p>
+        <p>
+          Confira os cadastros em <Link href="/admin/leads">Leads</Link> e os contatos sem
+          responsável na fila da gestão. Ausência de avisos pendentes não comprova que todos os
+          formulários externos estejam conectados.
+        </p>
+      </div>
       <div className="panel">
         <div className="table-wrap">
           <table>

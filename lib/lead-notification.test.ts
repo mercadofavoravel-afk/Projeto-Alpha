@@ -43,7 +43,7 @@ describe('notificação de lead da matriz', () => {
     mocks.createAudit.mockResolvedValue({ id: 'sent' });
     mocks.transaction.mockImplementation((run: (tx: unknown) => Promise<unknown>) =>
       run({
-        $queryRaw: mocks.lock,
+        $executeRaw: mocks.lock,
         auditLog: { findFirst: mocks.findAudit, create: mocks.createAudit },
         lead: { findUnique: mocks.findLead },
       }),

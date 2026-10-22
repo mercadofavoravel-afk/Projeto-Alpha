@@ -7,6 +7,41 @@ import { SITE_CONFIG } from '@/lib/site-config';
 const pendingAction = 'lead.email_notification.pending';
 const sentAction = 'lead.email_notification.sent';
 
+/** Aggregate only: no client contact details or notification credentials leave this helper. */
+export async function leadNotificationHealth(since: Date) {
+  const [pending, sent, latest] = await Promise.all([
+    db.$queryRaw<Array<{ count: number; oldestAt: Date | null }>>`
+      SELECT COUNT(*)::int AS count, MIN(p."createdAt") AS "oldestAt"
+      FROM (
+        SELECT p."entityId", MIN(p."createdAt") AS "createdAt"
+        FROM "AuditLog" p
+        JOIN "Lead" l ON l.id = p."entityId"
+        WHERE p.action = ${pendingAction} AND p."entityType" = 'Lead'
+          AND NOT EXISTS (
+            SELECT 1 FROM "AuditLog" s
+            WHERE s.action = ${sentAction} AND s."entityType" = 'Lead'
+              AND s."entityId" = p."entityId"
+          )
+        GROUP BY p."entityId"
+      ) p
+    `,
+    db.auditLog.count({
+      where: { action: sentAction, entityType: 'Lead', createdAt: { gte: since } },
+    }),
+    db.auditLog.findFirst({
+      where: { action: sentAction, entityType: 'Lead' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+  ]);
+  return {
+    pending: pending[0]?.count ?? 0,
+    oldestPendingAt: pending[0]?.oldestAt ?? null,
+    sent,
+    latestSentAt: latest?.createdAt,
+  };
+}
+
 /** The matrix inbox is fixed here; licensed organizations need their own scoped delivery. */
 export function leadNotificationPending(leadId: string) {
   return {
@@ -24,7 +59,8 @@ export async function deliverLeadNotification(leadId: string): Promise<boolean> 
       async (transaction) => {
         // The same lead can be processed by its request and the daily recovery job.
         const lock = `lead-email:${leadId}`;
-        await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
+        // PostgreSQL returns void here; execute without decoding a result row in Prisma.
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
         const pending = await transaction.auditLog.findFirst({
           where: { action: pendingAction, entityType: 'Lead', entityId: leadId },
           select: { id: true },

@@ -39,14 +39,14 @@ describe('resumo diário do CRM', () => {
       { id: 'consultant-1', email: 'team@example.com', role: 'CONSULTANT' },
     ]);
     mocks.count.mockResolvedValue(1);
-    mocks.lock.mockResolvedValue([]);
+    mocks.lock.mockResolvedValue(1);
     mocks.findAudit.mockResolvedValue(null);
     mocks.createAudit.mockResolvedValue({ id: 'audit-1' });
     mocks.send.mockResolvedValue(undefined);
     notify.retry.mockResolvedValue({ attempted: 0, failed: 0 });
     mocks.transaction.mockImplementation((run: (tx: unknown) => Promise<unknown>) =>
       run({
-        $queryRaw: mocks.lock,
+        $executeRaw: mocks.lock,
         auditLog: { findFirst: mocks.findAudit, create: mocks.createAudit },
       }),
     );
@@ -106,5 +106,45 @@ describe('resumo diário do CRM', () => {
     });
     expect(mocks.transaction).not.toHaveBeenCalled();
     expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it('usa trava sem desserializar void e mantém o dia comercial de São Paulo', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-23T01:00:00Z'));
+    try {
+      expect((await GET(request())).status).toBe(200);
+      expect(mocks.lock).toHaveBeenCalledOnce();
+      expect(mocks.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          day: '2026-10-22',
+          idempotencyKey: 'crm-digest:2026-10-22:consultant-1',
+        }),
+      );
+      expect(mocks.findAudit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: {
+              gte: new Date('2026-10-22T03:00:00Z'),
+              lt: new Date('2026-10-23T03:00:00Z'),
+            },
+          }),
+        }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('preserva a possibilidade de repetir o resumo se o provedor falhar', async () => {
+    mocks.send.mockRejectedValue(new Error('provider unavailable'));
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const response = await GET(request());
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual(expect.objectContaining({ sent: 0, failed: 1 }));
+      expect(mocks.createAudit).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
   });
 });

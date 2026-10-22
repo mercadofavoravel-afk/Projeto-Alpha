@@ -70,7 +70,8 @@ export async function GET(request: Request) {
         async (transaction) => {
           // Serializes duplicate invocations for this person and calendar day.
           const lock = `crm-digest:${day}:${user.id}`;
-          await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
+          // PostgreSQL returns void here; do not ask Prisma to deserialize it.
+          await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lock}))`;
           const existing = await transaction.auditLog.findFirst({
             where: {
               action: 'crm.daily_digest.sent',

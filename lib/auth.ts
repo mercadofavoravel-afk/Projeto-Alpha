@@ -119,10 +119,18 @@ export async function logout() {
   const token = jar.get(cookieName)?.value;
 
   if (token) {
-    await db.session.deleteMany({
-      where: {
-        tokenHash: hash(token),
-      },
+    await db.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('alpha:lead-routing'))`;
+      const session = await tx.session.findUnique({
+        where: { tokenHash: hash(token) },
+        select: { userId: true },
+      });
+      if (session)
+        await tx.leadRouletteEntry.updateMany({
+          where: { userId: session.userId, checkedOutAt: null },
+          data: { checkedOutAt: new Date() },
+        });
+      await tx.session.deleteMany({ where: { tokenHash: hash(token) } });
     });
   }
 
@@ -304,6 +312,7 @@ export async function resetPassword(token: string, password: string) {
 
   try {
     await db.$transaction(async (transaction) => {
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('alpha:lead-routing'))`;
       // A conditional claim makes concurrent submissions of one token mutually exclusive.
       const claimed = await transaction.passwordResetToken.updateMany({
         where: { id: record.id, usedAt: null, expiresAt: { gt: new Date() } },
@@ -317,6 +326,10 @@ export async function resetPassword(token: string, password: string) {
       });
       if (updated.count !== 1) throw new InvalidResetToken();
 
+      await transaction.leadRouletteEntry.updateMany({
+        where: { userId: record.userId, checkedOutAt: null },
+        data: { checkedOutAt: new Date() },
+      });
       await transaction.session.deleteMany({ where: { userId: record.userId } });
       await transaction.passwordResetToken.deleteMany({
         where: { userId: record.userId, id: { not: record.id } },

@@ -232,6 +232,11 @@ export default async function IntegrationsPage() {
             </tbody>
           </table>
         </div>
+        <p>
+          <Link href="/admin/integracoes/respondi">
+            Configurar formulários Respondi das páginas comerciais
+          </Link>
+        </p>
       </div>
       <div className="panel">
         <h2>Avisos internos de atendimento</h2>

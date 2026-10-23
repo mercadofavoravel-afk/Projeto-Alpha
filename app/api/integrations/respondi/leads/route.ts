@@ -4,7 +4,8 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/lib/db';
-import { parseRespondiLead } from '@/lib/article-lead-integration';
+import { parseRespondiLead, respondiFormId } from '@/lib/article-lead-integration';
+import { respondiFieldsSchema } from '@/lib/respondi-landing';
 import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
 import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
@@ -44,108 +45,46 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'JSON inválido.' }, { status: 400 });
   }
-  const details = parseRespondiLead(payload);
-  if (!details)
+  const formId = respondiFormId(payload);
+  if (!formId)
     return NextResponse.json({ error: 'Resposta incompleta ou inválida.' }, { status: 422 });
 
   const catalog = await db.articleLeadIntegration.findUnique({
-    where: { respondiFormId: details.formId },
+    where: { respondiFormId: formId },
     include: {
       article: { select: { slug: true, title: true, category: true, publishStatus: true } },
     },
   });
-  if (!catalog || catalog.article.publishStatus !== 'PUBLISHED') {
-    return NextResponse.json(
-      { error: 'Formulário não associado a artigo publicado.' },
-      { status: 422 },
-    );
+  // Article forms retain their existing publication gate. A landing mapping never
+  // overrides an article's form ID, including when that article is unpublished.
+  const landing = !catalog
+    ? await db.respondiLandingIntegration.findUnique({ where: { formId } })
+    : null;
+  const fields = landing ? respondiFieldsSchema.safeParse(landing.fields) : null;
+  if (
+    (catalog && catalog.article.publishStatus !== 'PUBLISHED') ||
+    (!catalog && (!landing?.enabled || !fields?.success))
+  ) {
+    return NextResponse.json({ error: 'Formulário sem associação ativa no CRM.' }, { status: 422 });
   }
+  const details = parseRespondiLead(payload, fields?.success ? fields.data : undefined);
+  if (!details)
+    return NextResponse.json({ error: 'Resposta incompleta ou inválida.' }, { status: 422 });
   const externalId = `${details.formId}:${details.respondentId}`;
   const key = { provider_externalId: { provider, externalId } };
   if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
-  const neighborhood = resolveArticleNeighborhood(catalog.article.category, catalog.article.title);
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      const leadId = await db.$transaction(
-        async (transaction) => {
-          const { assignee, routingQueueId } = await resolveLeadAssignment(
-            transaction,
-            neighborhood,
-          );
-          const created = await transaction.lead.create({
-            data: {
-              name: details.name,
-              phone: details.phone,
-              email: details.email,
-              neighborhood,
-              articleSlug: catalog.article.slug,
-              source: createArticleLeadSource(catalog.article.title, neighborhood).slice(0, 120),
-              message: details.message,
-              utmSource: details.utmSource,
-              utmMedium: details.utmMedium,
-              utmCampaign: details.utmCampaign,
-              consent: details.consent,
-              assignedToId: assignee?.id || null,
-              routingQueueId,
-            },
-          });
-          await transaction.externalLeadReceipt.create({
-            data: { provider, externalId, leadId: created.id },
-          });
-          if (created.consent) {
-            await transaction.leadActivity.createMany({
-              data: createOrganicFollowUpActivities(created, created.createdAt),
-            });
-          } else {
-            await transaction.leadActivity.create({
-              data: {
-                leadId: created.id,
-                type: 'TASK',
-                dueAt: created.createdAt,
-                note: 'Verificar autorização de contato antes de iniciar mensagens automáticas.',
-              },
-            });
-          }
-          await transaction.auditLog.create({
-            data: {
-              action: 'lead.respondi_received',
-              entityType: 'Lead',
-              entityId: created.id,
-              metadata: {
-                formId: details.formId,
-                articleSlug: catalog.article.slug,
-                assignedToId: assignee?.id || null,
-              },
-            },
-          });
-          await transaction.auditLog.create({ data: leadNotificationPending(created.id) });
-          if (assignee)
-            await transaction.user.update({
-              where: { id: assignee.id },
-              data: { lastLeadAssignedAt: created.createdAt },
-            });
-          return created.id;
-        },
-        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-      );
-      await deliverLeadNotification(leadId);
-      return NextResponse.json({ ok: true });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) {
-          return NextResponse.json({ ok: true, duplicate: true });
-        }
-      }
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2034' &&
-        attempt === 0
-      )
-        continue;
-      return NextResponse.json({ error: 'Falha temporária.' }, { status: 503 });
-    }
-  }
-  return NextResponse.json({ error: 'Falha temporária.' }, { status: 503 });
-}
+  const neighborhood = catalog
+    ? resolveArticleNeighborhood(catalog.article.category, catalog.article.title)
+    : landing!.neighborhood;
+  const articleSlug = catalog?.article.slug ?? null;
+  const source = catalog
+    ? createArticleLeadSource(catalog.article.title, neighborhood).slice(0, 120)
+    : `Respondi | página: ${l…2317 tokens truncated…00ednio. Sem esse pixel, o link pode abrir WhatsApp sem registrar origem. O webhook `lead_create` do Tintim pode ser configurado para CRM, mas requer amostra real do formato, autenticação e regra de reconciliação por telefone para impedir duplicatas entre formulário e conversa. Esse ingresso **ainda não está implementado**: conversa iniciada no Tintim não aparece automaticamente no CRM Alpha.
+
+## Validação para ativação
+
+Aplicar migração, publicar o código, associar URLs verificadas e testar leitura do formulário público, envio por webhook e presença de `articleSlug`, bairro, UTMs e consentimento na ficha do CRM. Conferir também o pixel e a origem de uma conversa no Tintim. A validação de envio real deve ser coordenada separadamente; não confundir cliques no botão, abertura de WhatsApp e lead recebido.
+
+Referências do fornecedor consultadas em 13/10/2026: [payload Respondi](https://help.respondi.app/article/48-webhooks-payload-de-exemplo), [criação de formulário](https://help.respondi.app/article/42-como-criar-um-formulario), [URL pública Respondi](https://help.respondi.app/article/93-como-atualizar-o-endereco-do-meu-formulario-para-o-novo-padrao), [webhooks Tintim](https://tintim.app/base-de-conhecimento/como-funcionam-os-webhooks-do-tintim/) e [pixel e link rastreável](https://tintim.app/base-de-conhecimento/como-instalar-o-link-rastreavel-do-tintim-no-botao-flutuante-de-whatsapp/).

@@ -16,7 +16,30 @@ Definir no ambiente de produção `RESPONDI_WEBHOOK_TOKEN` como segredo aleatór
 
 O provedor não documenta assinatura criptográfica do corpo na referência consultada; proteger a URL, controlar acesso ao painel Respondi e rotacionar o token se exposto. As perguntas têm de coincidir exatamente; uma mudança de rótulo exige ajuste do mapeamento antes de ativar.
 
-## Tintim
+## Formulários das páginas comerciais — entrega de 23/10
+
+O CRM também permite mapear formulários Respondi independentes dos artigos em
+`/alpha/admin/integracoes/respondi`. A gestão informa ID real, nome, página no
+domínio oficial, bairro e os títulos exatos das perguntas. Nome e telefone são
+obrigatórios; e-mail, interesse e pergunta de autorização podem ficar vazios.
+Sem resposta explícita `Sim` na pergunta configurada, a autorização é falsa.
+A mesma pergunta não pode alimentar campos distintos. Associações novas ficam
+pausadas até ativação explícita pela gestão.
+
+Um formulário vinculado a artigo não pode ser substituído por essa associação.
+Artigos não publicados continuam recusados. O receptor conserva a mesma chave
+privada, limite de corpo, deduplicação por formulário/respondente e transação
+de gravação, atribuição e aviso. Páginas comerciais usam origem `Respondi |
+página: ...`, mantêm UTMs e não inventam `articleSlug` nem origem orgânica.
+A URL da página consta na auditoria de recebimento.
+
+Pré-requisito: aplicar a migração aditiva `20261023150000_respondi_landing` antes
+de publicar o código. Ela cria apenas o catálogo de associações; não insere
+formulários, não ativa filas e não altera leads existentes. Conferir os campos
+e o webhook na conta Respondi e acompanhar um recebimento autorizado continuam
+obrigatórios. Esta entrega de código não comprova a integração em produção.
+
+## Tintim (entrada ainda pendente)
 
 Criar no Tintim um **link para site** nomeado pelo slug de cada artigo e associar o mesmo número da operação matriz. Colar o link íntegro no catálogo Alpha; não reescrever sua query string. Para preservar UTMs e parâmetros de visita, instalar também o pixel específico fornecido pelo painel Tintim nas páginas do domínio. Sem esse pixel, o link pode abrir WhatsApp sem registrar origem. O webhook `lead_create` do Tintim pode ser configurado para CRM, mas requer amostra real do formato, autenticação e regra de reconciliação por telefone para impedir duplicatas entre formulário e conversa. Esse ingresso **ainda não está implementado**: conversa iniciada no Tintim não aparece automaticamente no CRM Alpha.
 

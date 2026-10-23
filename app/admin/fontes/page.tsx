@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { alphaPath } from '@/lib/public-path';
 
 import { useState } from 'react';
@@ -387,6 +389,9 @@ export default function SourcesPage() {
 
   return (
     <>
+      <p>
+        <Link href="/admin/acervo">Abrir acervo de books e links por incorporadora</Link>
+      </p>
       <div className="eyebrow">Inteligência de mercado</div>
 
       <h1>Fontes</h1>

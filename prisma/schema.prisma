@@ -332,6 +332,32 @@ model Media {
   @@index([projectId])
 }
 
+// Private commercial archive. A registered URL or Library reference does not
+// imply that the underlying file has been copied to Alpha storage.
+model ArchiveItem {
+  id               String   @id @default(cuid())
+  sourceKey        String   @unique
+  title            String
+  kind             String   @default("LINK")
+  organization     String?
+  organizationKind String   @default("UNCONFIRMED")
+  projectName      String?
+  url              String?
+  fileName         String?
+  mimeType         String?
+  sizeBytes        Int?
+  status           String   @default("LINK_REGISTERED")
+  origin           String
+  notes            String?
+  references       Json?
+  extractedText    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([organization, kind])
+  @@index([status])
+}
+
 model BookIngestion {
   id         String   @id @default(cuid())
   fileName   String

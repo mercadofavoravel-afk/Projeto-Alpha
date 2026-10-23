@@ -81,10 +81,88 @@ export async function POST(request: Request) {
   const articleSlug = catalog?.article.slug ?? null;
   const source = catalog
     ? createArticleLeadSource(catalog.article.title, neighborhood).slice(0, 120)
-    : `Respondi | página: ${l…2317 tokens truncated…00ednio. Sem esse pixel, o link pode abrir WhatsApp sem registrar origem. O webhook `lead_create` do Tintim pode ser configurado para CRM, mas requer amostra real do formato, autenticação e regra de reconciliação por telefone para impedir duplicatas entre formulário e conversa. Esse ingresso **ainda não está implementado**: conversa iniciada no Tintim não aparece automaticamente no CRM Alpha.
-
-## Validação para ativação
-
-Aplicar migração, publicar o código, associar URLs verificadas e testar leitura do formulário público, envio por webhook e presença de `articleSlug`, bairro, UTMs e consentimento na ficha do CRM. Conferir também o pixel e a origem de uma conversa no Tintim. A validação de envio real deve ser coordenada separadamente; não confundir cliques no botão, abertura de WhatsApp e lead recebido.
-
-Referências do fornecedor consultadas em 13/10/2026: [payload Respondi](https://help.respondi.app/article/48-webhooks-payload-de-exemplo), [criação de formulário](https://help.respondi.app/article/42-como-criar-um-formulario), [URL pública Respondi](https://help.respondi.app/article/93-como-atualizar-o-endereco-do-meu-formulario-para-o-novo-padrao), [webhooks Tintim](https://tintim.app/base-de-conhecimento/como-funcionam-os-webhooks-do-tintim/) e [pixel e link rastreável](https://tintim.app/base-de-conhecimento/como-instalar-o-link-rastreavel-do-tintim-no-botao-flutuante-de-whatsapp/).
+    : `Respondi | página: ${landing!.name}`.slice(0, 120);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const leadId = await db.$transaction(
+        async (transaction) => {
+          const { assignee, routingQueueId } = await resolveLeadAssignment(
+            transaction,
+            neighborhood,
+          );
+          const created = await transaction.lead.create({
+            data: {
+              name: details.name,
+              phone: details.phone,
+              email: details.email,
+              neighborhood,
+              articleSlug,
+              source,
+              message: details.message,
+              utmSource: details.utmSource,
+              utmMedium: details.utmMedium,
+              utmCampaign: details.utmCampaign,
+              consent: details.consent,
+              assignedToId: assignee?.id || null,
+              routingQueueId,
+            },
+          });
+          await transaction.externalLeadReceipt.create({
+            data: { provider, externalId, leadId: created.id },
+          });
+          if (created.consent) {
+            await transaction.leadActivity.createMany({
+              data: createOrganicFollowUpActivities(created, created.createdAt),
+            });
+          } else {
+            await transaction.leadActivity.create({
+              data: {
+                leadId: created.id,
+                type: 'TASK',
+                dueAt: created.createdAt,
+                note: 'Verificar autorização de contato antes de iniciar mensagens automáticas.',
+              },
+            });
+          }
+          await transaction.auditLog.create({
+            data: {
+              action: 'lead.respondi_received',
+              entityType: 'Lead',
+              entityId: created.id,
+              metadata: {
+                formId: details.formId,
+                articleSlug,
+                pageUrl: landing?.pageUrl ?? null,
+                assignedToId: assignee?.id || null,
+              },
+            },
+          });
+          await transaction.auditLog.create({ data: leadNotificationPending(created.id) });
+          if (assignee)
+            await transaction.user.update({
+              where: { id: assignee.id },
+              data: { lastLeadAssignedAt: created.createdAt },
+            });
+          return created.id;
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+      await deliverLeadNotification(leadId);
+      return NextResponse.json({ ok: true });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) {
+          return NextResponse.json({ ok: true, duplicate: true });
+        }
+      }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2034' &&
+        attempt === 0
+      )
+        continue;
+      return NextResponse.json({ error: 'Falha temporária.' }, { status: 503 });
+    }
+  }
+  return NextResponse.json({ error: 'Falha temporária.' }, { status: 503 });
+}

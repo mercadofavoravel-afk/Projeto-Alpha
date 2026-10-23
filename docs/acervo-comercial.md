@@ -1,11 +1,11 @@
 # Acervo comercial
 
-O painel interno `/admin/acervo` reúne links, pastas, books, plantas, tabelas e fichas técnicas, agrupados por incorporadora ou origem confirmada. O acesso exige `media:write`, inclusive nas ações de cadastro e organização. O menu, Books e Fontes apontam para o acervo.
+O painel interno `/admin/acervo` reúne links de incorporadoras, imobiliárias e pastas comerciais, agrupados pela origem confirmada, com busca por empreendimento. O usuário abre a origem para consultar e baixar os materiais no computador. O acesso exige `media:write`, inclusive nas ações de cadastro e organização.
 
-`ArchiveItem` mantém a origem e separa o cadastro de um link da disponibilidade de um arquivo. `LINK_REGISTERED` significa somente que o endereço foi guardado; não certifica acesso ao destino. `FILE_PENDING` identifica um documento localizado cujo original ainda não foi copiado para o Alpha. O painel pode mostrar um trecho do texto recuperado, sem oferecer um download inexistente.
+O fluxo usa links. Não copia books ou outros arquivos para a plataforma. A consulta do painel exige URL cadastrada e não carrega textos dos documentos. Referências documentais previamente catalogadas sem URL permanecem no banco privado para procedência, fora da listagem de acesso.
 
-URLs são deduplicadas removendo parâmetros de acompanhamento e normalizando variantes de pastas Drive, preservando IDs de documentos e outros parâmetros relevantes. Arquivos importados são deduplicados pelo SHA-256 dos bytes. Uma nova importação não sobrescreve a curadoria existente. Referências de procedência permanecem no banco privado, sem URLs temporárias ou arquivos privados no repositório.
+URLs são deduplicadas removendo parâmetros de acompanhamento e normalizando variantes de pastas Drive, preservando IDs de documentos e outros parâmetros relevantes. Uma nova importação não sobrescreve a curadoria existente. Arquivos privados e URLs temporárias não são incluídos no repositório.
 
-Materiais sem autoria comprovada ficam em “Incorporadora a confirmar”. A equipe pode corrigir incorporadora e empreendimento no próprio painel. Tabelas históricas devem ser confirmadas na origem antes de qualquer uso comercial.
+Materiais sem autoria comprovada ficam em “Incorporadora a confirmar”. A equipe pode corrigir incorporadora e empreendimento no próprio painel. Links cadastrados não certificam a disponibilidade do destino; as pastas preservam as permissões de suas origens. O menu, Books e Fontes apontam para o acervo.
 
-A cópia dos PDFs para armazenamento privado permanece pendente: a conexão de hospedagem recusou a criação do armazenamento com HTTP 403. Não há cópia binária no banco nem publicação pública desses documentos. A tabela do acervo tem uma migração aditiva, sem alterar leads ou o catálogo publicado.
+A tabela ArchiveItem tem uma migração aditiva, sem alterar leads ou o catálogo publicado.

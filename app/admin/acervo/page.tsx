@@ -15,6 +15,7 @@ export default async function ArchivePage({
   await requirePermission('media:write');
   const params = await searchParams;
   const items = await db.archiveItem.findMany({
+    where: { url: { not: null } },
     orderBy: [{ organization: 'asc' }, { title: 'asc' }],
     select: {
       id: true,
@@ -29,19 +30,17 @@ export default async function ArchivePage({
       status: true,
       origin: true,
       notes: true,
-      extractedText: true,
     },
   });
   return (
     <>
       <div className="eyebrow">Acervo comercial · acesso interno</div>
-      <h1>Books e links por incorporadora</h1>
+      <h1>Links e materiais por incorporadora</h1>
       <p>
-        Consulte os links, books, plantas e tabelas recuperados. Pastas sem autoria confirmada ficam
-        em um grupo próprio. Um link cadastrado não confirma que seu destino esteja disponível.
+        Abra os links das incorporadoras e imobiliárias para consultar e baixar books, plantas e
+        tabelas diretamente na origem. Pastas sem autoria confirmada ficam em um grupo próprio.
       </p>
       <p>
-        <Link href="/admin/books">Processamento de books</Link> ·{' '}
         <Link href="/admin/fontes">Pesquisar fontes</Link> · <Link href="/admin/leads">Leads</Link>
       </p>
       {params.salvo && (
@@ -50,7 +49,7 @@ export default async function ArchivePage({
       {params.erro && <p role="alert">Confira o título e informe um link HTTP ou HTTPS válido.</p>}
       <ArchivePanel items={items} />
       <details className="panel">
-        <summary>Adicionar link ou book por URL</summary>
+        <summary>Adicionar link de materiais</summary>
         <form action={saveArchiveLink} className="form-grid">
           <label>
             Título

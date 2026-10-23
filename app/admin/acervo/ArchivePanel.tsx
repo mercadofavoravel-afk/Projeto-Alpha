@@ -17,7 +17,6 @@ export type ArchiveRow = {
   status: string;
   origin: string;
   notes: string | null;
-  extractedText: string | null;
 };
 
 export function ArchivePanel({ items }: { items: ArchiveRow[] }) {
@@ -40,22 +39,12 @@ export function ArchivePanel({ items }: { items: ArchiveRow[] }) {
         [item.title, item.organization, item.projectName, item.fileName, item.url].join(' '),
       ).includes(normalize(search)),
   );
-  const pending = items.filter((item) => item.status === 'FILE_PENDING').length;
   return (
     <>
       <div className="panel">
         <p>
-          <strong>{items.filter((i) => i.kind === 'LINK').length}</strong> links e pastas ·{' '}
-          <strong>{items.filter((i) => i.kind !== 'LINK').length}</strong> documentos catalogados ·{' '}
-          <strong>{labels.length}</strong> grupos
+          <strong>{items.length}</strong> links e pastas · <strong>{labels.length}</strong> grupos
         </p>
-        {pending > 0 && (
-          <p role="status">
-            {pending} documentos aguardam a cópia do arquivo para o Alpha. O texto recuperado pode
-            ser consultado abaixo, quando disponível. O PDF original ainda não está disponível para
-            download neste painel.
-          </p>
-        )}
         <div className="form-grid">
           <label>
             Buscar
@@ -117,11 +106,7 @@ export function ArchivePanel({ items }: { items: ArchiveRow[] }) {
                       </a>
                     </p>
                   )}
-                  <p>
-                    {item.status === 'FILE_PENDING'
-                      ? 'Arquivo original: cópia pendente'
-                      : 'Link cadastrado · disponibilidade depende da origem'}
-                  </p>
+                  <p>Acesso e download diretamente na origem</p>
                   {item.fileName && (
                     <p>
                       {item.fileName}
@@ -130,22 +115,6 @@ export function ArchivePanel({ items }: { items: ArchiveRow[] }) {
                   )}
                   {item.notes && <p>{item.notes}</p>}
                   <small>Origem: {item.origin}</small>
-                  {item.extractedText && (
-                    <details>
-                      <summary>Consultar trecho do texto recuperado</summary>
-                      <pre
-                        style={{
-                          whiteSpace: 'pre-wrap',
-                          maxHeight: 400,
-                          overflow: 'auto',
-                          fontFamily: 'inherit',
-                          fontSize: 14,
-                        }}
-                      >
-                        {item.extractedText}
-                      </pre>
-                    </details>
-                  )}
                   <details>
                     <summary>Organizar incorporadora e empreendimento</summary>
                     <form action={organizeArchiveItem} className="form-grid">

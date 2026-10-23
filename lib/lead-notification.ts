@@ -112,8 +112,9 @@ export async function deliverLeadNotification(leadId: string): Promise<boolean> 
 
 export async function retryPendingLeadNotifications(limit = 10) {
   const pending = await db.$queryRaw<Array<{ entityId: string }>>`
-    SELECT DISTINCT p."entityId" AS "entityId"
+    SELECT p."entityId" AS "entityId"
     FROM "AuditLog" p
+    JOIN "Lead" l ON l.id = p."entityId"
     WHERE p."action" = ${pendingAction} AND p."entityType" = 'Lead'
       AND p."entityId" IS NOT NULL
       AND NOT EXISTS (
@@ -121,7 +122,8 @@ export async function retryPendingLeadNotifications(limit = 10) {
         WHERE s."action" = ${sentAction} AND s."entityType" = 'Lead'
           AND s."entityId" = p."entityId"
       )
-    ORDER BY p."entityId"
+    GROUP BY p."entityId"
+    ORDER BY MIN(p."createdAt"), p."entityId"
     LIMIT ${limit}
   `;
   const ids = pending.map((item) => item.entityId);

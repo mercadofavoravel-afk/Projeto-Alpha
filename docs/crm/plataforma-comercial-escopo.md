@@ -4,6 +4,13 @@
 
 O Alpha reúne aquisição de clientes, publicação, páginas de conversão, campanhas e atendimento imobiliário. O CRM é parte da plataforma. Licenças vendidas devem receber os módulos contratados com administração própria; publicação de artigos, SEO, campanhas, construtor de landing pages e autonomia do corretor fazem parte do escopo comercial, não são extras descartados. Outros segmentos devem poder adaptar nomes, campos e conteúdo sem misturar seus dados.
 
+Decisão comercial atualizada em 23/10/2026: criação/publicação de artigos e suas
+métricas formam um módulo adicional dentro do Alpha, com contratação e acesso
+próprios. Não integra automaticamente a licença básica do CRM; preço ainda não
+definido. A matriz opera o módulo agora. Licenciados só terão acesso após
+contratação e implementação do isolamento de empresas, que continua pendente.
+As métricas da matriz não podem ser reutilizadas ou expostas a outra empresa.
+
 ## Estrutura e permissões
 
 - Matriz: administra empresas licenciadas, planos, módulos e limites. A matriz não compartilha automaticamente suas listas ou números de WhatsApp com licenciados.

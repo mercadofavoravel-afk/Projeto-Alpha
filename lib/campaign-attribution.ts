@@ -8,6 +8,15 @@ export type CampaignUtms = {
 
 function currentCampaignUtms(): CampaignUtms | null {
   const params = new URLSearchParams(window.location.search);
+  // Google ad identifiers take precedence over a search referrer. Never retain
+  // the identifier itself in analytics metadata or browser campaign storage.
+  if (['gclid', 'gbraid', 'wbraid'].some((key) => Boolean(params.get(key)))) {
+    return {
+      utmSource: 'google',
+      utmMedium: 'cpc',
+      utmCampaign: params.get('utm_campaign')?.trim().slice(0, 200) || undefined,
+    };
+  }
   if (!['utm_source', 'utm_medium', 'utm_campaign'].some((key) => params.has(key))) {
     return null;
   }

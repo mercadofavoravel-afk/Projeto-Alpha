@@ -72,7 +72,7 @@ function AdminLinks({ role }: { role: UserRole }) {
 
       {hasPermission(role, 'media:write') && (
         <>
-          <Link href="/admin/books">Books</Link>
+          <Link href="/admin/acervo">Acervo · links e materiais</Link>
 
           <Link href="/admin/midia">Mídia</Link>
         </>

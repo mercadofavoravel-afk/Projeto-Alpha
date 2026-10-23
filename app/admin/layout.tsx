@@ -46,6 +46,9 @@ function AdminLinks({ role }: { role: UserRole }) {
           <Link href="/admin/discovery">Discovery</Link>
 
           <Link href="/admin/artigos">Artigos</Link>
+          {['ADMIN', 'DIRECTOR'].includes(role) && (
+            <Link href="/admin/artigos/desempenho">Resultados dos artigos</Link>
+          )}
 
           <Link href="/admin/conteudo">Calendário e postagens</Link>
         </>

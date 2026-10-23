@@ -7,6 +7,7 @@ on:
       - codex/crm-roleta-plantoes-20261022
       - codex/crm-convites-horarios-20261022
       - codex/crm-fechamento-operacional-20261023
+      - codex/artigos-desempenho-20261023
 
   pull_request:
     branches:

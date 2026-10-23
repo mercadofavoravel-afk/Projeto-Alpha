@@ -46,7 +46,7 @@ export default async function ArticlesAdminPage({
 }: {
   searchParams: Promise<{ status?: string; regiao?: string }>;
 }) {
-  await requirePermission('catalog:write');
+  const user = await requirePermission('catalog:write');
 
   const params = await searchParams;
   const articles = await db.article.findMany({
@@ -115,6 +115,13 @@ export default async function ArticlesAdminPage({
       <div className="eyebrow">SEO editorial</div>
 
       <h1>Artigos</h1>
+      {['ADMIN', 'DIRECTOR'].includes(user.role) && (
+        <p>
+          <Link className="btn" href="/admin/artigos/desempenho">
+            Ver cliques, impressões e leads por artigo
+          </Link>
+        </p>
+      )}
 
       <p>
         Crie conteúdo para captar buscas orgânicas. Somente artigos publicados aparecem no site

@@ -1,8 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { sameSiteReferrerPath, sourceFromReferrer } from './campaign-attribution';
+import { getCampaignUtms, sameSiteReferrerPath, sourceFromReferrer } from './campaign-attribution';
 
 const site = 'https://imoveisdealtopadraorio.com.br';
+
+it('identifies auto-tagged Google ads without storing their click identifier', () => {
+  const save = vi.fn();
+  vi.stubGlobal('window', {
+    location: { search: '?gclid=private-click-id' },
+    sessionStorage: { setItem: save },
+  });
+  try {
+    expect(getCampaignUtms()).toEqual({
+      utmSource: 'google',
+      utmMedium: 'cpc',
+      utmCampaign: undefined,
+    });
+    expect(JSON.stringify(save.mock.calls)).not.toContain('private-click-id');
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
 
 describe('sourceFromReferrer', () => {
   it('identifies search, maps, social and property portal referrals', () => {

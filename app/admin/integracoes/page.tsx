@@ -40,6 +40,10 @@ export default async function IntegrationsPage() {
     mappedForms,
     publishedArticles,
     notifications,
+    queues,
+    eligibleUsers,
+    waitingForRoulette,
+    unassignedOutsideRoulette,
   ] = await Promise.all([
     db.externalLeadReceipt.count({
       where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } },
@@ -78,6 +82,27 @@ export default async function IntegrationsPage() {
     }),
     db.article.count({ where: { publishStatus: 'PUBLISHED' } }),
     leadNotificationHealth(since),
+    db.leadRouletteQueue.findMany({
+      select: { id: true, name: true, enabled: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+    db.user.count({
+      where: {
+        isActive: true,
+        acceptsLeads: true,
+        role: { in: ['DIRECTOR', 'MANAGER', 'CONSULTANT'] },
+      },
+    }),
+    db.lead.count({
+      where: {
+        assignedToId: null,
+        routingQueueId: { not: null },
+        status: { notIn: ['WON', 'LOST'] },
+      },
+    }),
+    db.lead.count({
+      where: { assignedToId: null, routingQueueId: null, status: { notIn: ['WON', 'LOST'] } },
+    }),
   ]);
 
   const channels = [
@@ -122,6 +147,36 @@ export default async function IntegrationsPage() {
         Configuração é verificada apenas pela presença das variáveis no servidor. Isso não comprova
         acesso à conta externa nem entrega de leads. O painel nunca exibe chaves ou tokens.
       </p>
+      <div className="panel">
+        <h2>Distribuição e pendências do CRM</h2>
+        <p>
+          {queues.filter((queue) => queue.enabled).length} fila(s) ativa(s) de {queues.length}{' '}
+          configurada(s). {eligibleUsers} profissional(is) com recebimento habilitado. Isso não
+          comprova presença online, check-in, disponibilidade por bairro ou capacidade livre.
+        </p>
+        {queues.length === 0 && (
+          <p role="status">
+            A roleta ainda não foi configurada. O sorteio exige uma fila de plantão; o recebimento
+            atual segue as regras de distribuição existentes.
+          </p>
+        )}
+        {queues.length > 0 && queues.every((queue) => !queue.enabled) && (
+          <p role="status">
+            Todas as filas estão pausadas. Os novos contatos dessas filas aguardam a gestão.
+          </p>
+        )}
+        <p>
+          {waitingForRoulette} cadastro(s) aguardando na roleta; {unassignedOutsideRoulette}{' '}
+          cadastro(s) sem responsável fora da roleta. Cadastros antigos não são incluídos
+          automaticamente no sorteio. Esses totais podem incluir testes e não representam clientes
+          comprovados.
+        </p>
+        <p>
+          <Link href="/admin/roleta">Configurar e acompanhar plantões</Link> ·{' '}
+          <Link href="/admin/usuarios">Conferir corretores e bairros</Link> ·{' '}
+          <Link href="/admin/leads">Revisar cadastros sem responsável</Link>
+        </p>
+      </div>
       <div className="panel">
         <h2>Avisos de novos leads</h2>
         <p>

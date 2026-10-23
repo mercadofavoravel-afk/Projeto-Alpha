@@ -7,6 +7,7 @@ import {
   type ChannelCount,
 } from '@/lib/article-performance';
 import { crmDayStartAfter, crmDayWindow } from '@/lib/crm-day';
+import { articleLeadPerformanceQuery } from '@/lib/article-performance-query';
 
 export const dynamic = 'force-dynamic';
 export async function GET() {
@@ -33,12 +34,7 @@ export async function GET() {
         WHERE name IN ('article_view', 'article_contact_click') AND "createdAt" >= ${since} AND "createdAt" <= ${now}
         GROUP BY slug, source, medium, name
       `,
-      db.$queryRaw<ChannelCount[]>`
-        SELECT "articleSlug" AS slug, NULLIF(LOWER(TRIM("utmSource")), '') AS source,
-          NULLIF(LOWER(TRIM("utmMedium")), '') AS medium, COUNT(*)::int AS count
-        FROM "Lead" WHERE "articleSlug" IS NOT NULL AND "createdAt" >= ${since} AND "createdAt" <= ${now}
-        GROUP BY "articleSlug", source, medium
-      `,
+      db.$queryRaw<ChannelCount[]>(articleLeadPerformanceQuery(since, now)),
       db.auditLog.findFirst({
         where: { action: 'editorial.search_snapshot' },
         orderBy: { createdAt: 'desc' },

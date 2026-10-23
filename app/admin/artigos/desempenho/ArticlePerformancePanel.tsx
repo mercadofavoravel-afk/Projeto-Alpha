@@ -25,9 +25,7 @@ export function ArticlePerformancePanel() {
       setData(value);
       setError('');
     } catch {
-      setError(
-        'Atualização indisponível. Os últimos números permanecem com o horário da consulta.',
-      );
+      setError('Não foi possível atualizar os resultados. Tente novamente.');
     }
   }, []);
   useEffect(() => {
@@ -67,7 +65,9 @@ export function ArticlePerformancePanel() {
         próprias.{' '}
         {data?.search
           ? `Última importação: ${stamp(data.search.fetchedAt)}. Último dia com dados: ${data.search.lastDataDate || 'sem linhas retornadas'}.`
-          : 'Nenhuma importação válida disponível.'}{' '}
+          : data
+            ? 'Nenhuma importação válida disponível.'
+            : 'Aguardando a consulta dos dados.'}{' '}
         “—” significa ausência de dados retornados, não prova de falta de indexação.
       </p>
       <p>
@@ -77,7 +77,14 @@ export function ArticlePerformancePanel() {
       </p>
       {error && <p role="alert">{error}</p>}
       {!data ? (
-        <p role="status">Carregando resultados…</p>
+        <div>
+          <p role="status">{error ? 'Os resultados não carregaram.' : 'Carregando resultados…'}</p>
+          {error && (
+            <button className="btn" onClick={() => void refresh()}>
+              Tentar novamente
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <p>

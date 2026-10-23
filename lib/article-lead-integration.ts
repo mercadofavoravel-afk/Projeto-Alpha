@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { defaultRespondiFields, type RespondiFields } from './respondi-landing';
 
 export const articleLeadIntegrationSchema = z
   .object({
@@ -70,13 +71,21 @@ function answer(answers: Record<string, unknown>, key: string) {
 
 // These exact questions are part of the Respondi catalogue template documented in docs.
 // Unknown/partial answers never become a CRM lead.
-export function parseRespondiLead(payload: unknown) {
+export function respondiFormId(payload: unknown) {
+  const parsed = payloadSchema.safeParse(payload);
+  return parsed.success ? parsed.data.form.form_id : null;
+}
+
+export function parseRespondiLead(
+  payload: unknown,
+  fields: RespondiFields = defaultRespondiFields,
+) {
   const parsed = payloadSchema.safeParse(payload);
   if (!parsed.success) return null;
   const { form, respondent } = parsed.data;
-  const name = answer(respondent.answers, 'Nome completo');
-  const phone = answer(respondent.answers, 'Telefone / WhatsApp');
-  const email = answer(respondent.answers, 'E-mail');
+  const name = answer(respondent.answers, fields.name);
+  const phone = answer(respondent.answers, fields.phone);
+  const email = fields.email ? answer(respondent.answers, fields.email) : '';
   if (
     name.length < 2 ||
     name.length > 120 ||
@@ -86,8 +95,7 @@ export function parseRespondiLead(payload: unknown) {
   )
     return null;
   const consent =
-    answer(respondent.answers, 'Autorizo o contato da Imóveis de Alto Padrão Rio').toLowerCase() ===
-    'sim';
+    Boolean(fields.consent) && answer(respondent.answers, fields.consent).toLowerCase() === 'sim';
   return {
     formId: form.form_id,
     respondentId: respondent.respondent_id,
@@ -95,7 +103,9 @@ export function parseRespondiLead(payload: unknown) {
     phone,
     email: email || null,
     consent,
-    message: answer(respondent.answers, 'O que procura?').slice(0, 2000) || null,
+    message: fields.message
+      ? answer(respondent.answers, fields.message).slice(0, 2000) || null
+      : null,
     utmSource: respondent.respondent_utms?.utm_source?.slice(0, 200) || null,
     utmMedium: respondent.respondent_utms?.utm_medium?.slice(0, 200) || null,
     utmCampaign: respondent.respondent_utms?.utm_campaign?.slice(0, 200) || null,

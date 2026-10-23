@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const calls = vi.hoisted(() => ({
   catalog: vi.fn(),
+  landing: vi.fn(),
   receiptFind: vi.fn(),
   receiptCreate: vi.fn(),
   leadCreate: vi.fn(),
@@ -14,6 +15,7 @@ const calls = vi.hoisted(() => ({
 vi.mock('@/lib/db', () => ({
   db: {
     articleLeadIntegration: { findUnique: calls.catalog },
+    respondiLandingIntegration: { findUnique: calls.landing },
     externalLeadReceipt: { findUnique: calls.receiptFind },
     $transaction: (callback: (transaction: unknown) => Promise<unknown>) =>
       callback({
@@ -75,6 +77,7 @@ describe('Respondi webhook', () => {
       },
     });
     calls.receiptFind.mockResolvedValue(null);
+    calls.landing.mockResolvedValue(null);
     notify.deliver.mockResolvedValue(true);
     calls.users.mockResolvedValue([]);
     calls.leadCreate.mockResolvedValue({
@@ -118,5 +121,47 @@ describe('Respondi webhook', () => {
     calls.receiptFind.mockResolvedValueOnce({ id: 'receipt-01' });
     expect((await POST(request(token))).status).toBe(200);
     expect(calls.leadCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('receives a mapped campaign form with its own questions without inventing article attribution', async () => {
+    calls.catalog.mockResolvedValue(null);
+    calls.landing.mockResolvedValue({
+      enabled: true,
+      name: 'Orla Copacabana',
+      neighborhood: 'Copacabana',
+      pageUrl: 'https://imoveisdealtopadraorio.com.br/studios-copacabana/',
+      fields: { name: 'Seu nome', phone: 'WhatsApp', email: '', message: '', consent: '' },
+    });
+    const campaign = {
+      ...payload,
+      respondent: {
+        ...payload.respondent,
+        respondent_utms: { utm_source: 'google', utm_medium: 'cpc' },
+        answers: { 'Seu nome': 'Ana Silva', WhatsApp: '21999999999' },
+      },
+    };
+    expect((await POST(request(process.env.RESPONDI_WEBHOOK_TOKEN!, campaign))).status).toBe(200);
+    expect(calls.leadCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        articleSlug: null,
+        neighborhood: 'Copacabana',
+        source: 'Respondi | página: Orla Copacabana',
+        utmMedium: 'cpc',
+        consent: false,
+      }),
+    });
+  });
+
+  it('rejects disabled or invalid landing mappings and never overrides an unpublished article', async () => {
+    calls.catalog.mockResolvedValue(null);
+    calls.landing.mockResolvedValue({ enabled: false, fields: {} });
+    expect((await POST(request(process.env.RESPONDI_WEBHOOK_TOKEN!))).status).toBe(422);
+    calls.landing.mockResolvedValue({ enabled: true, fields: {} });
+    expect((await POST(request(process.env.RESPONDI_WEBHOOK_TOKEN!))).status).toBe(422);
+    calls.catalog.mockResolvedValue({ article: { publishStatus: 'DRAFT' } });
+    calls.landing.mockClear();
+    expect((await POST(request(process.env.RESPONDI_WEBHOOK_TOKEN!))).status).toBe(422);
+    expect(calls.landing).not.toHaveBeenCalled();
+    expect(calls.leadCreate).not.toHaveBeenCalled();
   });
 });

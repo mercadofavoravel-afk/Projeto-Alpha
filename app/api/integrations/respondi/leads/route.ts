@@ -4,7 +4,8 @@ import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/lib/db';
-import { parseRespondiLead } from '@/lib/article-lead-integration';
+import { parseRespondiLead, respondiFormId } from '@/lib/article-lead-integration';
+import { respondiFieldsSchema } from '@/lib/respondi-landing';
 import { createArticleLeadSource, resolveArticleNeighborhood } from '@/lib/article-origin';
 import { resolveLeadAssignment } from '@/lib/lead-routing';
 import { createOrganicFollowUpActivities } from '@/lib/lead-follow-up';
@@ -44,28 +45,43 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'JSON inválido.' }, { status: 400 });
   }
-  const details = parseRespondiLead(payload);
-  if (!details)
+  const formId = respondiFormId(payload);
+  if (!formId)
     return NextResponse.json({ error: 'Resposta incompleta ou inválida.' }, { status: 422 });
 
   const catalog = await db.articleLeadIntegration.findUnique({
-    where: { respondiFormId: details.formId },
+    where: { respondiFormId: formId },
     include: {
       article: { select: { slug: true, title: true, category: true, publishStatus: true } },
     },
   });
-  if (!catalog || catalog.article.publishStatus !== 'PUBLISHED') {
-    return NextResponse.json(
-      { error: 'Formulário não associado a artigo publicado.' },
-      { status: 422 },
-    );
+  // Article forms retain their existing publication gate. A landing mapping never
+  // overrides an article's form ID, including when that article is unpublished.
+  const landing = !catalog
+    ? await db.respondiLandingIntegration.findUnique({ where: { formId } })
+    : null;
+  const fields = landing ? respondiFieldsSchema.safeParse(landing.fields) : null;
+  if (
+    (catalog && catalog.article.publishStatus !== 'PUBLISHED') ||
+    (!catalog && (!landing?.enabled || !fields?.success))
+  ) {
+    return NextResponse.json({ error: 'Formulário sem associação ativa no CRM.' }, { status: 422 });
   }
+  const details = parseRespondiLead(payload, fields?.success ? fields.data : undefined);
+  if (!details)
+    return NextResponse.json({ error: 'Resposta incompleta ou inválida.' }, { status: 422 });
   const externalId = `${details.formId}:${details.respondentId}`;
   const key = { provider_externalId: { provider, externalId } };
   if (await db.externalLeadReceipt.findUnique({ where: key, select: { id: true } })) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
-  const neighborhood = resolveArticleNeighborhood(catalog.article.category, catalog.article.title);
+  const neighborhood = catalog
+    ? resolveArticleNeighborhood(catalog.article.category, catalog.article.title)
+    : landing!.neighborhood;
+  const articleSlug = catalog?.article.slug ?? null;
+  const source = catalog
+    ? createArticleLeadSource(catalog.article.title, neighborhood).slice(0, 120)
+    : `Respondi | página: ${landing!.name}`.slice(0, 120);
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
       const leadId = await db.$transaction(
@@ -80,8 +96,8 @@ export async function POST(request: Request) {
               phone: details.phone,
               email: details.email,
               neighborhood,
-              articleSlug: catalog.article.slug,
-              source: createArticleLeadSource(catalog.article.title, neighborhood).slice(0, 120),
+              articleSlug,
+              source,
               message: details.message,
               utmSource: details.utmSource,
               utmMedium: details.utmMedium,
@@ -115,7 +131,8 @@ export async function POST(request: Request) {
               entityId: created.id,
               metadata: {
                 formId: details.formId,
-                articleSlug: catalog.article.slug,
+                articleSlug,
+                pageUrl: landing?.pageUrl ?? null,
                 assignedToId: assignee?.id || null,
               },
             },

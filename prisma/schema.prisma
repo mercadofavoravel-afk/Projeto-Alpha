@@ -411,6 +411,18 @@ model Lead {
   @@index([routingQueueId, assignedToId, createdAt])
 }
 
+model RespondiLandingIntegration {
+  id           String   @id @default(cuid())
+  formId       String   @unique
+  name         String
+  pageUrl      String
+  neighborhood String
+  fields       Json
+  enabled      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model ExternalLeadReceipt {
   id         String   @id @default(cuid())
   provider   String

@@ -1,5 +1,28 @@
 # CRM da matriz: fechamento operacional
 
+## Prioridade reafirmada em 23/10/2026
+
+Concluir o CRM antes de iniciar os outros módulos comerciais. Licenças,
+campanhas em massa, construtor de páginas e cobrança ficam após o aceite do CRM.
+A rotina editorial existente é uma operação separada.
+
+Consulta de produção em 23/10 confirmou zero filas de roleta, zero recebimentos
+externos e zero formulários Respondi associados a artigos. Há dois cadastros
+abertos sem responsável; não são automaticamente clientes comprovados e não
+devem ser redistribuídos sem revisão. Três pendências de aviso têm três registros
+de envio aceito, e o resumo diário possui execução em 23/10. Isso não comprova
+entrega na caixa de entrada ou ingresso dos formulários das campanhas.
+
+O receptor atual do Respondi está limitado ao catálogo de artigos publicados.
+Não considerar as páginas comerciais conectadas a esse receptor sem mapear
+os formulários reais e validar seus campos. Cliques/conversões no Ads não
+comprovam recebimento de um cadastro no CRM.
+
+A branch de fechamento acrescenta contagens de filas, profissionais habilitados,
+cadastros aguardando e cadastros fora da roleta no painel de integrações. A
+recuperação de e-mail passa a ordenar pelas pendências mais antigas e exclui
+avisos de leads inexistentes. Alterações ainda dependem de implantação.
+
 Escopo prioritário: receber os contatos da imobiliária, distribuí-los, registrar
 atendimento e manter os acompanhamentos visíveis para a equipe. Licenças,
 cobrança e publicação social fazem parte da plataforma completa e não bloqueiam

@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   mappedForms: vi.fn(),
   published: vi.fn(),
   health: vi.fn(),
+  queues: vi.fn(),
+  users: vi.fn(),
+  leads: vi.fn(),
 }));
 vi.mock('@/lib/auth', () => ({ requirePermission: mocks.permission }));
 vi.mock('@/lib/lead-notification', () => ({ leadNotificationHealth: mocks.health }));
@@ -19,6 +22,9 @@ vi.mock('@/lib/db', () => ({
     auditLog: { count: mocks.auditCount, findFirst: mocks.auditLatest },
     articleLeadIntegration: { count: mocks.mappedForms },
     article: { count: mocks.published },
+    leadRouletteQueue: { findMany: mocks.queues },
+    user: { count: mocks.users },
+    lead: { count: mocks.leads },
   },
 }));
 
@@ -34,6 +40,9 @@ describe('diagnóstico do recebimento de leads', () => {
     mocks.auditLatest.mockResolvedValue(null);
     mocks.mappedForms.mockResolvedValue(0);
     mocks.published.mockResolvedValue(175);
+    mocks.queues.mockResolvedValue([]);
+    mocks.users.mockResolvedValue(1);
+    mocks.leads.mockResolvedValue(0);
     mocks.health.mockResolvedValue({
       pending: 0,
       oldestPendingAt: null,
@@ -76,5 +85,27 @@ describe('diagnóstico do recebimento de leads', () => {
     expect(html).toContain('Não há avisos pendentes na fila registrada.');
     expect(html).toContain('Ausência de avisos pendentes não comprova');
     expect(html).toContain('0 de 175 artigos publicados');
+  });
+
+  it('expõe ausência de roleta sem confundir cadastro com cliente ou usuário habilitado com online', async () => {
+    mocks.leads.mockImplementation(({ where }) =>
+      Promise.resolve(where.routingQueueId === null ? 2 : 3),
+    );
+    const html = renderToStaticMarkup(await IntegrationsPage());
+    expect(html).toContain('A roleta ainda não foi configurada.');
+    expect(html).toContain('3 cadastro(s) aguardando na roleta; 2');
+    expect(html).toContain('não representam clientes');
+    expect(html).toContain('não comprova presença online');
+  });
+
+  it('distingue filas pausadas de fila ativa e mantém as pendências visíveis', async () => {
+    mocks.queues.mockResolvedValue([{ id: 'queue', name: 'Geral', enabled: false }]);
+    expect(renderToStaticMarkup(await IntegrationsPage())).toContain(
+      'Todas as filas estão pausadas.',
+    );
+    mocks.queues.mockResolvedValue([{ id: 'queue', name: 'Geral', enabled: true }]);
+    const html = renderToStaticMarkup(await IntegrationsPage());
+    expect(html).toContain('1 fila(s) ativa(s) de 1');
+    expect(html).not.toContain('Todas as filas estão pausadas.');
   });
 });

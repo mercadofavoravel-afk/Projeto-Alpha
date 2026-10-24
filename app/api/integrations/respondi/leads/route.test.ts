@@ -100,6 +100,28 @@ describe('Respondi webhook', () => {
     expect((await POST(request(process.env.RESPONDI_WEBHOOK_TOKEN!))).status).toBe(422);
     expect(calls.leadCreate).not.toHaveBeenCalled();
   });
+  it('accepts a bearer credential without placing the secret in the URL', async () => {
+    const req = new Request('http://localhost/api/integrations/respondi/leads', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RESPONDI_WEBHOOK_TOKEN!}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    expect((await POST(req)).status).toBe(200);
+    expect(calls.leadCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fall back to a URL credential when an explicit header is invalid', async () => {
+    for (const authorization of ['Bearer wrong', 'Basic wrong', 'Bearer']) {
+      const req = request(process.env.RESPONDI_WEBHOOK_TOKEN!);
+      req.headers.set('Authorization', authorization);
+      expect((await POST(req)).status).toBe(401);
+    }
+    expect(calls.leadCreate).not.toHaveBeenCalled();
+    expect(calls.catalog).not.toHaveBeenCalled();
+  });
   it('links the mapped form to the article and deduplicates retries', async () => {
     const token = process.env.RESPONDI_WEBHOOK_TOKEN!;
     expect((await POST(request(token))).status).toBe(200);

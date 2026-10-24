@@ -3,6 +3,7 @@ import { requireApiPermission } from '@/lib/auth';
 import { parseLeadFilters, statusLabel } from '@/lib/lead-filters';
 import { typologyFromMessage } from '@/lib/lead-typology';
 import { buildLeadListWhere, parseLeadRiskFilter } from '@/lib/lead-list-query';
+import { leadExcelBuffer } from '@/lib/lead-excel';
 
 function csvCell(value: unknown) {
   const text = String(value ?? '');
@@ -59,8 +60,8 @@ export async function GET(request: Request) {
     take: 2000,
   });
 
-  const csv = [
-    toCsvRow([
+  const rows = [
+    [
       'Criado em',
       'Nome',
       'Telefone',
@@ -74,9 +75,9 @@ export async function GET(request: Request) {
       'UTM Campaign',
       'Consentimento',
       'Estágio',
-    ]),
+    ],
     ...leads.map((lead) =>
-      toCsvRow([
+      [
         lead.createdAt.toISOString(),
         lead.name,
         lead.phone,
@@ -90,9 +91,20 @@ export async function GET(request: Request) {
         lead.utmCampaign,
         lead.consent ? 'Sim' : 'Não',
         statusLabel(lead.status),
-      ]),
+      ].map((value) => String(value ?? '')),
     ),
-  ].join('\n');
+  ];
+
+  if (url.searchParams.get('format') === 'xlsx') {
+    return new Response(await leadExcelBuffer(rows), {
+      headers: {
+        'Content-Disposition': 'attachment; filename="leads-alpha.xlsx"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+  const csv = rows.map(toCsvRow).join('\n');
 
   return new Response(`\uFEFF${csv}`, {
     headers: {

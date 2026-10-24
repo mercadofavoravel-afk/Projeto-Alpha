@@ -62,6 +62,9 @@ export default async function LeadsPage({
   if (risk) exportParams.set('risk', risk);
 
   const exportHref = `/api/admin/leads/export${exportParams.size ? `?${exportParams.toString()}` : ''}`;
+  const excelParams = new URLSearchParams(exportParams);
+  excelParams.set('format', 'xlsx');
+  const excelHref = `/api/admin/leads/export?${excelParams.toString()}`;
 
   const originGroups = await db.lead.groupBy({
     by: ['source', 'neighborhood'],
@@ -319,6 +322,9 @@ export default async function LeadsPage({
             <button className="btn" type="submit">
               Aplicar filtros
             </button>
+            <Link className="btn btn-ghost" href={excelHref}>
+              Baixar Excel
+            </Link>
             <Link className="btn btn-ghost" href={exportHref}>
               Exportar CSV
             </Link>

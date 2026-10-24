@@ -27,7 +27,14 @@ export async function POST(request: Request) {
   }
   // Respondi documents a destination URL, without a signed payload. The private URL token
   // must be placed only in its webhook configuration, never in an article or client script.
-  const token = new URL(request.url).searchParams.get('token') || '';
+  // Diagnostics and clients supporting headers must not put credentials in URLs.
+  // Keep the private URL option for the provider's URL-only webhook settings.
+  // An explicitly supplied header is authoritative, even when it is malformed.
+  const authorization = request.headers.get('authorization');
+  const token =
+    authorization !== null
+      ? authorization.match(/^Bearer ([^\s]+)$/i)?.[1] || ''
+      : new URL(request.url).searchParams.get('token') || '';
   if (!authorized(token, secret))
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {

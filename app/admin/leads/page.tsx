@@ -143,6 +143,13 @@ export default async function LeadsPage({
     <>
       <div className="eyebrow">CRM</div>
       <h1>Leads</h1>
+      {['ADMIN', 'DIRECTOR'].includes(user.role) && (
+        <p>
+          <Link href="/admin/leads/entrada">
+            Cadastrar lead, importar planilha e gerenciar repique
+          </Link>
+        </p>
+      )}
       <p>
         {canViewUnassignedLeads(user.role)
           ? 'Visão da equipe e leads sem responsável.'

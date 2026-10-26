@@ -430,11 +430,47 @@ model Lead {
   updatedAt    DateTime      @updatedAt
   activities   LeadActivity[]
   externalReceipts ExternalLeadReceipt[]
+  repiqueItems LeadRepiqueItem[]
 
   @@index([status])
   @@index([assignedToId])
   @@index([createdAt])
   @@index([routingQueueId, assignedToId, createdAt])
+}
+
+model LeadRepiqueCampaign {
+  id String @id @default(cuid())
+  name String
+  brokerIds String[]
+  intervalMinutes Int
+  mode String @default("ONE")
+  status String @default("PAUSED")
+  cursor Int @default(0)
+  nextRunAt DateTime?
+  createdById String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items LeadRepiqueItem[]
+
+  @@index([status, nextRunAt])
+}
+
+model LeadRepiqueItem {
+  id String @id @default(cuid())
+  campaignId String
+  campaign LeadRepiqueCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  leadId String
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  expectedAssignedToId String?
+  expectedUpdatedAt DateTime
+  status String @default("PENDING")
+  assignedToId String?
+  deliveredAt DateTime?
+  reason String?
+  createdAt DateTime @default(now())
+
+  @@unique([campaignId, leadId])
+  @@index([campaignId, status, createdAt])
 }
 
 model RespondiLandingIntegration {

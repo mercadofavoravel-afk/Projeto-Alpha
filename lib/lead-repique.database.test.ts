@@ -78,10 +78,12 @@ describe.runIf(process.env.REPIQUE_DATABASE_TESTS === '1')(
       });
       expect(campaign.status).toBe('PAUSED');
       leadIds = campaign.items.map((item) => item.leadId);
-      expect((await db.lead.findFirstOrThrow()).phone.startsWith('55')).toBe(true);
+      expect(
+        (await db.lead.findFirstOrThrow({ where: { id: { in: leadIds } } })).phone.startsWith('55'),
+      ).toBe(true);
       expect(await (await importContacts(request(payload))).json()).toEqual(result);
-      expect(await db.lead.count()).toBe(3);
-      expect(await db.leadRepiqueCampaign.count()).toBe(1);
+      expect(await db.lead.count({ where: { id: { in: leadIds } } })).toBe(3);
+      expect(await db.leadRepiqueCampaign.count({ where: { id: campaignId } })).toBe(1);
     });
 
     it('respeita pausa, intervalo e rodada sem rajada ou entrega duplicada', async () => {
@@ -112,7 +114,11 @@ describe.runIf(process.env.REPIQUE_DATABASE_TESTS === '1')(
       expect(
         (await db.leadRepiqueCampaign.findUniqueOrThrow({ where: { id: campaignId } })).status,
       ).toBe('COMPLETED');
-      expect(await db.auditLog.count({ where: { action: 'lead.repique_assigned' } })).toBe(2);
+      expect(
+        await db.auditLog.count({
+          where: { action: 'lead.repique_assigned', entityId: { in: leadIds } },
+        }),
+      ).toBe(2);
     });
 
     it('reutiliza contatos sem alterar consentimento nem dados existentes', async () => {
@@ -133,8 +139,40 @@ describe.runIf(process.env.REPIQUE_DATABASE_TESTS === '1')(
     it('bloqueia importação sem permissão antes de gravar qualquer contato', async () => {
       auth.allowed = false;
       expect((await importContacts(request(payload))).status).toBe(403);
-      expect(await db.lead.count()).toBe(3);
+      expect(await db.lead.count({ where: { id: { in: leadIds } } })).toBe(3);
       auth.allowed = true;
+    });
+
+    it('serializa dois pulsos simultâneos e entrega uma rodada sem duplicar', async () => {
+      const response = await importContacts(
+        request({
+          ...payload,
+          batchId: randomUUID(),
+          name: 'isolated-round-list',
+          rows: [
+            { name: 'Rodada isolada um', phone: '21999990011', neighborhood: 'Leblon' },
+            { name: 'Rodada isolada dois', phone: '21999990012', neighborhood: 'Leblon' },
+            { name: 'Rodada isolada três', phone: '21999990013', neighborhood: 'Leblon' },
+          ],
+          campaign: { brokerIds: brokers, intervalMinutes: 30, mode: 'ROUND' },
+        }),
+      );
+      expect(response.status).toBe(200);
+      const { campaignId: roundId } = await response.json();
+      await changeCampaign(request({ id: roundId, action: 'start' }));
+      const campaign = await db.leadRepiqueCampaign.findUniqueOrThrow({ where: { id: roundId } });
+      const due = campaign.nextRunAt!;
+      const results = await Promise.all([processRepique(due), processRepique(due)]);
+      expect(results.reduce((total, result) => total + result.delivered, 0)).toBe(2);
+      const items = await db.leadRepiqueItem.findMany({
+        where: { campaignId: roundId, status: 'DELIVERED' },
+      });
+      expect(items).toHaveLength(2);
+      expect(new Set(items.map((item) => item.assignedToId)).size).toBe(2);
+      const next = await db.leadRepiqueCampaign.findUniqueOrThrow({ where: { id: roundId } });
+      expect(next.nextRunAt?.getTime()).toBe(due.getTime() + 30 * 60000);
+      await changeCampaign(request({ id: roundId, action: 'pause' }));
+      expect((await processRepique(new Date(due.getTime() + 60 * 60000))).delivered).toBe(0);
     });
 
     afterAll(async () => db.$disconnect());

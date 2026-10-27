@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/crm-release-20261027
       - codex/crm-roleta-plantoes-20261022
       - codex/crm-convites-horarios-20261022
       - codex/crm-fechamento-operacional-20261023
@@ -54,6 +55,7 @@ jobs:
       ADMIN_PASSWORD: ci-admin-password
       NODE_ENV: test
       ROULETTE_DATABASE_TESTS: '1'
+      REPIQUE_DATABASE_TESTS: '1'
 
     steps:
       - name: Checkout
@@ -100,7 +102,7 @@ jobs:
         run: npm run lint
 
       - name: Tests
-        run: npm run test
+        run: npm run test -- --fileParallelism=false
 
       - name: Production build
         run: npm run build

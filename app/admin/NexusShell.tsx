@@ -81,7 +81,6 @@ export function NexusShell({
             <strong>{name}</strong>
             <small>{role}</small>
           </div>
-          {logout}
         </div>
       </aside>
       <div className="nexus-workspace">
@@ -110,6 +109,7 @@ export function NexusShell({
             ALPHA NEXUS <span>/</span> <strong>Workspace comercial</strong>
           </div>
           <div className="nexus-top-actions">
+            {logout}
             <button
               type="button"
               onClick={toggleTheme}

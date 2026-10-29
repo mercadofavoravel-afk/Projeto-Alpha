@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import './nexus-login.css';
 import { loginAction } from './actions';
 
 export default async function LoginPage({
@@ -16,11 +17,16 @@ export default async function LoginPage({
           ? 'Senha alterada. Entre novamente.'
           : null;
   return (
-    <main className="login-shell">
+    <main className="login-shell nexus-login">
       <form className="login-card" action={loginAction}>
-        <div className="eyebrow">Área restrita</div>
-        <h1>Projeto ALPHA</h1>
-        <p>Entre com uma conta autorizada.</p>
+        <div className="nexus-login-symbol" aria-hidden="true">
+          N
+        </div>
+        <div className="eyebrow">SEU WORKSPACE COMERCIAL</div>
+        <h1>
+          ALPHA <span>NEXUS</span>
+        </h1>
+        <p>Entre para dar o próximo passo.</p>
         {message && <div className="notice">{message}</div>}
         <label>
           E-mail

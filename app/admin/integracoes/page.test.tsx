@@ -108,4 +108,25 @@ describe('diagnóstico do recebimento de leads', () => {
     expect(html).toContain('1 fila(s) ativa(s) de 1');
     expect(html).not.toContain('Todas as filas estão pausadas.');
   });
+  it('não confunde ausência de heartbeat com automação operacional', async () => {
+    const html = renderToStaticMarkup(await IntegrationsPage());
+    expect(html).toContain('Repique: sem execução comprovada');
+    expect(html).toContain('Roleta: sem execução comprovada');
+    expect(html).toContain('não comprovam o agendador externo');
+  });
+
+  it('diferencia execução recente de heartbeat atrasado por rotina', async () => {
+    mocks.auditLatest.mockImplementation(({ where }) =>
+      Promise.resolve(
+        where.action === 'lead.repique_server_tick'
+          ? { createdAt: new Date() }
+          : where.action === 'lead.roulette_server_tick'
+            ? { createdAt: new Date(Date.now() - 600_000) }
+            : null,
+      ),
+    );
+    const html = renderToStaticMarkup(await IntegrationsPage());
+    expect(html).toContain('Repique: execução recente');
+    expect(html).toContain('Roleta: execução atrasada');
+  });
 });

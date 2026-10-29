@@ -8,9 +8,11 @@ import { hasPermission } from '@/lib/permissions';
 import { alphaPath } from '@/lib/public-path';
 import { LeadAttention } from './LeadAttention';
 import { RoulettePresence } from './RoulettePresence';
+import { NexusShell } from './NexusShell';
+import './nexus.css';
 
 export const metadata: Metadata = {
-  title: 'Administração',
+  title: 'Alpha Nexus | Central comercial',
   manifest: alphaPath('/manifest.webmanifest'),
   icons: {
     icon: alphaPath('/icons/alpha-192.png'),
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: 'Alpha',
+    title: 'Alpha Nexus',
     statusBarStyle: 'default',
   },
   robots: {
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
 function AdminLinks({ role }: { role: UserRole }) {
   return (
     <>
-      <Link href="/admin">Visão geral</Link>
+      <Link href="/admin">Central Nexus</Link>
 
       {hasPermission(role, 'catalog:write') && (
         <>
@@ -56,16 +58,19 @@ function AdminLinks({ role }: { role: UserRole }) {
 
       {hasPermission(role, 'crm:read') && (
         <>
-          <Link href="/admin/leads">Leads</Link>
+          <Link href="/admin/leads">Leads · Radar de oportunidades</Link>
 
-          <Link href="/admin/leads/kanban">Quadro comercial</Link>
+          {hasPermission(role, 'crm:manage') && (
+            <Link href="/admin/leads/entrada">Cadastro, planilhas e repique</Link>
+          )}
+          <Link href="/admin/leads/kanban">Pipeline comercial</Link>
 
-          <Link href="/admin/agenda">Agenda</Link>
+          <Link href="/admin/agenda">Agenda · Próximas ações</Link>
           {['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(role) && (
-            <Link href="/admin/roleta">Roleta de plantão</Link>
+            <Link href="/admin/roleta">Fila inteligente · Plantões</Link>
           )}
           {['ADMIN', 'DIRECTOR', 'MANAGER'].includes(role) && (
-            <Link href="/admin/equipe">Equipe comercial</Link>
+            <Link href="/admin/equipe">Equipe comercial · Squad</Link>
           )}
         </>
       )}
@@ -96,7 +101,7 @@ function AdminLinks({ role }: { role: UserRole }) {
 
       {hasPermission(role, 'users:manage') && (
         <>
-          <Link href="/admin/usuarios">Usuários</Link>
+          <Link href="/admin/usuarios">Equipe e acessos</Link>
           <Link href="/admin/integracoes">Integrações de leads</Link>
         </>
       )}
@@ -108,35 +113,29 @@ function AdminLinks({ role }: { role: UserRole }) {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
 
+  const roleNames: Record<string, string> = {
+    ADMIN: 'Administrador',
+    DIRECTOR: 'Diretor',
+    MANAGER: 'Gerente',
+    CONSULTANT: 'Corretor',
+    EDITOR: 'Editor',
+    MARKETING: 'Marketing',
+    VIEWER: 'Consulta',
+  };
   return (
-    <div className="admin">
-      <aside className="side">
-        <div className="brand">
-          PROJETO ALPHA
-          <small>{user.role}</small>
-        </div>
-
-        <nav className="admin-desktop-links" aria-label="Navegação administrativa">
-          <AdminLinks role={user.role} />
-        </nav>
-
-        <details className="admin-mobile-links">
-          <summary>Menu do painel</summary>
-          <nav aria-label="Navegação administrativa no celular">
-            <AdminLinks role={user.role} />
-          </nav>
-        </details>
-
+    <NexusShell
+      name={user.name || 'Minha conta'}
+      role={roleNames[user.role] || user.role}
+      navigation={<AdminLinks role={user.role} />}
+      logout={
         <form action={logoutAction}>
           <button className="side-button">Sair</button>
         </form>
-      </aside>
-
-      <main className="main">
-        {hasPermission(user.role, 'crm:read') && <LeadAttention />}
-        {['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(user.role) && <RoulettePresence />}
-        {children}
-      </main>
-    </div>
+      }
+    >
+      {hasPermission(user.role, 'crm:read') && <LeadAttention />}
+      {['ADMIN', 'DIRECTOR', 'MANAGER', 'CONSULTANT'].includes(user.role) && <RoulettePresence />}
+      {children}
+    </NexusShell>
   );
 }

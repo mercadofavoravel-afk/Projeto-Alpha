@@ -125,8 +125,20 @@ export default async function Page() {
 
   return (
     <>
-      <div className="eyebrow">Painel operacional</div>
-      <h1>Visão geral</h1>
+      <section className="nexus-welcome">
+        <div>
+          <div className="eyebrow">SEU PRÓXIMO MOVIMENTO COMEÇA AQUI</div>
+          <h1>
+            Central <span>Nexus</span>
+          </h1>
+          <p>Uma visão clara da sua operação. Mais foco em cada oportunidade.</p>
+        </div>
+        {hasPermission(user.role, 'crm:read') && (
+          <Link className="nexus-primary" href="/admin/leads">
+            Abrir oportunidades <span aria-hidden="true">↗</span>
+          </Link>
+        )}
+      </section>
 
       <section className="admin-card">
         <h2>Acessos rápidos</h2>

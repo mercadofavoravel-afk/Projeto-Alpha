@@ -44,6 +44,8 @@ export default async function IntegrationsPage() {
     eligibleUsers,
     waitingForRoulette,
     unassignedOutsideRoulette,
+    repiqueTick,
+    rouletteTick,
   ] = await Promise.all([
     db.externalLeadReceipt.count({
       where: { provider: 'GOOGLE_ADS', createdAt: { gte: since } },
@@ -103,7 +105,23 @@ export default async function IntegrationsPage() {
     db.lead.count({
       where: { assignedToId: null, routingQueueId: null, status: { notIn: ['WON', 'LOST'] } },
     }),
+    db.auditLog.findFirst({
+      where: { action: 'lead.repique_server_tick' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
+    db.auditLog.findFirst({
+      where: { action: 'lead.roulette_server_tick' },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    }),
   ]);
+
+  const schedulerChecks = [
+    { name: 'Repique', last: repiqueTick?.createdAt },
+    { name: 'Roleta', last: rouletteTick?.createdAt },
+  ];
+  const checkedAt = Date.now();
 
   const channels = [
     {
@@ -175,6 +193,37 @@ export default async function IntegrationsPage() {
           <Link href="/admin/roleta">Configurar e acompanhar plantões</Link> ·{' '}
           <Link href="/admin/usuarios">Conferir corretores e bairros</Link> ·{' '}
           <Link href="/admin/leads">Revisar cadastros sem responsável</Link>
+        </p>
+      </div>
+      <div className="panel">
+        <h2>Automação com o painel fechado</h2>
+        <p>
+          Última execução de servidor concluída. Pulso da tela aberta e sorteio de plantão não
+          comprovam o agendador externo.
+        </p>
+        <ul>
+          {schedulerChecks.map(({ name, last }) => {
+            const age = last ? checkedAt - last.getTime() : null;
+            const recent = age !== null && age >= 0 && age <= 3 * 60_000;
+            return (
+              <li key={name}>
+                <strong>
+                  {name}:{' '}
+                  {recent
+                    ? 'execução recente'
+                    : last
+                      ? 'execução atrasada'
+                      : 'sem execução comprovada'}
+                </strong>
+                {' — '}
+                {dateLabel(last, 'Nenhuma execução registrada')}.
+              </li>
+            );
+          })}
+        </ul>
+        <p>
+          Se não houver execução recente, não dependa da distribuição ou do repique com o painel
+          fechado. Confira o agendador e a autenticação.
         </p>
       </div>
       <div className="panel">

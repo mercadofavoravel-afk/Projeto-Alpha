@@ -111,3 +111,56 @@
     font-size: 26px;
   }
 }
+
+/* Match the public site's warm, understated identity. */
+.nexus-login {
+  color-scheme: light;
+  background: radial-gradient(ellipse at 15% 15%, #d9ddcc 0, transparent 55%), #eee9df;
+  color: #233d30;
+}
+.nexus-login .login-card {
+  background: #f7f3eb;
+  border-color: #c9ccb8;
+  box-shadow: 0 24px 80px #283f2c18;
+}
+.nexus-login-symbol {
+  background: linear-gradient(135deg, #526442, #233d30);
+  border-color: #b39b64;
+  box-shadow: 0 0 24px #b59b5a18;
+  color: #f4efe6;
+}
+.nexus-login .eyebrow {
+  color: #677752;
+}
+.nexus-login .login-card h1 {
+  color: #233d30;
+}
+.nexus-login h1 span {
+  color: #8a743f;
+}
+.nexus-login p {
+  color: #5d695c;
+}
+.nexus-login .login-card label {
+  color: #40513f;
+}
+.nexus-login .login-card input {
+  background: #eeeee2;
+  border-color: #b9c1aa;
+  color: #243c2d;
+}
+.nexus-login input:focus-visible {
+  outline-color: #607752;
+}
+.nexus-login .btn {
+  background: #35533b;
+  border-color: #607752;
+  color: #f7f2e6;
+  box-shadow: 0 8px 24px #253b2715;
+}
+.nexus-login .btn:hover {
+  background: #436448;
+}
+.nexus-login .text-link {
+  color: #4f6547;
+}

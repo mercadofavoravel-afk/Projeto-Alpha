@@ -1,30 +1,30 @@
 /* The Nexus palette is contained within the authenticated workspace. */
 .nexus {
-  --g: #91b8ed;
-  --c: #26364a;
-  --i: #f0f3f7;
-  --m: #becbd9;
-  --l: #52657b;
-  --nx-surface: #33475d;
-  --nx-input: #2b3d52;
+  --g: #d3b77d;
+  --c: #263c33;
+  --i: #f3f0e7;
+  --m: #c4cebf;
+  --l: #536a59;
+  --nx-surface: #344c3f;
+  --nx-input: #2b4236;
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
-  background: radial-gradient(ellipse at 80% 0%, #344e68 0, transparent 48%), var(--c);
+  background: radial-gradient(ellipse at 80% 0%, #39513f 0, transparent 48%), var(--c);
   color: var(--i);
   font-family: Arial, sans-serif;
   min-height: 100vh;
   color-scheme: dark;
 }
 .nexus-light {
-  --g: #285c92;
-  --c: #dce4e9;
-  --i: #24394b;
-  --m: #506579;
-  --l: #bbcbd5;
-  --nx-surface: #eaf0f3;
-  --nx-input: #e1e9ee;
+  --g: #37533d;
+  --c: #eee9df;
+  --i: #23352a;
+  --m: #5d695c;
+  --l: #cfcbbd;
+  --nx-surface: #f7f3eb;
+  --nx-input: #eeeade;
   color-scheme: light;
-  background: radial-gradient(ellipse at 80% 0%, #d5e2e9 0, transparent 48%), var(--c);
+  background: radial-gradient(ellipse at 80% 0%, #e5e2d3 0, transparent 48%), var(--c);
 }
 .nexus .nexus-side {
   position: sticky;
@@ -641,7 +641,7 @@
   color: #253f55;
 }
 .nexus-light .nexus-brand-copy b {
-  color: #285c92;
+  color: #37533d;
 }
 .nexus-light .nexus-brand-copy small,
 .nexus-light .nexus-nav-label {
@@ -655,7 +655,7 @@
   background: #b6ccdd;
   border-color: #8caabe;
   color: #163b58;
-  box-shadow: inset 3px 0 #285c92;
+  box-shadow: inset 3px 0 #37533d;
 }
 .nexus-light .nexus-user strong {
   color: #263e52;
@@ -700,4 +700,79 @@
   .nexus-breadcrumb {
     max-width: 80px;
   }
+}
+
+/* Site identity: warm ivory, forest green and restrained champagne accents. */
+.nexus .nexus-side,
+.nexus-light .nexus-side {
+  background: #233d30;
+  color: #d1dacb;
+  border-color: #49614d;
+}
+.nexus .nexus-brand,
+.nexus-light .nexus-brand {
+  color: #f4efe6;
+}
+.nexus .nexus-brand-copy b,
+.nexus-light .nexus-brand-copy b {
+  color: #d6bd87;
+}
+.nexus .nexus-brand-copy small,
+.nexus-light .nexus-brand-copy small,
+.nexus .nexus-nav-label,
+.nexus-light .nexus-nav-label {
+  color: #b5c2ab;
+}
+.nexus .nexus-symbol {
+  background: linear-gradient(135deg, #526442, #2f4937);
+  border-color: #c1a56b;
+  box-shadow: 0 0 24px #b59b5a18;
+  color: #f4efe6;
+}
+.nexus .nexus-nav a:hover,
+.nexus-light .nexus-nav a:hover {
+  background: #344e3c;
+  color: #f4efe6;
+}
+.nexus .nexus-nav a[aria-current='page'],
+.nexus-light .nexus-nav a[aria-current='page'] {
+  background: #415a40;
+  border-color: #73815c;
+  color: #f4edda;
+  box-shadow: inset 3px 0 #d2b678;
+}
+.nexus .nexus-user strong,
+.nexus-light .nexus-user strong {
+  color: #f4efe6;
+}
+.nexus .nexus-user small,
+.nexus-light .nexus-user small {
+  color: #bfccb7;
+}
+.nexus .nexus-side-footer,
+.nexus-light .nexus-side-footer {
+  border-color: #526951;
+}
+.nexus .nexus-avatar,
+.nexus-light .nexus-avatar {
+  background: #52694c;
+  color: #f4efe6;
+}
+.nexus .nexus-primary,
+.nexus .primary {
+  background: #35533b;
+  border: 1px solid #607752;
+  color: #f6f0e3;
+  box-shadow: 0 5px 20px #253b2715;
+}
+.nexus .nexus-kpi:before,
+.nexus .kpi:before {
+  background: #b09860;
+}
+.nexus .nexus-welcome h1 span {
+  color: #a38b54;
+}
+.nexus .nexus-skip {
+  background: #f4efe6;
+  color: #233d30;
 }

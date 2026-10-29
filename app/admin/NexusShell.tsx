@@ -19,12 +19,12 @@ export function NexusShell({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(true);
   const nav = useRef<HTMLElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    setLight(localStorage.getItem('alpha-nexus-theme') === 'light');
+    setLight(localStorage.getItem('alpha-nexus-theme-site') !== 'dark');
     setCollapsed(localStorage.getItem('alpha-nexus-sidebar') === 'collapsed');
   }, []);
   useEffect(() => {
@@ -39,7 +39,7 @@ export function NexusShell({
 
   function toggleTheme() {
     setLight(!light);
-    localStorage.setItem('alpha-nexus-theme', !light ? 'light' : 'dark');
+    localStorage.setItem('alpha-nexus-theme-site', !light ? 'light' : 'dark');
   }
   function toggleSidebar() {
     setCollapsed(!collapsed);

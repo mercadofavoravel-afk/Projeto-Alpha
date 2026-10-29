@@ -1,0 +1,632 @@
+/* The Nexus palette is contained within the authenticated workspace. */
+.nexus {
+  --g: #60a5fa;
+  --c: #0a1020;
+  --i: #e8eef8;
+  --m: #a0aec4;
+  --l: #28354c;
+  --nx-surface: #111c30;
+  --nx-input: #0c1526;
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  background: radial-gradient(ellipse at 80% 0%, #15264a 0, transparent 48%), var(--c);
+  color: var(--i);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  color-scheme: dark;
+}
+.nexus-light {
+  --g: #245fd4;
+  --c: #f2f5fa;
+  --i: #14213c;
+  --m: #586780;
+  --l: #d5dfec;
+  --nx-surface: #fff;
+  --nx-input: #f7f9fc;
+  color-scheme: light;
+  background: radial-gradient(ellipse at 80% 0%, #e0ebff 0, transparent 48%), var(--c);
+}
+.nexus .nexus-side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 18px 16px;
+  background: #0a1222;
+  color: #b5c3db;
+  border-right: 1px solid #223049;
+  z-index: 30;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.nexus .nexus-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 27px;
+  color: #f5f8ff;
+  letter-spacing: 1.8px;
+  white-space: nowrap;
+  font-size: 17px;
+}
+.nexus-symbol {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 42px;
+  border: 1px solid #75a9ff;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #2058b8, #16315b);
+  box-shadow: 0 0 25px #3b82f626;
+  font-weight: 800;
+  font-size: 23px;
+  font-style: italic;
+  color: #fff;
+}
+.nexus-brand-copy b {
+  color: #86b4ff;
+  font-weight: 700;
+}
+.nexus-brand-copy small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #8596b2;
+  margin-top: 7px;
+}
+.nexus-nav-label {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: #7185a6;
+  padding: 0 14px 12px;
+}
+.nexus .nexus-nav {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  align-content: start;
+}
+.nexus .nexus-nav a {
+  padding: 11px 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.nexus .nexus-nav a:hover {
+  background: #15243d;
+  color: #fff;
+}
+.nexus .nexus-nav a[aria-current='page'] {
+  background: linear-gradient(90deg, #214376, #162c4e);
+  border-color: #365d8f;
+  color: #cce1ff;
+  box-shadow: inset 3px 0 #79b4ff;
+}
+.nexus-side-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #26334b;
+  margin-top: 25px;
+  padding: 20px 6px 0;
+}
+.nexus-avatar {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: #233956;
+  color: #d6e6ff;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nexus-user {
+  min-width: 0;
+  flex: 1;
+  font-size: 11px;
+}
+.nexus-user strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #e7edf8;
+}
+.nexus-user small {
+  display: block;
+  color: #8c9fbd;
+  margin-top: 5px;
+}
+.nexus .side-button {
+  background: none;
+  border: 1px solid #30415f;
+  border-radius: 7px;
+  padding: 7px 9px;
+  color: #afbed7;
+  font-size: 10px;
+  cursor: pointer;
+}
+.nexus-workspace {
+  min-width: 0;
+}
+.nexus-topbar {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 36px;
+  border-bottom: 1px solid var(--l);
+  background: var(--nx-surface);
+}
+.nexus-icon-button {
+  background: transparent;
+  color: var(--m);
+  border: 1px solid var(--l);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+.nexus-breadcrumb {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--m);
+}
+.nexus-breadcrumb span {
+  padding: 0 13px;
+  color: var(--g);
+}
+.nexus-breadcrumb strong {
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--i);
+}
+.nexus-top-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  font-size: 11px;
+}
+.nexus-theme {
+  border: 1px solid var(--l);
+  background: transparent;
+  color: var(--m);
+  padding: 8px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.nexus-account {
+  color: var(--i);
+}
+.nexus-account span {
+  color: var(--g);
+  margin-left: 7px;
+}
+.nexus .nexus-main {
+  max-width: 1680px;
+  padding: 36px 40px 60px;
+  margin: auto;
+}
+.nexus-welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 0 28px;
+}
+.nexus .eyebrow {
+  color: var(--g);
+  font:
+    600 10px/1.6 Arial,
+    sans-serif;
+  letter-spacing: 2px;
+}
+.nexus h1,
+.nexus h2,
+.nexus h3,
+.nexus h4 {
+  font-family: Arial, sans-serif;
+  color: var(--i);
+  letter-spacing: -0.6px;
+}
+.nexus h1 {
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 650;
+  margin: 10px 0 14px;
+}
+.nexus h1 span {
+  color: var(--g);
+}
+.nexus h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.nexus h3 {
+  font-size: 17px;
+}
+.nexus p {
+  color: var(--m);
+  line-height: 1.7;
+  font-size: 13px;
+}
+.nexus-welcome p {
+  margin: 0;
+}
+.nexus-primary {
+  background: #3379ed;
+  border: 1px solid #619bfc;
+  color: #fff;
+  border-radius: 9px;
+  padding: 14px 18px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 7px 22px #2974ef25;
+}
+.nexus-primary span {
+  margin-left: 20px;
+}
+.nexus .panel,
+.nexus .admin-card,
+.nexus .kpi,
+.nexus .content-plan-card,
+.nexus .publication-card {
+  background: var(--nx-surface);
+  border: 1px solid var(--l);
+  border-radius: 14px;
+  box-shadow: 0 6px 25px #0000000c;
+}
+.nexus .panel,
+.nexus .admin-card {
+  padding: 24px;
+  margin: 22px 0;
+}
+.nexus .kpis {
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 14px;
+  margin: 22px 0;
+}
+.nexus .kpi {
+  position: relative;
+  padding: 24px 21px;
+  font-size: 11px;
+  color: var(--m);
+  overflow: hidden;
+}
+.nexus .kpi:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 28px;
+  height: 2px;
+  background: #6faaff;
+}
+.nexus .kpi b {
+  font:
+    600 34px/1.2 Arial,
+    sans-serif;
+  letter-spacing: -1px;
+  color: var(--i);
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.nexus .admin-shortcuts {
+  gap: 8px;
+}
+.nexus .admin-shortcuts a {
+  background: var(--nx-input);
+  border: 1px solid var(--l);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 11px;
+  color: var(--i);
+}
+.nexus .admin-shortcuts a:hover {
+  border-color: var(--g);
+  color: var(--g);
+}
+.nexus .table {
+  background: var(--nx-surface);
+  font-size: 12px;
+}
+.nexus .table th {
+  background: var(--nx-input);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--m);
+}
+.nexus .table th,
+.nexus .table td {
+  border-color: var(--l);
+  padding: 15px 12px;
+}
+.nexus .table tr:hover td {
+  background: var(--nx-input);
+}
+.nexus input,
+.nexus select,
+.nexus textarea {
+  background: var(--nx-input);
+  border: 1px solid var(--l);
+  border-radius: 8px;
+  color: var(--i);
+  padding: 11px;
+  font: inherit;
+  max-width: 100%;
+}
+.nexus input::placeholder,
+.nexus textarea::placeholder {
+  color: var(--m);
+}
+.nexus :focus-visible {
+  outline: 2px solid var(--g);
+  outline-offset: 3px;
+}
+.nexus label {
+  color: var(--m);
+  font-size: 12px;
+}
+.nexus .notice {
+  background: #262319;
+  border: 1px solid #5e4c2c;
+  border-left: 3px solid #d6ad65;
+  border-radius: 9px;
+  color: #f2d49b;
+  font-size: 12px;
+}
+.nexus .notice p {
+  color: inherit;
+}
+.nexus .notice-success {
+  background: #123329;
+  border-color: #28654e;
+  color: #b5e8cc;
+}
+.nexus-light .notice {
+  background: #fff5df;
+  color: #6e4c18;
+}
+.nexus-light .notice-success {
+  background: #e3f4eb;
+  color: #205e41;
+}
+.nexus-footer {
+  border-top: 1px solid var(--l);
+  padding: 22px 40px;
+  color: var(--m);
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+.nexus-footer span {
+  color: var(--g);
+  font-weight: 700;
+}
+.nexus-skip {
+  position: fixed;
+  left: 20px;
+  top: -100px;
+  z-index: 100;
+  background: #fff;
+  color: #102449;
+  padding: 12px;
+}
+.nexus-skip:focus {
+  top: 10px;
+}
+.nexus-mobile-toggle,
+.nexus-backdrop {
+  display: none;
+}
+.nexus-collapsed {
+  grid-template-columns: 84px minmax(0, 1fr);
+}
+.nexus-collapsed .nexus-side {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.nexus-collapsed .nexus-brand {
+  padding-left: 10px;
+}
+.nexus-collapsed .nexus-brand-copy,
+.nexus-collapsed .nexus-nav-label,
+.nexus-collapsed .nexus-nav,
+.nexus-collapsed .nexus-user,
+.nexus-collapsed .nexus-side-footer {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .nexus {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .nexus .nexus-main {
+    padding: 26px 22px 40px;
+  }
+  .nexus-topbar {
+    padding: 0 22px;
+  }
+  .nexus-collapsed {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+  .nexus-breadcrumb strong,
+  .nexus-breadcrumb span {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .nexus,
+  .nexus-collapsed {
+    display: block;
+  }
+  .nexus .nexus-side {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 270px;
+    transform: translateX(-100%);
+    transition: transform 0.2s;
+  }
+  .nexus-mobile-open .nexus-side {
+    transform: translateX(0);
+  }
+  .nexus-collapsed .nexus-nav {
+    display: grid;
+  }
+  .nexus-collapsed .nexus-brand-copy,
+  .nexus-collapsed .nexus-nav-label,
+  .nexus-collapsed .nexus-user,
+  .nexus-collapsed .nexus-side-footer {
+    display: block;
+  }
+  .nexus-collapsed .nexus-side-footer {
+    display: flex;
+  }
+  .nexus-mobile-toggle {
+    display: block;
+  }
+  .nexus-desktop-toggle {
+    display: none;
+  }
+  .nexus-mobile-open .nexus-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    border: 0;
+    background: #0009;
+  }
+  .nexus-topbar {
+    height: 64px;
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .nexus-top-actions {
+    gap: 10px;
+  }
+  .nexus-account {
+    font-size: 0;
+  }
+  .nexus-account span {
+    font-size: 16px;
+  }
+  .nexus .nexus-main {
+    padding: 22px 16px 36px;
+  }
+  .nexus-welcome {
+    display: block;
+    padding-top: 4px;
+  }
+  .nexus-primary {
+    display: inline-block;
+    margin-top: 20px;
+  }
+  .nexus .panel,
+  .nexus .admin-card {
+    padding: 18px;
+  }
+  .nexus .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .nexus .kpi {
+    padding: 20px 15px;
+  }
+  .nexus .kpi b {
+    font-size: 29px;
+  }
+  .nexus-footer {
+    padding: 20px 16px;
+  }
+  .nexus .head {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .nexus .table {
+    display: block;
+    overflow-x: auto;
+  }
+  .nexus .nexus-breadcrumb {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nexus * {
+    transition: none !important;
+  }
+}
+.nexus .editor-form,
+.nexus .media-item,
+.nexus .channel-picker {
+  background: var(--nx-surface);
+  border-color: var(--l);
+  border-radius: 12px;
+}
+.nexus .kanban-column {
+  background: var(--nx-input);
+  border: 1px solid var(--l);
+  border-radius: 12px;
+}
+.nexus .kanban-card {
+  background: var(--nx-surface);
+  border: 1px solid var(--l);
+  border-radius: 10px;
+}
+.nexus .kanban-card:hover {
+  border-color: var(--g);
+}
+.nexus .kanban-column-head {
+  border-color: var(--l);
+}
+.nexus .kanban-card strong,
+.nexus .kanban-column-head strong {
+  font-family: Arial, sans-serif;
+  color: var(--i);
+}
+.nexus .kanban-column-head span {
+  background: var(--g);
+  color: var(--c);
+}
+.nexus .kanban-card em {
+  color: var(--g);
+}
+.nexus .form-grid input,
+.nexus .form-grid textarea,
+.nexus .inline-form select,
+.nexus .editor-grid input,
+.nexus .editor-grid select,
+.nexus .editor-grid textarea {
+  background: var(--nx-input);
+  color: var(--i);
+  border-color: var(--l);
+}
+.nexus th,
+.nexus td {
+  border-color: var(--l);
+}
+.nexus td small {
+  color: var(--m);
+}
+.nexus .primary {
+  background: #3379ed;
+  color: #fff;
+  border: 1px solid #619bfc;
+}
+.nexus .error {
+  color: #ffb4ac;
+}
+@media (max-width: 720px) {
+  .nexus .editor-grid,
+  .nexus .form-grid,
+  .nexus .publication-grid,
+  .nexus .media-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

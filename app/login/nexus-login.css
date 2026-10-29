@@ -1,0 +1,113 @@
+.nexus-login {
+  color-scheme: dark;
+  background: radial-gradient(ellipse at 20% 20%, #18335c 0, transparent 48%),
+    radial-gradient(ellipse at 85% 85%, #14284c 0, transparent 50%), #090f1d;
+  color: #e9f0fc;
+  position: relative;
+}
+.nexus-login .login-card {
+  background: #101b2ee8;
+  border: 1px solid #2c3d59;
+  border-radius: 20px;
+  padding: 44px;
+  width: min(450px, 100%);
+  box-shadow: 0 24px 90px #0005;
+}
+.nexus-login-symbol {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 50px;
+  border: 1px solid #73a7fc;
+  background: linear-gradient(135deg, #2866cb, #182d50);
+  border-radius: 12px;
+  font:
+    italic 800 27px Arial,
+    sans-serif;
+  color: white;
+  margin-bottom: 28px;
+  box-shadow: 0 0 32px #488fff25;
+}
+.nexus-login .eyebrow {
+  color: #85b4ff;
+  font:
+    600 9px Arial,
+    sans-serif;
+  letter-spacing: 2.2px;
+}
+.nexus-login .login-card h1 {
+  font:
+    650 29px Arial,
+    sans-serif;
+  letter-spacing: 1px;
+  margin: 14px 0;
+}
+.nexus-login h1 span {
+  color: #83b2ff;
+}
+.nexus-login p {
+  color: #9cacc5;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+.nexus-login .login-card label {
+  font:
+    500 12px Arial,
+    sans-serif;
+  color: #b7c5dc;
+}
+.nexus-login .login-card input {
+  background: #0b1527;
+  border: 1px solid #304360;
+  border-radius: 9px;
+  color: #edf3ff;
+  padding: 14px;
+}
+.nexus-login input:focus-visible {
+  outline: 2px solid #77adff;
+  outline-offset: 3px;
+}
+.nexus-login .btn {
+  display: block;
+  width: 100%;
+  margin-top: 26px;
+  border-radius: 9px;
+  background: #367cf0;
+  border: 1px solid #659efd;
+  color: #fff;
+  padding: 14px;
+  font:
+    600 12px Arial,
+    sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 25px #397de728;
+}
+.nexus-login .btn:hover {
+  background: #488cfb;
+}
+.nexus-login .text-link {
+  display: block;
+  text-align: center;
+  margin-top: 22px;
+  color: #a5c7ff;
+  font-size: 11px;
+}
+.nexus-login .notice {
+  background: #322819;
+  color: #f2d395;
+  border-color: #d7b36b;
+  border-radius: 8px;
+  font-size: 12px;
+}
+@media (max-width: 480px) {
+  .nexus-login {
+    padding: 20px;
+  }
+  .nexus-login .login-card {
+    padding: 30px 24px;
+  }
+  .nexus-login .login-card h1 {
+    font-size: 26px;
+  }
+}

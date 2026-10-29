@@ -1,17 +1,17 @@
 .nexus-login {
   color-scheme: dark;
-  background: radial-gradient(ellipse at 20% 20%, #18335c 0, transparent 48%),
-    radial-gradient(ellipse at 85% 85%, #14284c 0, transparent 50%), #090f1d;
-  color: #e9f0fc;
+  background: radial-gradient(ellipse at 20% 20%, #54738e 0, transparent 48%),
+    radial-gradient(ellipse at 85% 85%, #405c77 0, transparent 50%), #2b3f53;
+  color: #f0f4f8;
   position: relative;
 }
 .nexus-login .login-card {
-  background: #101b2ee8;
-  border: 1px solid #2c3d59;
+  background: #3b5269f5;
+  border: 1px solid #768c9f;
   border-radius: 20px;
   padding: 44px;
   width: min(450px, 100%);
-  box-shadow: 0 24px 90px #0005;
+  box-shadow: 0 24px 90px #172b3c33;
 }
 .nexus-login-symbol {
   display: grid;
@@ -46,7 +46,7 @@
   color: #83b2ff;
 }
 .nexus-login p {
-  color: #9cacc5;
+  color: #d2dde7;
   font-size: 13px;
   line-height: 1.6;
   margin-bottom: 30px;
@@ -55,13 +55,13 @@
   font:
     500 12px Arial,
     sans-serif;
-  color: #b7c5dc;
+  color: #e1e9f0;
 }
 .nexus-login .login-card input {
-  background: #0b1527;
-  border: 1px solid #304360;
+  background: #30465b;
+  border: 1px solid #8095a7;
   border-radius: 9px;
-  color: #edf3ff;
+  color: #f6f8fa;
   padding: 14px;
 }
 .nexus-login input:focus-visible {

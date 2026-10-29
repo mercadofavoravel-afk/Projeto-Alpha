@@ -1,30 +1,30 @@
 /* The Nexus palette is contained within the authenticated workspace. */
 .nexus {
-  --g: #60a5fa;
-  --c: #0a1020;
-  --i: #e8eef8;
-  --m: #a0aec4;
-  --l: #28354c;
-  --nx-surface: #111c30;
-  --nx-input: #0c1526;
+  --g: #91b8ed;
+  --c: #26364a;
+  --i: #f0f3f7;
+  --m: #becbd9;
+  --l: #52657b;
+  --nx-surface: #33475d;
+  --nx-input: #2b3d52;
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
-  background: radial-gradient(ellipse at 80% 0%, #15264a 0, transparent 48%), var(--c);
+  background: radial-gradient(ellipse at 80% 0%, #344e68 0, transparent 48%), var(--c);
   color: var(--i);
   font-family: Arial, sans-serif;
   min-height: 100vh;
   color-scheme: dark;
 }
 .nexus-light {
-  --g: #245fd4;
-  --c: #f2f5fa;
-  --i: #14213c;
-  --m: #586780;
-  --l: #d5dfec;
-  --nx-surface: #fff;
-  --nx-input: #f7f9fc;
+  --g: #285c92;
+  --c: #dce4e9;
+  --i: #24394b;
+  --m: #506579;
+  --l: #bbcbd5;
+  --nx-surface: #eaf0f3;
+  --nx-input: #e1e9ee;
   color-scheme: light;
-  background: radial-gradient(ellipse at 80% 0%, #e0ebff 0, transparent 48%), var(--c);
+  background: radial-gradient(ellipse at 80% 0%, #d5e2e9 0, transparent 48%), var(--c);
 }
 .nexus .nexus-side {
   position: sticky;
@@ -33,9 +33,9 @@
   display: flex;
   flex-direction: column;
   padding: 28px 18px 16px;
-  background: #0a1222;
-  color: #b5c3db;
-  border-right: 1px solid #223049;
+  background: #25374a;
+  color: #c4d1de;
+  border-right: 1px solid #4b6076;
   z-index: 30;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -45,7 +45,7 @@
   align-items: center;
   gap: 12px;
   padding: 0 8px 27px;
-  color: #f5f8ff;
+  color: #eef4fa;
   letter-spacing: 1.8px;
   white-space: nowrap;
   font-size: 17px;
@@ -99,20 +99,20 @@
     color 0.15s;
 }
 .nexus .nexus-nav a:hover {
-  background: #15243d;
+  background: #3c536b;
   color: #fff;
 }
 .nexus .nexus-nav a[aria-current='page'] {
-  background: linear-gradient(90deg, #214376, #162c4e);
-  border-color: #365d8f;
-  color: #cce1ff;
+  background: linear-gradient(90deg, #476889, #3b5671);
+  border-color: #6787a7;
+  color: #edf5fd;
   box-shadow: inset 3px 0 #79b4ff;
 }
 .nexus-side-footer {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-top: 1px solid #26334b;
+  border-top: 1px solid #4b6076;
   margin-top: 25px;
   padding: 20px 6px 0;
 }
@@ -121,7 +121,7 @@
   height: 32px;
   display: grid;
   place-items: center;
-  background: #233956;
+  background: #476078;
   color: #d6e6ff;
   border-radius: 50%;
   flex-shrink: 0;
@@ -145,10 +145,10 @@
 }
 .nexus .side-button {
   background: none;
-  border: 1px solid #30415f;
+  border: 1px solid #71869c;
   border-radius: 7px;
   padding: 7px 9px;
-  color: #afbed7;
+  color: #d6e1ec;
   font-size: 10px;
   cursor: pointer;
 }
@@ -628,5 +628,76 @@
   .nexus .publication-grid,
   .nexus .media-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Muted mineral tones, including a light sidebar without pure white surfaces. */
+.nexus-light .nexus-side {
+  background: #cbd8e1;
+  color: #304b62;
+  border-color: #aabfcc;
+}
+.nexus-light .nexus-brand {
+  color: #253f55;
+}
+.nexus-light .nexus-brand-copy b {
+  color: #285c92;
+}
+.nexus-light .nexus-brand-copy small,
+.nexus-light .nexus-nav-label {
+  color: #506a80;
+}
+.nexus-light .nexus-nav a:hover {
+  background: #bdcedb;
+  color: #183c5a;
+}
+.nexus-light .nexus-nav a[aria-current='page'] {
+  background: #b6ccdd;
+  border-color: #8caabe;
+  color: #163b58;
+  box-shadow: inset 3px 0 #285c92;
+}
+.nexus-light .nexus-user strong {
+  color: #263e52;
+}
+.nexus-light .nexus-user small {
+  color: #4b6479;
+}
+.nexus-light .nexus-side-footer {
+  border-color: #a7bdcc;
+}
+.nexus-light .nexus-avatar {
+  background: #a9c0d1;
+  color: #193d59;
+}
+.nexus .nexus-top-actions .side-button {
+  color: var(--i);
+  border: 1px solid var(--l);
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1;
+  background: var(--nx-input);
+  white-space: nowrap;
+}
+.nexus .nexus-top-actions .side-button:hover {
+  border-color: var(--g);
+  color: var(--g);
+}
+.nexus .nexus-top-actions form {
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .nexus-top-actions {
+    gap: 8px;
+  }
+  .nexus-theme {
+    padding: 8px 9px;
+  }
+  .nexus .nexus-top-actions .side-button {
+    padding: 9px 11px;
+  }
+  .nexus-breadcrumb {
+    max-width: 80px;
   }
 }

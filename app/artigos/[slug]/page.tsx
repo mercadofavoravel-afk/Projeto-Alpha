@@ -207,6 +207,34 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </article>
 
+        <section className="collections-section" id="atendimento">
+          <div className="wrap collections-hero-grid">
+            <div>
+              <div className="eyebrow">Atendimento reservado</div>
+
+              <h2>Receba plantas e informações para escolher seu imóvel.</h2>
+
+              <p>
+                Fale agora com um especialista da Imóveis de Alto Padrão Rio e receba todo o
+                material em primeira mão.
+              </p>
+            </div>
+
+            <LeadCaptureForm
+              neighborhood={neighborhood}
+              projectName={`Conteúdo: ${article.title}`}
+              projectSlug={`artigo-${article.slug}`}
+              articleSlug={article.slug}
+              source={createArticleLeadSource(article.title, neighborhood)}
+            />
+            <ArticleExternalCapture
+              articleSlug={article.slug}
+              respondiUrl={article.leadIntegration?.respondiUrl}
+              tintimUrl={article.leadIntegration?.tintimUrl}
+            />
+          </div>
+        </section>
+
         <section className="article-related">
           <div className="wrap">
             <div className="article-related-head">
@@ -298,33 +326,6 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="collections-section" id="atendimento">
-          <div className="wrap collections-hero-grid">
-            <div>
-              <div className="eyebrow">Atendimento reservado</div>
-
-              <h2>Receba oportunidades alinhadas ao que você procura.</h2>
-
-              <p>
-                Fale agora com um especialista da Imóveis de Alto Padrão Rio e receba todo o
-                material em primeira mão.
-              </p>
-            </div>
-
-            <LeadCaptureForm
-              neighborhood={neighborhood}
-              projectName={`Conteúdo: ${article.title}`}
-              projectSlug={`artigo-${article.slug}`}
-              articleSlug={article.slug}
-              source={createArticleLeadSource(article.title, neighborhood)}
-            />
-            <ArticleExternalCapture
-              articleSlug={article.slug}
-              respondiUrl={article.leadIntegration?.respondiUrl}
-              tintimUrl={article.leadIntegration?.tintimUrl}
-            />
-          </div>
-        </section>
         <style>{`
           .article-related {
             padding: 95px 0 110px;

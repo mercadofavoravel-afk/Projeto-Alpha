@@ -109,7 +109,7 @@ export function LeadCaptureForm({
           neighborhood,
           budgetMax: budgetMax ? Number(budgetMax) : undefined,
           message: message.trim() || undefined,
-          typology: typology.trim(),
+          typology: typology.trim() || undefined,
           source: (source || `empreendimento:${projectSlug}`).slice(0, 120),
           articleSlug,
           utmSource: campaignUtms.utmSource,
@@ -188,7 +188,7 @@ export function LeadCaptureForm({
         <span>Solicitação de atendimento</span>
         <p>
           {articleSlug
-            ? 'Preencha seus dados para falar sobre este conteúdo e receber opções relacionadas ao seu interesse.'
+            ? 'Receba plantas e informações comerciais para escolher seu imóvel. Informe seu nome e WhatsApp; os demais detalhes são opcionais.'
             : 'Preencha seus dados para receber informações comerciais e disponibilidade deste empreendimento.'}
         </p>
       </div>
@@ -216,7 +216,8 @@ export function LeadCaptureForm({
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
           autoComplete="tel"
-          placeholder="Seu contato preferencial"
+          type="tel"
+          placeholder="DDD e número, ou código do país"
           required
           minLength={8}
           maxLength={30}
@@ -224,7 +225,7 @@ export function LeadCaptureForm({
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-email">E-mail</label>
+        <label htmlFor="lead-email">E-mail (opcional)</label>
 
         <input
           id="lead-email"
@@ -233,7 +234,6 @@ export function LeadCaptureForm({
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
           placeholder="Seu e-mail"
-          required
         />
       </div>
 
@@ -278,14 +278,13 @@ export function LeadCaptureForm({
       </div>
 
       <div className="quiz-block">
-        <label htmlFor="lead-typology">Tipologia de interesse</label>
+        <label htmlFor="lead-typology">Tipologia de interesse (opcional)</label>
         <input
           id="lead-typology"
           value={typology}
           onChange={(event) => setTypology(event.target.value)}
           placeholder="Ex.: studio, 2 quartos, cobertura"
           list="lead-typology-options"
-          required
           minLength={2}
           maxLength={120}
         />
@@ -311,7 +310,7 @@ export function LeadCaptureForm({
       </div>
 
       <button className="btn concierge-submit" type="submit" disabled={loading}>
-        {loading ? 'Enviando solicitação...' : 'Solicitar atendimento'}
+        {loading ? 'Enviando solicitação...' : 'Receber plantas e informações'}
       </button>
 
       <div className="concierge-privacy-note">

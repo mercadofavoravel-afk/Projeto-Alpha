@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Script from "next/script";
-import { useEffect, useState } from "react";
+import Script from 'next/script';
+import { useEffect, useState } from 'react';
 
-const MEASUREMENT_ID = "G-WMFPWVJ51L";
+const MEASUREMENT_ID = 'G-WMFPWVJ51L';
 
 // Load the existing site's stream only on its public production host.
 // Enhanced Measurement already tracks history changes for this stream;
@@ -12,11 +12,7 @@ export function PublicAnalytics() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    setEnabled(
-      /^(www\.)?imoveisdealtopadraorio\.com\.br$/.test(
-        window.location.hostname,
-      ),
-    );
+    setEnabled(/^(www\.)?imoveisdealtopadraorio\.com\.br$/.test(window.location.hostname));
   }, []);
 
   if (!enabled) return null;
